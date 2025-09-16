@@ -1,0 +1,72 @@
+/* Components/LoadingSpinner.css */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.loading-spinner .spinner {
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-spinner.small .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: currentColor;
+}
+
+.loading-spinner.medium .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: currentColor;
+}
+
+.loading-spinner.large .spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top-color: currentColor;
+}
+
+.loading-spinner.primary {
+    color: #646cff;
+}
+
+.loading-spinner.secondary {
+    color: #888;
+}
+
+.loading-spinner.success {
+    color: #4caf50;
+}
+
+.loading-spinner.danger {
+    color: #f44336;
+}
+
+.loading-spinner.warning {
+    color: #ff9800;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* For screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
