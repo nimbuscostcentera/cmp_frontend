@@ -20,6 +20,10 @@ function Layout1Table({ setIsDisable, search, setTextDetail, type }) {
     updateLayout1,
     deleteLayout1,
 
+    // Add states
+    addIsSuccess,
+  
+
     // Update states
     updateIsLoading,
     updateError,
@@ -87,7 +91,7 @@ function Layout1Table({ setIsDisable, search, setTextDetail, type }) {
   // Fetch items on mount or type change
   useEffect(() => {
     if (type) fetchLayout1(type);
-  }, [type]);
+  }, [type, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
   // Handle update success/error
   useEffect(() => {

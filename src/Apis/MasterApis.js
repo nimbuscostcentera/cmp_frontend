@@ -43,3 +43,10 @@ export const AddLayout5MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout5/`;
 export const UpdateLayout5MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout5`;
 export const DeleteLayout5MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout5`;
 
+
+
+//layout7 master
+export const AddLayout7MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout7/`;
+export const UpdateLayout7MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout7`;
+export const DeleteLayout7MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout7`;
+

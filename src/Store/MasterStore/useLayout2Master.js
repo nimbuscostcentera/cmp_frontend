@@ -80,7 +80,7 @@ const useLayout2Master = create((set, get) => ({
   deleteLayout2: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout2MasterAPI}/${id}/`, {
+      await axios.delete(`${DeleteLayout2MasterAPI}/${id}/?type=${type}`, {
         data: { type },
       }); // send type in body
       set({ deleteIsSuccess: true, deleteIsLoading: false });

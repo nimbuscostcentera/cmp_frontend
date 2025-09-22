@@ -5,6 +5,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import Layout1Table from "./Layout1Table"; // replace ColorTable with generic table
 import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 import "../../Components/Table/table.css";
+import masterMapping from "../../Utils/mastermapping";
 
 function Layout1Master() {
   const inputRef = useRef();
@@ -63,7 +64,6 @@ function Layout1Master() {
       toast.success(
         `${type.charAt(0).toUpperCase() + type.slice(1)} Added Successfully`
       );
-      fetchLayout1(type);
       setItemData({ Code: "", Description: "" });
     }
     if (addError) {
@@ -78,9 +78,7 @@ function Layout1Master() {
       <Row className="w-100">
         <Col xs={12}>
           <div className="d-flex align-items-center">
-            <h5 className="mb-0 text-sm md:text-base">
-              {type.charAt(0).toUpperCase() + type.slice(1)} Master
-            </h5>
+            <h5 className="mb-0 text-sm md:text-base">{masterMapping[type]}</h5>
           </div>
           <hr className="my-1" />
         </Col>

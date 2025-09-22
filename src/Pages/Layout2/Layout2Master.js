@@ -7,10 +7,11 @@ import Layout2Table from "./Layout2Table"
 import SearchableDropDown from "../../Components/SearchableDropDown"
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master"
 import useUnitMaster from "../../Store/MasterStore/useUnitMaster"
+import useLayout7Master from "../../Store/MasterStore/useLayout7Master"
 
 function Layout2Master() {
   const inputRef = useRef()
-  const [type, setType] = useState("sm") // 'sm' for Stone Master, 'dm' for Department Master
+  const [type, setType] = useState("dm") // 'sm' for Stone Master, 'dm' for Department Master
   const [searchData, setSearchData] = useState("")
   const [isDisable, setIsDisable] = useState(false)
   const [textDetail, setTextDetail] = useState("")
@@ -20,18 +21,30 @@ function Layout2Master() {
     Description: "",
     ID_master: -1,
   })
+  const {
+    layout7,
+    fetchLayout7,
+  } = useLayout7Master();
   const { units, fetchUnits } = useUnitMaster()
 
-  const dropdownList = useMemo(
-    () =>
-      units.map((item) => ({
+  const dropdownList = useMemo(() => {
+    if (type === "sm") {
+      return units.map((item) => ({
         label: `${item.Unit_Code}`,
         value: item.Unit_ID,
-      })),
-    [units],
-  )
+      }));
+    } else {
+      return layout7.map((item) => ({
+        label: `${item.Process_Code}`,
+        value: item.Process_ID,
+      }));
+    }
+  }, [units, layout7, type]);
 
-  const { layout2, fetchLayout2, fetchIsLoading, addLayout2, addIsLoading, addError, addIsSuccess, clearAddState } =
+
+
+
+  const { addLayout2, addIsLoading, addError, addIsSuccess, clearAddState } =
     useLayout2Master()
 
   // Focus input on mount
@@ -40,7 +53,7 @@ function Layout2Master() {
     if (type === "sm") {
       fetchUnits() // Load units on mount
     } else {
-      fetchUnits() // Load processes on mount
+      fetchLayout7(); // Load processes on mount
     }
   }, [type])
 

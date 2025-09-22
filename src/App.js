@@ -15,6 +15,7 @@ import ProcessMaster from "./Pages/ProcessMaster/ProcessMaster";
 import PlatingPolishMaster from "./Pages/PlatingPolishMaster/PlatingPolishMaster";
 import UnitMaster from "./Pages/UnitMaster/UnitMaster";
 import Layout1Master from "./Pages/Layout1/Layout1Master";
+import Layout7Master from "./Pages/Layout7/Layout7Master";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -55,7 +56,7 @@ const router = createBrowserRouter([
         element: withSuspense(ColorMaster),
       },
       {
-        path: "stone",
+        path: "layout2",
         element: withSuspense(Layout2Master),
       },
       {
@@ -75,8 +76,8 @@ const router = createBrowserRouter([
         element: withSuspense(Layout5Master),
       },
       {
-        path: "process",
-        element: withSuspense(ProcessMaster),
+        path: "layout7",
+        element: withSuspense(Layout7Master),
       },
       {
         path: "platingpolish",

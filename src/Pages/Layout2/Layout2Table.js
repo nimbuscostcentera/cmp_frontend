@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
+import useUnitMaster from "../../Store/MasterStore/useUnitMaster";
+import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
 
 function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
   const editinputref = useRef(null);
@@ -14,20 +16,24 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
     ID_master: -1,
   });
 
-  const typeArr = [
-    { label: 1, value: "Customer" },
-    { label: 2, value: "WholeSeller" },
-    { label: 3, value: "Mahajon" },
-  ];
+  // Masters
+  const { units, fetchUnits } = useUnitMaster();
+  const { layout7, fetchLayout7 } = useLayout7Master();
 
-  const typeList = useMemo(
-    () =>
-      typeArr.map((item) => ({
-        label: item.value,
-        value: item.label,
-      })),
-    []
-  );
+  // Dropdown based on type
+  const dropdownList = useMemo(() => {
+    if (type === "sm") {
+      return units.map((item) => ({
+        label: `${item.Unit_Code}`,
+        value: item.Unit_ID,
+      }));
+    } else {
+      return layout7.map((item) => ({
+        label: `${item.Process_Code}`,
+        value: item.Process_ID,
+      }));
+    }
+  }, [units, layout7, type]);
 
   const {
     layout2,
@@ -64,8 +70,8 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
   // Save changes
   const SaveChange = () => {
     const { ID, Code, Description, ID_master } = editedData;
-    if (!Code || !Description) {
-      toast.error("Both fields required");
+    if (!Code || !Description || ID_master === -1) {
+      toast.error("All fields required");
       return;
     }
     if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
@@ -92,14 +98,22 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
     const filtered = layout2.filter(
       (item) =>
         item.Code?.toLowerCase().includes(val) ||
-        item.Description?.toLowerCase().includes(val)
+        item.Description?.toLowerCase().includes(val) ||
+        (type === "sm"
+          ? item.Unit_Code?.toLowerCase().includes(val)
+          : item.Process_Code?.toLowerCase().includes(val))
     );
     setFilteredData(filtered);
-  }, [search, layout2]);
+  }, [search, layout2, type]);
 
-  // Fetch list
+  // Fetch list + masters
   useEffect(() => {
     fetchLayout2(type);
+    if (type === "sm") {
+      fetchUnits();
+    } else {
+      fetchLayout7();
+    }
   }, [type, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
   // Handle add/update/delete success/error
@@ -116,24 +130,19 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
     if (deleteIsSuccess) toast.success("Deleted successfully");
     if (deleteError) toast.error(deleteError);
     clearDeleteState();
-  }, [
+  }, [updateIsSuccess, deleteIsSuccess, updateError, deleteError]);
 
-    updateIsSuccess,
-    deleteIsSuccess,
-    updateError,
-    deleteError,
-  ]);
-
+  // Dynamic columns based on type
   const Col = [
     { headername: "Code", fieldname: "Code", type: "String", width: "120px" },
     { headername: "Description", fieldname: "Description", type: "String" },
     {
-      headername: "Type",
-      fieldname: "ID_master",
+      headername: type === "sm" ? "Unit" : "Process",
+      fieldname: type === "sm" ? "Unit_Code" : "Process_Code",
       selectionname: "ID_master",
       type: "String",
       isSelection: true,
-      options: typeList,
+      options: dropdownList,
     },
   ];
 
