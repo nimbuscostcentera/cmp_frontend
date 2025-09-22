@@ -1,23 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Navbar,
-  Nav,
-  Container,
-  Form,
-  Button,
-  Offcanvas,
-} from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import "bootstrap-icons/font/bootstrap-icons.min.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.min.css"; // icons
 import Image from "../../Asset/Nimbus_Logo_Transparent_white.png"; // logo
-import "./authNavBar.css";
+import { submenuInitial } from "../../InitialData/submenuInitial";
 
 function AuthNavBar() {
   const navigate = useNavigate();
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  // ✅ File dropdown state + timer
+  const [fileMenuOpen, setFileMenuOpen] = useState(false);
+  const fileMenuTimer = useRef(null);
+
+  const handleFileEnter = () => {
+    if (fileMenuTimer.current) clearTimeout(fileMenuTimer.current);
+    setFileMenuOpen(true);
+  };
+
+  const handleFileLeave = () => {
+    fileMenuTimer.current = setTimeout(() => {
+      setFileMenuOpen(false);
+    }, 300); // close after 0.3s
+  };
+
   const searchRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -51,214 +58,217 @@ function AuthNavBar() {
 
   return (
     <>
-      <Navbar
-        bg="dark"
-        variant="dark"
-        expand="lg"
-        className="custom-navbar py-2 px-3 shadow-sm"
-        fixed="top"
-      >
-        <Container
-          fluid
-          className="d-flex justify-content-between align-items-center"
-        >
+      {/* Top Navbar */}
+      <nav className="fixed top-0 left-0 w-full bg-gray-900 text-white shadow-md z-50">
+        <div className="flex items-center justify-between px-4 py-2">
           {/* Left: Logo + Desktop Nav */}
-          <div className="d-flex align-items-center">
-            <Navbar.Brand
-              as={Link}
-              to="/auth"
-              className="d-flex align-items-center me-3"
-            >
-              <img src={Image} alt="Nimbus Logo" className="navbar-logo" />
-            </Navbar.Brand>
+          <div className="flex items-center">
+            <Link to="/auth" className="flex items-center mr-4">
+              <img src={Image} alt="Nimbus Logo" className="h-8" />
+            </Link>
 
-            {/* Desktop Nav (visible only lg and up) */}
-            <div className="d-none d-lg-flex">
-              <Nav>
-                <Nav.Link as={Link} to="/auth/home" className="nav-link-custom">
-                  <i className="bi bi-house me-1"></i> Home
-                </Nav.Link>
-                <Nav.Link as={Link} to="/auth/file" className="nav-link-custom">
-                  <i className="bi bi-folder me-1"></i> File
-                </Nav.Link>
-              </Nav>
+            {/* Desktop Nav */}
+            <div className="hidden lg:flex space-x-6">
+              <Link
+                to="/auth/home"
+                className="flex items-center text-white no-underline hover:!text-blue-400 transition-colors duration-200"
+              >
+                <i className="bi bi-house mr-1"></i> Home
+              </Link>
+
+              {/* File dropdown (hover with timer) */}
+              <div
+                className="relative"
+                onMouseEnter={handleFileEnter}
+                onMouseLeave={handleFileLeave}
+              >
+                <button
+                  className={`flex items-center px-2 py-1 rounded-md transition-all duration-200 ${
+                    fileMenuOpen
+                      ? "text-blue-400 bg-gray-800 shadow-md"
+                      : "text-white hover:text-blue-400 hover:bg-gray-800"
+                  }`}
+                >
+                  <i
+                    className={`mr-1 bi ${
+                      fileMenuOpen ? "bi-folder2-open" : "bi-folder"
+                    }`}
+                  ></i>
+                  File
+                </button>
+
+                {/* Dropdown menu */}
+                {fileMenuOpen && (
+                  <div className="menu absolute left-0 top-9 bg-black rounded-md shadow-lg min-w-[160px]">
+                    <ul className="list-none p-0 m-0">
+                      {submenuInitial.map((menu, i) => (
+                        <li
+                          key={i}
+                          className="relative group px-4 py-2 hover:bg-gray-700 rounded-md cursor-pointer flex justify-between items-center"
+                        >
+                          <span>{menu.title}</span>
+                          <span className="ml-2">▸</span>
+                          {/* Submenu */}
+                          <div className="submenu absolute left-full top-0 hidden group-hover:block bg-gray-800 text-white shadow-lg rounded-md">
+                            <ul className="list-none p-0 m-0">
+                              {menu.items
+                                .filter((item) => item.id === menu.title)
+                                .map((subitem, idx) => (
+                                  <li
+                                    key={idx}
+                                    className="px-4 py-2 hover:bg-gray-600 cursor-pointer w-40"
+                                  >
+                                    <Link to={subitem.link} className="text-white no-underline hover:no-underline block text-left">
+                                      {subitem.title}
+                                    </Link>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Right: Search + Profile/Icons */}
-          <div className="d-flex align-items-center">
+          <div className="flex items-center space-x-4">
             {/* Desktop Search */}
             <div
               ref={searchRef}
-              className={`search-container d-none d-lg-flex align-items-center ${
-                searchExpanded ? "expanded" : ""
+              className={`hidden lg:flex items-center transition-all duration-300 ${
+                searchExpanded ? "w-64" : "w-8"
               }`}
             >
-              <Form className="d-flex w-100" onSubmit={handleSearch}>
-                <Form.Control
-                  ref={inputRef}
-                  type="search"
-                  placeholder="Search menus..."
-                  value={searchQuery}
-                  onFocus={() => setSearchExpanded(true)}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input"
-                />
-                {searchExpanded && (
-                  <Button
-                    variant="link"
-                    className="search-close-btn"
+              {searchExpanded ? (
+                <form
+                  onSubmit={handleSearch}
+                  className="flex items-center w-full bg-gray-800 rounded-md px-2"
+                >
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Search menus..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent outline-none w-full px-2 py-1 text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="ml-2"
                     onClick={() => {
                       setSearchExpanded(false);
                       setSearchQuery("");
                     }}
                   >
                     <i className="bi bi-x"></i>
-                  </Button>
-                )}
-              </Form>
-
-              {!searchExpanded && (
-                <Button
-                  variant="link"
-                  className="search-icon-btn"
+                  </button>
+                </form>
+              ) : (
+                <button
                   onClick={() => {
                     setSearchExpanded(true);
                     setTimeout(() => inputRef.current?.focus(), 10);
                   }}
                 >
                   <i className="bi bi-search"></i>
-                </Button>
+                </button>
               )}
             </div>
 
-            {/* Profile + Settings + Logout (always visible) */}
-            <Nav className="align-items-center d-none d-lg-flex">
-              <Nav.Link
-                as={Link}
-                to="/auth/profile"
-                className="nav-link-custom"
-              >
+            {/* Desktop Profile/Settings/Logout */}
+            <div className="hidden lg:flex items-center space-x-6">
+              <Link to="/auth/profile" className="hover:text-blue-400">
                 <i className="bi bi-person-circle"></i>
-              </Nav.Link>
-              <Nav.Link as={Link} to="/auth/setup" className="nav-link-custom">
+              </Link>
+              <Link to="/auth/setup" className="hover:text-blue-400">
                 <i className="bi bi-gear-fill"></i>
-              </Nav.Link>
-              <Nav.Link onClick={handleLogout} className="nav-link-custom">
+              </Link>
+              <button onClick={handleLogout} className="hover:text-red-400">
                 <i className="bi bi-box-arrow-right"></i>
-              </Nav.Link>
-            </Nav>
+              </button>
+            </div>
 
-            {/* Mobile Toggle & Search */}
-            <div className="d-lg-none d-flex align-items-center">
-              <Button
-                variant="link"
-                className="search-mobile-btn"
+            {/* Mobile Buttons */}
+            <div className="lg:hidden flex items-center space-x-3">
+              <button
                 onClick={() => {
                   setSearchExpanded(true);
                   setTimeout(() => inputRef.current?.focus(), 10);
                 }}
               >
                 <i className="bi bi-search"></i>
-              </Button>
-              <Navbar.Toggle
-                aria-controls="offcanvasNavbar"
-                onClick={() => setShowOffcanvas(!showOffcanvas)}
-              />
+              </button>
+              <button onClick={() => setShowMenu(!showMenu)}>
+                <i className="bi bi-list text-2xl"></i>
+              </button>
             </div>
           </div>
-        </Container>
-      </Navbar>
+        </div>
+      </nav>
+
+      {/* Mobile Dropdown Menu */}
+      {showMenu && (
+        <div className="lg:hidden bg-gray-800 text-white px-4 py-4 space-y-3 shadow-md">
+          <Link to="/auth/home" className="block hover:text-blue-400">
+            <i className="bi bi-house mr-2"></i> Home
+          </Link>
+          <Link to="/auth/file" className="block hover:text-blue-400">
+            <i className="bi bi-folder mr-2"></i> File
+          </Link>
+          <Link to="/auth/profile" className="block hover:text-blue-400">
+            <i className="bi bi-person-circle mr-2"></i> Profile
+          </Link>
+          <Link to="/auth/setup" className="block hover:text-blue-400">
+            <i className="bi bi-gear-fill mr-2"></i> Settings
+          </Link>
+          <hr className="border-gray-700" />
+          <button
+            onClick={handleLogout}
+            className="block text-left w-full hover:text-red-400"
+          >
+            <i className="bi bi-box-arrow-right mr-2"></i> Logout
+          </button>
+        </div>
+      )}
 
       {/* Mobile Search Overlay */}
       {searchExpanded && (
-        <div className="mobile-search-overlay">
-          <div className="mobile-search-container">
-            <Form className="d-flex w-100" onSubmit={handleSearch}>
-              <Form.Control
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-start justify-center pt-20 z-50 lg:hidden">
+          <div className="bg-gray-900 w-11/12 p-3 rounded-lg flex items-center">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center w-full bg-gray-800 rounded-md px-2"
+            >
+              <input
                 ref={inputRef}
-                type="search"
+                type="text"
                 placeholder="Search menus..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="mobile-search-input"
+                className="bg-transparent outline-none w-full px-2 py-1 text-sm text-white"
                 autoFocus
               />
-              <Button
-                variant="link"
-                className="mobile-search-close"
+              <button
+                type="button"
+                className="ml-2 text-gray-300 hover:text-white"
                 onClick={() => {
                   setSearchExpanded(false);
                   setSearchQuery("");
                 }}
               >
                 <i className="bi bi-x"></i>
-              </Button>
-            </Form>
+              </button>
+            </form>
           </div>
         </div>
       )}
 
-      {/* Offcanvas Menu (Mobile only) */}
-      <Offcanvas
-        show={showOffcanvas}
-        onHide={() => setShowOffcanvas(false)}
-        placement="end"
-        className="custom-offcanvas"
-      >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Menu</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <Nav className="flex-column">
-            <Nav.Link
-              as={Link}
-              to="/auth/home"
-              className="offcanvas-nav-link"
-              onClick={() => setShowOffcanvas(false)}
-            >
-              <i className="bi bi-house me-2"></i> Home
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/auth/file"
-              className="offcanvas-nav-link"
-              onClick={() => setShowOffcanvas(false)}
-            >
-              <i className="bi bi-folder me-2"></i> File
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/auth/profile"
-              className="offcanvas-nav-link"
-              onClick={() => setShowOffcanvas(false)}
-            >
-              <i className="bi bi-person-circle me-2"></i> Profile
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/auth/setup"
-              className="offcanvas-nav-link"
-              onClick={() => setShowOffcanvas(false)}
-            >
-              <i className="bi bi-gear-fill me-2"></i> Settings
-            </Nav.Link>
-            <hr />
-            <Nav.Link
-              onClick={() => {
-                handleLogout();
-                setShowOffcanvas(false);
-              }}
-              className="offcanvas-nav-link"
-            >
-              <i className="bi bi-box-arrow-right me-2"></i> Logout
-            </Nav.Link>
-          </Nav>
-        </Offcanvas.Body>
-      </Offcanvas>
-
-      {/* Padding for fixed navbar */}
-      <div style={{ paddingTop: "76px" }}></div>
+      {/* Padding to prevent content overlap with fixed navbar */}
+      <div className="pt-16"></div>
     </>
   );
 }

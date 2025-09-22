@@ -1,20 +1,20 @@
 import  BASE_URL  from "./ApiBaseUrl";
 const MASTER_BASE_URL = "api/v1/masters";
 
-//color master
+///color master
 export const AddColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster/`;
 export const UpdateColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster`;
 export const DeleteColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster`;
 
 
 
-//unit master
+///unit master
 export const AddUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster/`;
 export const UpdateUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster`;
 export const DeleteUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster`;
 
 
-//layout1 master
+///layout1 master
 export const AddLayout1MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout1/`;
 export const UpdateLayout1MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout1`;
 export const DeleteLayout1MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout1`;

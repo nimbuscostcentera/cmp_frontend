@@ -1,20 +1,20 @@
-/* AuthNavBar.css */
+AuthNavBar.css
 .custom-navbar {
     background: linear-gradient(135deg, #1c234d 0%, #064948 100%) !important;
     z-index: 1030;
 }
 
 .navbar-logo {
-    height: 30px;
+    height: 80px;
     margin-right: 10px;
 }
 
-.navbar-brand-text {
+/* .navbar-brand-text {
     font-weight: 600;
     font-size: 1.2rem;
-}
+} */
 
-.nav-link-custom {
+/* .nav-link-custom {
     color: rgba(255, 255, 255, 0.85) !important;
     padding: 0.5rem 0.8rem !important;
     border-radius: 4px;
@@ -26,7 +26,7 @@
     color: white !important;
     background-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
-}
+} */
 
 .search-container {
     flex-grow: 0.5;
