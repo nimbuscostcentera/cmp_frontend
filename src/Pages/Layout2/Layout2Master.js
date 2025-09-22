@@ -1,99 +1,105 @@
-// ColorMasterListEdit.js
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
-import "../../Components/Table/table.css";
-import Layout2Table from "./Layout2Table";
-import SearchableDropDown from "../../Components/SearchableDropDown";
+
+import { useEffect, useMemo, useRef, useState } from "react"
+import { toast, ToastContainer } from "react-toastify"
+import { Container, Row, Col, Button } from "react-bootstrap"
+import "../../Components/Table/table.css"
+import Layout2Table from "./Layout2Table"
+import SearchableDropDown from "../../Components/SearchableDropDown"
+import useLayout2Master from "../../Store/MasterStore/useLayout2Master"
+import useUnitMaster from "../../Store/MasterStore/useUnitMaster"
 
 function Layout2Master() {
-  const inputRef = useRef();
-  const [searchData, setSearchData] = useState("");
-  const [isDisable, setIsDisable] = useState(false);
-  const [textDetail, setTextDetail] = useState("");
+  const inputRef = useRef()
+  const [type, setType] = useState("sm") // 'sm' for Stone Master, 'dm' for Department Master
+  const [searchData, setSearchData] = useState("")
+  const [isDisable, setIsDisable] = useState(false)
+  const [textDetail, setTextDetail] = useState("")
 
   const [inputData, setInputData] = useState({
-    CODE: "",
-      DESCRIPTION: "",
-    id_master: -1
-  });
-     const typeArr = [
-       { label: 1, value: "Customer" },
-       { label: 2, value: "WholeSeller" },
-       { label: 3, value: "Mahajon" },
-    ];
+    Code: "",
+    Description: "",
+    ID_master: -1,
+  })
+  const { units, fetchUnits } = useUnitMaster()
 
-      const typeList = useMemo(() => {
-        return typeArr.map((item) => ({
-          label: `${item?.value}`,
-          value: item?.label,
-        }));
-      }, [typeArr]);
+  const dropdownList = useMemo(
+    () =>
+      units.map((item) => ({
+        label: `${item.Unit_Code}`,
+        value: item.Unit_ID,
+      })),
+    [units],
+  )
 
-  const {
-    ColorMasterError,
-    isColorMasterLoading,
-    ColorMasterSuccess,
-    ColorMasterAdd,
-    ClearStateColorMasterAdd,
-    } = useAddColorMaster();
-    
+  const { layout2, fetchLayout2, fetchIsLoading, addLayout2, addIsLoading, addError, addIsSuccess, clearAddState } =
+    useLayout2Master()
 
+  // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    inputRef.current?.focus()
+    if (type === "sm") {
+      fetchUnits() // Load units on mount
+    } else {
+      fetchUnits() // Load processes on mount
+    }
+  }, [type])
 
+  // Handle input changes
   const OnChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setInputData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setInputData((prev) => ({ ...prev, [name]: value }))
+  }
 
+  // Save new item
   const SaveData = () => {
-    const { CODE, DESCRIPTION } = inputData;
-    if (!CODE || !DESCRIPTION) {
-      toast.error("Both Code and Description are mandatory");
-      return;
+    const { Code, Description, ID_master } = inputData
+    if (!Code || !Description || ID_master === -1) {
+      toast.error("All fields are mandatory")
+      return
     }
-    if (!/^[a-zA-Z0-9]{1,6}$/.test(CODE)) {
-      toast.error("Code must be alphanumeric & max 6 chars");
-      return;
+    if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
+      toast.error("Code must be alphanumeric & max 6 chars")
+      return
     }
-    if (!/^[a-zA-Z0-9 ]{1,15}$/.test(DESCRIPTION)) {
-      toast.error("Description must be alphanumeric & max 15 chars");
-      return;
+    if (!/^[a-zA-Z0-9 ]{1,15}$/.test(Description)) {
+      toast.error("Description must be alphanumeric & max 15 chars")
+      return
     }
-    ColorMasterAdd(inputData);
-  };
 
+    addLayout2(type, inputData)
+  }
+
+  // Fetch layout2 data on mount and after successful add
+  // useEffect(() => {
+  //   fetchLayout2(type);
+  // }, [type, addIsSuccess]);
+
+  // Show toast messages
   useEffect(() => {
-    if (ColorMasterSuccess && !isColorMasterLoading && !ColorMasterError) {
-      toast.success("Color Added Successfully");
-      setInputData({ CODE: "", DESCRIPTION: "" , id_master: -1});
+    if (addIsSuccess && !addIsLoading && !addError) {
+      toast.success("Item Added Successfully")
+      setInputData({ Code: "", Description: "", ID_master: -1 })
     }
-    if (ColorMasterError && !isColorMasterLoading && !ColorMasterSuccess) {
-      toast.error(ColorMasterError);
+    if (addError && !addIsLoading) {
+      toast.error(addError)
     }
-    ClearStateColorMasterAdd();
-  }, [isColorMasterLoading, ColorMasterSuccess, ColorMasterError]);
+    clearAddState()
+  }, [addIsSuccess, addIsLoading, addError])
 
   return (
     <Container fluid className="p-0" style={{ width: "98%" }}>
       <ToastContainer />
-      <Row className=" w-100">
+      <Row className="w-100">
         <Col xs={12}>
           <div className="d-flex align-items-center">
-            <h5 className="mb-0 text-sm md:text-base">Stone Master</h5>
+            <h5 className="mb-0 text-sm md:text-base">{type === "sm" ? "Stone Master" : "Department Master"}</h5>
           </div>
           <hr className="my-1" />
         </Col>
 
         <Col xs={12}>
           <div className="d-flex flex-column flex-md-row justify-content-start align-items-md-center">
-            <div
-              className="table-wrapper me-md-3 mb-2 mb-md-0"
-              style={{ overflowX: "auto" }}
-            >
+            <div className="table-wrapper me-md-3 mb-2 mb-md-0" style={{ overflowX: "auto" }}>
               <table className="text-sm">
                 <thead className="tab-head">
                   <tr>
@@ -102,7 +108,7 @@ function Layout2Master() {
                     </th>
                     <th className="text-xs md:text-sm">Code*</th>
                     <th className="text-xs md:text-sm">Description*</th>
-                    <th className="text-xs md:text-sm">Unit*</th>
+                    <th className="text-xs md:text-sm">Master*</th>
                   </tr>
                 </thead>
                 <tbody className="tab-body">
@@ -114,8 +120,8 @@ function Layout2Master() {
                       <input
                         placeholder="Enter Code"
                         className="input-cell form-input text-xs md:text-sm py-1"
-                        name="CODE"
-                        value={inputData?.CODE || ""}
+                        name="Code"
+                        value={inputData?.Code || ""}
                         onChange={OnChangeHandler}
                         maxLength={6}
                         ref={inputRef}
@@ -126,8 +132,8 @@ function Layout2Master() {
                       <input
                         placeholder="Enter Description"
                         className="input-cell form-input text-xs md:text-sm py-1"
-                        name="DESCRIPTION"
-                        value={inputData?.DESCRIPTION || ""}
+                        name="Description"
+                        value={inputData?.Description || ""}
                         onChange={OnChangeHandler}
                         maxLength={15}
                         style={{ width: "180px" }}
@@ -135,14 +141,13 @@ function Layout2Master() {
                     </td>
                     <td>
                       <SearchableDropDown
-                        options={typeList}
+                        options={dropdownList}
                         handleChange={(e) => OnChangeHandler(e)}
-                        selectedVal={inputData?.id_master || -1}
-                        label={"id_master"}
+                        selectedVal={inputData?.ID_master || -1}
+                        label={"ID_master"}
                         placeholder={"--Select Type--"}
-                        key={1}
-                        defaultval={-1}
                         width={"100%"}
+                        defaultval={-1}
                       />
                     </td>
                   </tr>
@@ -153,45 +158,39 @@ function Layout2Master() {
             <div>
               <Button
                 variant="success"
-                onClick={() => SaveData()}
-                disabled={isDisable}
+                onClick={SaveData}
+                disabled={isDisable || addIsLoading}
                 className="text-xs md:text-sm py-1"
                 size="sm"
               >
-                {isColorMasterLoading ? "Please wait..." : "Submit"}
+                {addIsLoading ? "Please wait..." : "Submit"}
               </Button>
             </div>
           </div>
         </Col>
 
         <Col xs={12} className="my-2">
-          {/* <hr className="my-2" /> */}
-          <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-2">
-            {/* Right Side: Textarea + Search */}
-            <div className="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1 w-100">
-              {/* Textarea */}
-              <div className="flex-grow-1" style={{ minWidth: "180px" }}>
-                <textarea
-                  value={textDetail}
-                  readOnly
-                  placeholder="Detail View"
-                  className="w-100 border border-blue-400 rounded p-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none"
-                  rows={2}
-                />
-              </div>
+          <div className="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1 w-100">
+            <div className="flex-grow-1" style={{ minWidth: "180px" }}>
+              <textarea
+                value={textDetail}
+                readOnly
+                placeholder="Detail View"
+                className="w-100 border border-blue-400 rounded p-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none"
+                rows={2}
+              />
+            </div>
 
-              {/* Search Bar */}
-              <div className="flex-grow-1" style={{ minWidth: "180px" }}>
-                <div className="flex items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm focus-within:ring-1 focus-within:ring-blue-300">
-                  <i className="bi bi-search text-gray-400 mx-1"></i>
-                  <input
-                    value={searchData}
-                    type="search"
-                    placeholder="Search here..."
-                    onChange={(e) => setSearchData(e.target.value)}
-                    className="w-100 border-0 outline-none bg-transparent px-1"
-                  />
-                </div>
+            <div className="flex-grow-1" style={{ minWidth: "180px" }}>
+              <div className="flex items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm focus-within:ring-1 focus-within:ring-blue-300">
+                <i className="bi bi-search text-gray-400 mx-1"></i>
+                <input
+                  value={searchData}
+                  type="search"
+                  placeholder="Search here..."
+                  onChange={(e) => setSearchData(e.target.value)}
+                  className="w-100 border-0 outline-none bg-transparent px-1"
+                />
               </div>
             </div>
           </div>
@@ -203,11 +202,12 @@ function Layout2Master() {
             setIsDisable={setIsDisable}
             search={searchData}
             setTextDetail={setTextDetail}
+            type={type}
           />
         </Col>
       </Row>
     </Container>
-  );
+  )
 }
 
-export default Layout2Master;
+export default Layout2Master

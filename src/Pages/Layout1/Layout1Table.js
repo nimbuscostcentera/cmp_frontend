@@ -1,51 +1,40 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+// pages/Layout1Master/Layout1Table.js
+import React, { useEffect, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
+import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 
-function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
-  const editinputref = useRef(null);
+function Layout1Table({ setIsDisable, search, setTextDetail, type }) {
+  const editInputRef = useRef(null);
   const [filteredData, setFilteredData] = useState([]);
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [editedData, setEditedData] = useState({
-    ID: null,
+    ID: "",
     Code: "",
     Description: "",
-    ID_master: -1,
   });
 
-  const typeArr = [
-    { label: 1, value: "Customer" },
-    { label: 2, value: "WholeSeller" },
-    { label: 3, value: "Mahajon" },
-  ];
-
-  const typeList = useMemo(
-    () =>
-      typeArr.map((item) => ({
-        label: item.value,
-        value: item.label,
-      })),
-    []
-  );
-
   const {
-    layout2,
-    fetchLayout2,
-    isLoading: fetchIsLoading,
-    addLayout2,
-    updateLayout2,
-    deleteLayout2,
-    addIsSuccess,
-    updateIsSuccess,
-    deleteIsSuccess,
-    addError,
+    layout1: items,
+    fetchLayout1,
+    updateLayout1,
+    deleteLayout1,
+
+    // Update states
+    updateIsLoading,
     updateError,
-    deleteError,
-    clearAddState,
+    updateIsSuccess,
     clearUpdateState,
+
+    // Delete states
+    deleteIsLoading,
+    deleteError,
+    deleteIsSuccess,
     clearDeleteState,
-  } = useLayout2Master();
+
+    // Fetch states
+    fetchIsLoading,
+  } = useLayout1Master();
 
   // Enable editing
   const ActionFunc = (tabIndex) => {
@@ -57,15 +46,14 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
         ID: selected.ID,
         Code: selected.Code,
         Description: selected.Description,
-        ID_master: selected.ID_master || -1,
       });
   };
 
   // Save changes
   const SaveChange = () => {
-    const { ID, Code, Description, ID_master } = editedData;
+    const { Code, Description, ID } = editedData;
     if (!Code || !Description) {
-      toast.error("Both fields required");
+      toast.error("Both fields are required");
       return;
     }
     if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
@@ -76,65 +64,64 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
       toast.error("Description max 15 alphanumeric");
       return;
     }
-
-    updateLayout2(type, ID, { Code, Description, ID_master });
+    updateLayout1(type, ID, { Code, Description });
   };
 
   // Delete
   const handleDelete = (id) => {
     const obj = filteredData[id];
-    if (obj) deleteLayout2(type, obj.ID);
+    if (obj) deleteLayout1(type, obj.ID);
   };
 
-  // Search filter
+  // Filter data based on search
   useEffect(() => {
     const val = search.toLowerCase();
-    const filtered = layout2.filter(
+    const filtered = items.filter(
       (item) =>
         item.Code?.toLowerCase().includes(val) ||
         item.Description?.toLowerCase().includes(val)
     );
     setFilteredData(filtered);
-  }, [search, layout2]);
+  }, [search, items]);
 
-  // Fetch list
+  // Fetch items on mount or type change
   useEffect(() => {
-    fetchLayout2(type);
-  }, [type, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
+    if (type) fetchLayout1(type);
+  }, [type]);
 
-  // Handle add/update/delete success/error
+  // Handle update success/error
   useEffect(() => {
-    if (updateIsSuccess) {
-      toast.success("Updated successfully");
+    if (updateIsSuccess && !updateIsLoading && !updateError) {
+      toast.success(`${type} updated successfully`);
       setParams({ IsAction: false, ActionID: -1 });
-      setEditedData({ ID: null, Code: "", Description: "", ID_master: -1 });
+      setEditedData({ ID: "", Code: "", Description: "" });
       setIsDisable(false);
+      clearUpdateState();
     }
-    if (updateError) toast.error(updateError);
-    clearUpdateState();
+    if (updateError && !updateIsLoading && !updateIsSuccess) {
+      toast.error(updateError);
+      clearUpdateState();
+    }
+  }, [updateIsSuccess, updateError, updateIsLoading]);
 
-    if (deleteIsSuccess) toast.success("Deleted successfully");
-    if (deleteError) toast.error(deleteError);
-    clearDeleteState();
-  }, [
-
-    updateIsSuccess,
-    deleteIsSuccess,
-    updateError,
-    deleteError,
-  ]);
+  // Handle delete success/error
+  useEffect(() => {
+    if (deleteIsSuccess && !deleteIsLoading && !deleteError) {
+      toast.success(`${type} deleted successfully`);
+      setParams({ IsAction: false, ActionID: -1 });
+      setEditedData({ ID: "", Code: "", Description: "" });
+      setIsDisable(false);
+      clearDeleteState();
+    }
+    if (deleteError && !deleteIsLoading && !deleteIsSuccess) {
+      toast.error(deleteError);
+      clearDeleteState();
+    }
+  }, [deleteIsSuccess, deleteError, deleteIsLoading]);
 
   const Col = [
     { headername: "Code", fieldname: "Code", type: "String", width: "120px" },
     { headername: "Description", fieldname: "Description", type: "String" },
-    {
-      headername: "Type",
-      fieldname: "ID_master",
-      selectionname: "ID_master",
-      type: "String",
-      isSelection: true,
-      options: typeList,
-    },
   ];
 
   return (
@@ -155,8 +142,8 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
         Col={Col}
         isEdit={true}
         EditedData={editedData}
-        isLoading={fetchIsLoading}
-        useInputRef={editinputref}
+        isLoading={updateIsLoading || deleteIsLoading || fetchIsLoading}
+        useInputRef={editInputRef}
         isDelete={true}
         handleDelete={handleDelete}
         height={"40vh"}
@@ -165,4 +152,4 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
   );
 }
 
-export default Layout2Table;
+export default Layout1Table;

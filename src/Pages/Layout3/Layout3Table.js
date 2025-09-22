@@ -2,10 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useFetchColorMaster from "../../Store/ShowStore/useFetchColorMaster";
-import useEditColorMaster from "../../Store/UpdateStore/useEditColorMaster";
-import useDeleteColorMaster from "../../Store/DeleteMasterStore/useDeleteColorMaster";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
+import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
 
 function Layout3Table({ setIsDisable, search, setTextDetail }) {
   const editinputref = useRef(null);
@@ -23,21 +20,24 @@ function Layout3Table({ setIsDisable, search, setTextDetail }) {
 
   const [CompanyID] = useState(1);
 
-  const { ColorMasterList, fetchColorMaster, isColorMasterLoading } =
-    useFetchColorMaster();
+  // 🔹 Import all actions from store
   const {
-    EditColorMasterFunc,
-    ColorMasterEditSuccess,
-    ColorMasterEditError,
-    ClearStateEditColorMaster,
-  } = useEditColorMaster();
-  const {
-    DeleteColorMaster,
-    ColorMasterDeleteMsg,
-    ColorMasterDeleteErr,
-    ClearColorMasterDelete,
-  } = useDeleteColorMaster();
-  const { ColorMasterSuccess } = useAddColorMaster();
+    layout3List,
+    fetchLayout3,
+    isFetchLoading,
+
+    editLayout3,
+    editIsSuccess,
+    editError,
+    clearEditState,
+
+    deleteLayout3,
+    deleteIsSuccess,
+    deleteError,
+    clearDeleteState,
+
+    addIsSuccess,
+  } = useLayout3Master();
 
   // Enable editing
   const ActionFunc = (tabIndex) => {
@@ -86,19 +86,19 @@ function Layout3Table({ setIsDisable, search, setTextDetail }) {
       return;
     }
 
-    EditColorMasterFunc({ ...editedData, CompanyID });
+    editLayout3("artisan", { ...editedData, CompanyID });
   };
 
   // Delete
   const handleDelete = (id) => {
     const obj = filteredData[id];
-    if (obj) DeleteColorMaster({ CompanyID, ID: obj.ID });
+    if (obj) deleteLayout3("artisan", { CompanyID, ID: obj.ID });
   };
 
   // Search filter
   useEffect(() => {
     const val = search.toLowerCase();
-    const filtered = ColorMasterList.filter(
+    const filtered = layout3List.filter(
       (c) =>
         c.CODE?.toLowerCase().includes(val) ||
         c.NAME?.toLowerCase().includes(val) ||
@@ -108,16 +108,16 @@ function Layout3Table({ setIsDisable, search, setTextDetail }) {
         c.CONTACT?.toLowerCase().includes(val)
     );
     setFilteredData(filtered);
-  }, [search, ColorMasterList]);
+  }, [search, layout3List]);
 
-  // Fetch list
+  // Fetch list on mount & when new data is added
   useEffect(() => {
-    fetchColorMaster({ CompanyID });
-  }, [ColorMasterSuccess]);
+    fetchLayout3("artisan", { CompanyID });
+  }, [addIsSuccess]);
 
   // Handle edit success/error
   useEffect(() => {
-    if (ColorMasterEditSuccess) {
+    if (editIsSuccess) {
       toast.success("Artisan Updated Successfully");
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({
@@ -131,16 +131,16 @@ function Layout3Table({ setIsDisable, search, setTextDetail }) {
       });
       setIsDisable(false);
     }
-    if (ColorMasterEditError) toast.error(ColorMasterEditError);
-    ClearStateEditColorMaster();
-  }, [ColorMasterEditSuccess, ColorMasterEditError]);
+    if (editError) toast.error(editError);
+    clearEditState();
+  }, [editIsSuccess, editError]);
 
-  // Handle delete
+  // Handle delete success/error
   useEffect(() => {
-    if (ColorMasterDeleteMsg) toast.success(ColorMasterDeleteMsg);
-    if (ColorMasterDeleteErr) toast.error(ColorMasterDeleteErr);
-    ClearColorMasterDelete();
-  }, [ColorMasterDeleteMsg, ColorMasterDeleteErr]);
+    if (deleteIsSuccess) toast.success("Artisan Deleted Successfully");
+    if (deleteError) toast.error(deleteError);
+    clearDeleteState();
+  }, [deleteIsSuccess, deleteError]);
 
   const Col = [
     { headername: "Code", fieldname: "CODE", type: "String", width: "100px" },
@@ -171,7 +171,7 @@ function Layout3Table({ setIsDisable, search, setTextDetail }) {
         Col={Col}
         isEdit={true}
         EditedData={editedData}
-        isLoading={isColorMasterLoading}
+        isLoading={isFetchLoading}
         useInputRef={editinputref}
         isDelete={true}
         handleDelete={handleDelete}

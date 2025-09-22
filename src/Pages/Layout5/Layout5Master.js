@@ -1,11 +1,11 @@
-// CustomerMaster.js
+// Layout5Master.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
 import "../../Components/Table/table.css";
 import Layout5Table from "./Layout5Table";
 import SearchableDropDown from "../../Components/SearchableDropDown";
+import useLayout5Master from "../../Store/MasterStore/useLayout5Master";
 
 function Layout5Master() {
   const inputRef = useRef();
@@ -34,20 +34,16 @@ function Layout5Master() {
     }));
   }, [typeArr]);
 
-  const {
-    ColorMasterError,
-    isColorMasterLoading,
-    ColorMasterSuccess,
-    ColorMasterAdd,
-    ClearStateColorMasterAdd,
-  } = useAddColorMaster();
+  // Zustand store methods & states
+  const { addLayout5, addIsLoading, addIsSuccess, addError, clearAddState } =
+    useLayout5Master();
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   const OnChangeHandler = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target || {}; // from input or dropdown
     if (name === "CONTACT") {
       if (value && value.length > 10) {
         return;
@@ -86,11 +82,11 @@ function Layout5Master() {
       return;
     }
 
-    ColorMasterAdd(inputData);
+    addLayout5("csm", inputData); // 👈 pass type (Customer Master = csm)
   };
 
   useEffect(() => {
-    if (ColorMasterSuccess && !isColorMasterLoading && !ColorMasterError) {
+    if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Customer Added Successfully");
       setInputData({
         NAME: "",
@@ -101,11 +97,11 @@ function Layout5Master() {
         id_master: 2, // Reset to Customer default
       });
     }
-    if (ColorMasterError && !isColorMasterLoading && !ColorMasterSuccess) {
-      toast.error(ColorMasterError);
+    if (addError && !addIsLoading && !addIsSuccess) {
+      toast.error(addError);
     }
-    ClearStateColorMasterAdd();
-  }, [isColorMasterLoading, ColorMasterSuccess, ColorMasterError]);
+    clearAddState();
+  }, [addIsLoading, addIsSuccess, addError]);
 
   return (
     <Container fluid className="p-0" style={{ width: "98%" }}>
@@ -193,14 +189,19 @@ function Layout5Master() {
                           value={inputData?.CONTACT || ""}
                           onChange={OnChangeHandler}
                           maxLength={10}
-                          type="number"
+                          type="text"
                           style={{ width: "150px" }}
                         />
                       </td>
                       <td>
                         <SearchableDropDown
                           options={typeList}
-                          handleChange={(e) => OnChangeHandler(e)}
+                          handleChange={(e) =>
+                            setInputData((prev) => ({
+                              ...prev,
+                              id_master: e.value,
+                            }))
+                          }
                           selectedVal={inputData?.id_master || 2}
                           label={"id_master"}
                           placeholder={"--Select Type--"}
@@ -224,7 +225,7 @@ function Layout5Master() {
                 className="text-xs md:text-sm py-1 mt-2 mt-md-0"
                 size="sm"
               >
-                {isColorMasterLoading ? "Please wait..." : "Submit"}
+                {addIsLoading ? "Please wait..." : "Submit"}
               </Button>
             </Col>
           </Row>

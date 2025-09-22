@@ -1,125 +1,144 @@
 import React, { useEffect, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useFetchColorMaster from "../../Store/ShowStore/useFetchColorMaster";
-import useEditColorMaster from "../../Store/UpdateStore/useEditColorMaster";
-import useDeleteColorMaster from "../../Store/DeleteMasterStore/useDeleteColorMaster";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
+import useUnitMaster from "../../Store/MasterStore/useUnitMaster";
 
 function UnitTable({ setIsDisable, search, setTextDetail }) {
   const editinputref = useRef(null);
+
   const [filteredData, setFilteredData] = useState([]);
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [editedData, setEditedData] = useState({
     ID: null,
-    CODE: "",
-    DESCRIPTION: "",
-    RATE: "",
+    Unit_Code: "",
+    Description: "",
+    Conversion: "",
   });
 
-  const [CompanyID, setCompanyID] = useState(1);
-  const { ColorMasterList, fetchColorMaster, isColorMasterLoading } =
-    useFetchColorMaster();
   const {
-    EditColorMasterFunc,
-    ColorMasterEditSuccess,
-    ColorMasterEditError,
-    ClearStateEditColorMaster,
-  } = useEditColorMaster();
-  const {
-    DeleteColorMaster,
-    ColorMasterDeleteMsg,
-    ColorMasterDeleteErr,
-    ClearColorMasterDelete,
-  } = useDeleteColorMaster();
-  const { ColorMasterSuccess } = useAddColorMaster();
+    units,
+    fetchUnits,
+    fetchIsLoading,
+
+    updateUnit,
+    updateIsSuccess,
+    updateError,
+    clearUpdateState,
+
+    deleteUnit,
+    deleteIsSuccess,
+    deleteError,
+    clearDeleteState,
+  } = useUnitMaster();
 
   // Enable editing
   const ActionFunc = (tabIndex) => {
     setParams({ IsAction: true, ActionID: tabIndex });
     setIsDisable(true);
     const selected = filteredData[tabIndex];
-    if (selected)
+    if (selected) {
       setEditedData({
-        ID: selected.ID,
-        CODE: selected.CODE,
-        DESCRIPTION: selected.DESCRIPTION,
-        RATE: selected.RATE,
+        ID: selected.Unit_ID,
+        Unit_Code: selected.Unit_Code,
+        Description: selected.Description,
+        Conversion: selected.Conversion,
       });
+    }
   };
 
   // Save changes
   const SaveChange = () => {
-    const { CODE, DESCRIPTION, RATE } = editedData;
-    if (!CODE || !DESCRIPTION || !RATE) {
+    const { Unit_Code, Description, Conversion } = editedData;
+    if (!Unit_Code || !Description || !Conversion) {
       toast.error("All fields are mandatory");
       return;
     }
-    if (!/^[a-zA-Z0-9]{1,6}$/.test(CODE)) {
+    if (!/^[a-zA-Z0-9]{1,6}$/.test(Unit_Code)) {
       toast.error("Code must be alphanumeric & max 6 chars");
       return;
     }
-    if (!/^[a-zA-Z0-9 ]{1,15}$/.test(DESCRIPTION)) {
+    if (!/^[a-zA-Z0-9 ]{1,15}$/.test(Description)) {
       toast.error("Description must be alphanumeric & max 15 chars");
       return;
     }
-    const rateValue = parseFloat(RATE);
-    if (isNaN(rateValue) || rateValue >= 5.2) {
-      toast.error("Rate/Gm must be a decimal value less than 5.2");
+    const conv = parseFloat(Conversion);
+    if (isNaN(conv)) {
+      toast.error("Conversion must be a valid number");
       return;
     }
 
-    EditColorMasterFunc({ ...editedData, CompanyID });
+    updateUnit(editedData.ID, {
+      Unit_Code,
+      Description,
+      Conversion,
+    });
   };
 
   // Delete
   const handleDelete = (id) => {
     const obj = filteredData[id];
-    if (obj) DeleteColorMaster({ CompanyID, ID: obj.ID });
+    if (obj) {
+      deleteUnit(obj.Unit_ID);
+    }
   };
 
   // Search filter
   useEffect(() => {
     const val = search.toLowerCase();
-    const filtered = ColorMasterList.filter(
-      (c) =>
-        c.CODE?.toLowerCase().includes(val) ||
-        c.DESCRIPTION?.toLowerCase().includes(val) ||
-        c.RATE?.toString().includes(val)
+    const filtered = units.filter(
+      (u) =>
+        u.Unit_ID?.toString().includes(val) ||
+        u.Unit_Code?.toLowerCase().includes(val) ||
+        u.Description?.toLowerCase().includes(val) ||
+        u.Conversion?.toString().includes(val)
     );
     setFilteredData(filtered);
-  }, [search, ColorMasterList]);
+  }, [search, units]);
 
-  // Fetch list
+  // Fetch list on mount
   useEffect(() => {
-    fetchColorMaster({ CompanyID });
-  }, [ColorMasterSuccess]);
+    fetchUnits();
+  }, []);
 
-  // Handle edit success/error
+  // Handle update success/error
   useEffect(() => {
-    if (ColorMasterEditSuccess) {
-      toast.success("Plating/Polish Updated Successfully");
+    if (updateIsSuccess) {
+      toast.success("Unit Updated Successfully");
       setParams({ IsAction: false, ActionID: -1 });
-      setEditedData({ ID: null, CODE: "", DESCRIPTION: "", RATE: "" });
+      setEditedData({
+        ID: null,
+        Unit_Code: "",
+        Description: "",
+        Conversion: "",
+      });
       setIsDisable(false);
+      fetchUnits();
     }
-    if (ColorMasterEditError) toast.error(ColorMasterEditError);
-    ClearStateEditColorMaster();
-  }, [ColorMasterEditSuccess, ColorMasterEditError]);
+    if (updateError) toast.error(updateError);
+    clearUpdateState();
+  }, [updateIsSuccess, updateError]);
 
-  // Handle delete
+  // Handle delete success/error
   useEffect(() => {
-    if (ColorMasterDeleteMsg) toast.success(ColorMasterDeleteMsg);
-    if (ColorMasterDeleteErr) toast.error(ColorMasterDeleteErr);
-    ClearColorMasterDelete();
-  }, [ColorMasterDeleteMsg, ColorMasterDeleteErr]);
+    if (deleteIsSuccess) {
+      toast.success("Unit Deleted Successfully");
+      fetchUnits();
+    }
+    if (deleteError) toast.error(deleteError);
+    clearDeleteState();
+  }, [deleteIsSuccess, deleteError]);
 
   const Col = [
-    { headername: "Code", fieldname: "CODE", type: "String", width: "120px" },
-    { headername: "Description", fieldname: "DESCRIPTION", type: "String" },
     {
-      headername: "Rate/Gm",
-      fieldname: "RATE",
+      headername: "Code",
+      fieldname: "Unit_Code",
+      type: "String",
+      width: "120px",
+    },
+    { headername: "Description", fieldname: "Description", type: "String" },
+    {
+      headername: "Conversion",
+      fieldname: "Conversion",
       type: "Decimal",
       width: "100px",
     },
@@ -132,20 +151,26 @@ function UnitTable({ setIsDisable, search, setTextDetail }) {
         isAction={params.IsAction}
         ActionFunc={ActionFunc}
         ActionId={params.ActionID}
-        OnChangeHandler={(i, e) =>
+        OnChangeHandler={(i, e) => {
+          if (e.target.name === "Conversion" && e.target.value !== "") {
+            // Allow only numbers and a single decimal point also before . it can take 7 numbers and after . it can take 3 digits
+            const regex = /^\d{1,7}\.?\d{0,3}$/;
+            if (!regex.test(e.target.value)) {
+              return;
+            }
+          }
           setEditedData((prev) => ({
             ...prev,
             [e.target.name]: e.target.value,
-          }))
+          }));
+        }
         }
         OnSaveHandler={SaveChange}
-        getFocusText={(val) => {
-          setTextDetail(val);
-        }}
+        getFocusText={(val) => setTextDetail(val)}
         Col={Col}
         isEdit={true}
         EditedData={editedData}
-        isLoading={isColorMasterLoading}
+        isLoading={fetchIsLoading}
         useInputRef={editinputref}
         isDelete={true}
         handleDelete={handleDelete}

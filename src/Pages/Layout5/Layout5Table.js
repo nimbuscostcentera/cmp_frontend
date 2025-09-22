@@ -1,11 +1,8 @@
-// Layout4Table.js
+// Layout5Table.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useFetchColorMaster from "../../Store/ShowStore/useFetchColorMaster";
-import useEditColorMaster from "../../Store/UpdateStore/useEditColorMaster";
-import useDeleteColorMaster from "../../Store/DeleteMasterStore/useDeleteColorMaster";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
+import useLayout5Master from "../../Store/MasterStore/useLayout5Master";
 
 function Layout5Table({ setIsDisable, search, setTextDetail }) {
   const editinputref = useRef(null);
@@ -22,6 +19,7 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
     id_master: 2, // default Customer
   });
 
+  const type = "csm"; // <-- Customer Master
   const [CompanyID] = useState(1);
 
   const typeArr = [
@@ -36,21 +34,23 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
     }));
   }, [typeArr]);
 
-  const { ColorMasterList, fetchColorMaster, isColorMasterLoading } =
-    useFetchColorMaster();
   const {
-    EditColorMasterFunc,
-    ColorMasterEditSuccess,
-    ColorMasterEditError,
-    ClearStateEditColorMaster,
-  } = useEditColorMaster();
-  const {
-    DeleteColorMaster,
-    ColorMasterDeleteMsg,
-    ColorMasterDeleteErr,
-    ClearColorMasterDelete,
-  } = useDeleteColorMaster();
-  const { ColorMasterSuccess } = useAddColorMaster();
+    layout5,
+    fetchLayout5,
+    updateLayout5,
+    deleteLayout5,
+
+    // States
+    fetchIsLoading,
+    addIsSuccess,
+    updateIsSuccess,
+    updateError,
+    deleteIsSuccess,
+    deleteError,
+
+    clearUpdateState,
+    clearDeleteState,
+  } = useLayout5Master();
 
   // Enable editing
   const ActionFunc = (tabIndex) => {
@@ -71,7 +71,7 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
 
   // Save changes
   const SaveChange = () => {
-    const { NAME, CONTACT } = editedData;
+    const { NAME, CONTACT, ID } = editedData;
 
     if (!NAME) {
       toast.error("Name is mandatory");
@@ -97,19 +97,19 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
       return;
     }
 
-    EditColorMasterFunc({ ...editedData, CompanyID });
+    updateLayout5(type, ID, { ...editedData, CompanyID });
   };
 
   // Delete
   const handleDelete = (id) => {
     const obj = filteredData[id];
-    if (obj) DeleteColorMaster({ CompanyID, ID: obj.ID });
+    if (obj) deleteLayout5(type, obj.ID);
   };
 
   // Search filter
   useEffect(() => {
     const val = search.toLowerCase();
-    const filtered = ColorMasterList.filter(
+    const filtered = layout5.filter(
       (c) =>
         c.NAME?.toLowerCase().includes(val) ||
         c.ADDRESS1?.toLowerCase().includes(val) ||
@@ -118,16 +118,16 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
         c.CONTACT?.toLowerCase().includes(val)
     );
     setFilteredData(filtered);
-  }, [search, ColorMasterList]);
+  }, [search, layout5]);
 
   // Fetch list
   useEffect(() => {
-    fetchColorMaster({ CompanyID });
-  }, [ColorMasterSuccess]);
+    fetchLayout5(type);
+  }, [addIsSuccess]);
 
-  // Handle edit success/error
+  // Handle update success/error
   useEffect(() => {
-    if (ColorMasterEditSuccess) {
+    if (updateIsSuccess) {
       toast.success("Customer Updated Successfully");
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({
@@ -141,16 +141,16 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
       });
       setIsDisable(false);
     }
-    if (ColorMasterEditError) toast.error(ColorMasterEditError);
-    ClearStateEditColorMaster();
-  }, [ColorMasterEditSuccess, ColorMasterEditError]);
+    if (updateError) toast.error(updateError);
+    clearUpdateState();
+  }, [updateIsSuccess, updateError]);
 
   // Handle delete
   useEffect(() => {
-    if (ColorMasterDeleteMsg) toast.success(ColorMasterDeleteMsg);
-    if (ColorMasterDeleteErr) toast.error(ColorMasterDeleteErr);
-    ClearColorMasterDelete();
-  }, [ColorMasterDeleteMsg, ColorMasterDeleteErr]);
+    if (deleteIsSuccess) toast.success("Customer Deleted Successfully");
+    if (deleteError) toast.error(deleteError);
+    clearDeleteState();
+  }, [deleteIsSuccess, deleteError]);
 
   const Col = [
     { headername: "Name", fieldname: "NAME", type: "String", width: "150px" },
@@ -188,7 +188,7 @@ function Layout5Table({ setIsDisable, search, setTextDetail }) {
         Col={Col}
         isEdit={true}
         EditedData={editedData}
-        isLoading={isColorMasterLoading}
+        isLoading={fetchIsLoading}
         useInputRef={editinputref}
         isDelete={true}
         handleDelete={handleDelete}

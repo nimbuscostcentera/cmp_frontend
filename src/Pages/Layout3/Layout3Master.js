@@ -1,11 +1,10 @@
-// ArtisanMaster.js
-import React, { useEffect, useMemo, useRef, useState } from "react";
+// Layout3Master.js
+import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
+import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
 import "../../Components/Table/table.css";
 import Layout3Table from "./Layout3Table";
-import PhnoValidation from "../../GlobalFunctions/PhnoValidation";
 
 function Layout3Master() {
   const inputRef = useRef();
@@ -22,13 +21,8 @@ function Layout3Master() {
     CONTACT: "",
   });
 
-  const {
-    ColorMasterError,
-    isColorMasterLoading,
-    ColorMasterSuccess,
-    ColorMasterAdd,
-    ClearStateColorMasterAdd,
-  } = useAddColorMaster();
+  const { addLayout3, addIsLoading, addIsSuccess, addError, clearAddState } =
+    useLayout3Master();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -36,10 +30,8 @@ function Layout3Master() {
 
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if (name == "CONTACT") {
-      if (value && value.length > 10) {
-        return;
-      }
+    if (name === "CONTACT") {
+      if (value && value.length > 10) return;
     }
     setInputData((prev) => ({ ...prev, [name]: value }));
   };
@@ -63,7 +55,7 @@ function Layout3Master() {
       return;
     }
 
-    // Optional fields validations
+    // Optional address validations
     for (let i = 1; i <= 3; i++) {
       if (
         inputData[`ADDRESS${i}`] &&
@@ -75,16 +67,16 @@ function Layout3Master() {
     }
 
     if (inputData.CONTACT && !/^\d{10}$/.test(inputData.CONTACT)) {
-      console.log(inputData.CONTACT);
-      toast.error("Contact No must be alphanumeric & max 10 chars");
+      toast.error("Contact No must be numeric & exactly 10 digits");
       return;
     }
 
-    ColorMasterAdd(inputData);
+    // Call store add action
+    addLayout3("artisan", inputData); // 👈 pass type (example: artisan)
   };
 
   useEffect(() => {
-    if (ColorMasterSuccess && !isColorMasterLoading && !ColorMasterError) {
+    if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Artisan Added Successfully");
       setInputData({
         CODE: "",
@@ -95,11 +87,11 @@ function Layout3Master() {
         CONTACT: "",
       });
     }
-    if (ColorMasterError && !isColorMasterLoading && !ColorMasterSuccess) {
-      toast.error(ColorMasterError);
+    if (addError && !addIsLoading && !addIsSuccess) {
+      toast.error(addError);
     }
-    ClearStateColorMasterAdd();
-  }, [isColorMasterLoading, ColorMasterSuccess, ColorMasterError]);
+    clearAddState();
+  }, [addIsLoading, addIsSuccess, addError, clearAddState]);
 
   return (
     <Container fluid className="p-0" style={{ width: "98%" }}>
@@ -113,11 +105,10 @@ function Layout3Master() {
         </Col>
 
         {/* Input Fields */}
-        <Col xs={12} className="">
+        <Col xs={12}>
           <Row className="align-items-center">
-            {/* Input Form */}
             <Col xs={12} md={10}>
-              <div className=" mb-2" style={{ overflowX: "auto" }}>
+              <div className="mb-2" style={{ overflowX: "auto" }}>
                 <table className="text-sm">
                   <thead className="tab-head">
                     <tr>
@@ -209,16 +200,15 @@ function Layout3Master() {
               </div>
             </Col>
 
-            {/* Submit Button */}
             <Col xs={12} md={2} className="text-start text-md-center">
               <Button
                 variant="success"
-                onClick={() => SaveData()}
+                onClick={SaveData}
                 disabled={isDisable}
                 className="text-xs md:text-sm py-1 mt-2 mt-md-0"
                 size="sm"
               >
-                {isColorMasterLoading ? "Please wait..." : "Submit"}
+                {addIsLoading ? "Please wait..." : "Submit"}
               </Button>
             </Col>
           </Row>

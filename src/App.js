@@ -11,10 +11,10 @@ import Layout2Master from "./Pages/Layout2/Layout2Master";
 import Layout3Master from "./Pages/Layout3/Layout3Master";
 import Layout4Master from "./Pages/Layout4/Layout4Master";
 import Layout5Master from "./Pages/Layout5/Layout5Master";
-import ProcessTable from "./Pages/ProcessMaster/ProcessTable";
 import ProcessMaster from "./Pages/ProcessMaster/ProcessMaster";
 import PlatingPolishMaster from "./Pages/PlatingPolishMaster/PlatingPolishMaster";
 import UnitMaster from "./Pages/UnitMaster/UnitMaster";
+import Layout1Master from "./Pages/Layout1/Layout1Master";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -57,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "stone",
         element: withSuspense(Layout2Master),
+      },
+      {
+        path: "layout1",
+        element: withSuspense(Layout1Master),
       },
       {
         path: "artisan",

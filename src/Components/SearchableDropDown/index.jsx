@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Select from "react-select";
-import { Modal, InputGroup, Form, ListGroup } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 const SearchableDropDown = ({
   options,
@@ -11,8 +11,8 @@ const SearchableDropDown = ({
   label,
   placeholder,
   defaultval,
-  width,
-  directSearch = false, // New prop to control search behavior
+  width = "w-full",
+  directSearch = false,
 }) => {
   const [show, setShow] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +25,6 @@ const SearchableDropDown = ({
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  // Find the selected value label
   const findSelectedValue = () => {
     if (Array.isArray(options) && options.length !== 0) {
       const vl = options?.filter((item) => item?.value == selectedVal);
@@ -34,7 +33,6 @@ const SearchableDropDown = ({
     return "";
   };
 
-  // Handle input change for direct search
   const handleInputChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -45,7 +43,6 @@ const SearchableDropDown = ({
       return;
     }
 
-    // Filter options based on search term
     const filtered = options.filter((option) =>
       option.label.toLowerCase().includes(value.toLowerCase())
     );
@@ -54,7 +51,6 @@ const SearchableDropDown = ({
     setShowDropdown(true);
   };
 
-  // Handle option selection from dropdown
   const handleOptionSelect = (option) => {
     const obj = { target: { value: option.value, name: label } };
     handleChange(obj);
@@ -62,28 +58,21 @@ const SearchableDropDown = ({
     setShowDropdown(false);
   };
 
-  // Handle key press events
   const handleKeyDown = (e) => {
-    // Handle Tab key
     if (e.key === "Tab") {
-      e.preventDefault(); // Prevent default tab behavior
-      setShowDropdown(false); // Close the dropdown
-      handleShow(); // Open the modal with Select component
+      e.preventDefault();
+      setShowDropdown(false);
+      handleShow();
     }
-
-    // Handle Enter key
     if (e.key === "Enter" && filteredOptions.length > 0) {
       e.preventDefault();
       handleOptionSelect(filteredOptions[0]);
     }
-
-    // Handle Escape key
     if (e.key === "Escape") {
       setShowDropdown(false);
     }
   };
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -95,104 +84,81 @@ const SearchableDropDown = ({
         setShowDropdown(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reset search term when selected value changes
   useEffect(() => {
     setSearchTerm(findSelectedValue());
   }, [selectedVal, options]);
 
-  // Focus the Select component when modal opens
   useEffect(() => {
     if (show && selectRef.current) {
-      setTimeout(() => {
-        if (selectRef.current) {
-          selectRef.current.focus();
-        }
-      }, 100);
+      setTimeout(() => selectRef.current.focus(), 100);
     }
   }, [show]);
 
   return (
-    <div style={{ width: width || "auto", position: "relative", zIndex: 1 }}>
-      <InputGroup
-        style={{ width: width || "100%",}}
-      >
-        <Form.Control
+    <div className={`relative z-10 ${width}`}>
+      {/* Input */}
+      <div className="flex w-full">
+        <input
           ref={inputRef}
           placeholder={placeholder}
           value={directSearch ? searchTerm : findSelectedValue()}
-          onChange={
-            directSearch
-              ? handleInputChange
-              : () => {
-                  return;
-                }
-          }
+          onChange={directSearch ? handleInputChange : () => {}}
           onKeyUp={handleKeyDown}
-          onClick={
-            directSearch
-              ? () => {
-                  return;
-                }
-              : handleShow
-          }
-          aria-describedby="basic-addon2"
-          style={{
-            borderRadius: "8px 0 0 8x" ,
-            padding: "6px 8px",
-            fontSize: "13px",
-            color: "rgba(75, 75, 75, 0.62)",
-          }}
+          onClick={directSearch ? () => {} : handleShow}
+          className="flex-grow rounded-l-md border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
         />
-        <InputGroup.Text
-          id="basic-addon2"
+        <button
           onClick={handleShow}
-          style={{
-            padding: "4px 5px",
-            borderTopRightRadius: "3px",
-            borderBottomRightRadius: "3px",
-            cursor: "pointer",
-          }}
+          className="bg-gray-200 border border-l-0 border-gray-300 rounded-r-md px-2 py-1 text-gray-700 hover:bg-gray-300 transition"
         >
           <i className="bi bi-search"></i>
-        </InputGroup.Text>
-      </InputGroup>
+        </button>
+      </div>
+
+      {/* Dropdown suggestions for directSearch */}
+      {directSearch && showDropdown && filteredOptions.length > 0 && (
+        <ul
+          ref={dropdownRef}
+          className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg z-20"
+        >
+          {filteredOptions.map((option) => (
+            <li
+              key={option.value}
+              onClick={() => handleOptionSelect(option)}
+              className="cursor-pointer px-2 py-1 hover:bg-blue-100"
+            >
+              {option.label}
+            </li>
+          ))}
+        </ul>
+      )}
+
       {/* Modal for traditional search */}
-      <Modal
-        show={show}
-        onHide={handleClose}
-        size="lg"
-        backdrop="static"
-      >
+      <Modal show={show} onHide={handleClose} size="lg" backdrop="static">
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            {placeholder}
-          </Modal.Title>
+          <Modal.Title>{placeholder}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Select
             ref={selectRef}
             defaultValue={defaultval}
             value={options.find((opt) => opt.value === selectedVal) || null}
-            isClearable={true}
+            isClearable
             options={options}
-            isSearchable={true}
+            isSearchable
             onChange={(e) => {
-              const obj = { target: { value: null, name: null } };
-              obj.target.value = e ? e.value : null;
-              obj.target.name = label;
+              const obj = {
+                target: { value: e ? e.value : null, name: label },
+              };
               handleChange(obj);
               handleClose();
             }}
             placeholder={`--${placeholder}--`}
-            label={label}
-            menuIsOpen={true}
+            menuIsOpen
             autoFocus
             openMenuOnFocus
             styles={{
@@ -200,15 +166,13 @@ const SearchableDropDown = ({
                 ...base,
                 boxShadow: "none",
                 borderColor: "#ced4da",
-                "&:hover": {
-                  borderColor: "#adb5bd",
-                },
+                "&:hover": { borderColor: "#adb5bd" },
               }),
               menu: (base) => ({
                 ...base,
                 marginTop: 0,
                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                zIndex: 4,
+                zIndex: 50,
               }),
             }}
           />
