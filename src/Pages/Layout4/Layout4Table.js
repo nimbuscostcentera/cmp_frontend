@@ -1,175 +1,189 @@
-// Layout3Table.js
+// Layout4Table.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useFetchColorMaster from "../../Store/ShowStore/useFetchColorMaster";
-import useEditColorMaster from "../../Store/UpdateStore/useEditColorMaster";
-import useDeleteColorMaster from "../../Store/DeleteMasterStore/useDeleteColorMaster";
-import useAddColorMaster from "../../Store/AddStore/useAddColorMaster";
+import useLayout4Master from "../../Store/MasterStore/useLayout4Master";
+import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
+import PhnoValidation from "../../GlobalFunctions/PhnoValidation";
 
-function Layout4Table({ setIsDisable, search, setTextDetail }) {
+function Layout4Table({ setIsDisable, search, setTextDetail, type }) {
   const editinputref = useRef(null);
   const [filteredData, setFilteredData] = useState([]);
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
+    const { layout7 } = useLayout7Master();
+
+    const dropdownList = useMemo(() => {
+      return layout7.map((item) => ({
+        label: `${item.Process_Code}`,
+        value: item.Process_ID,
+      }));
+    }, [layout7]);
+
+  // Edited Data State -> aligned with Layout4Master.js
   const [editedData, setEditedData] = useState({
-    ID: null,
-    CODE: "",
-    NAME: "",
-    ADDRESS1: "",
-    ADDRESS2: "",
-    ADDRESS3: "",
-      CONTACT: "",
-    id_master : -1
+    Staff_ID: null,
+    Staff_Code: "",
+    Staff_Name: "",
+    Contact: "",
+    ID_master: -1,
+    Address1: "",
+    Address2: "",
+    Address3: "",
+    type: type,
   });
 
-    const [CompanyID] = useState(1);
-    
-      const typeArr = [
-        { label: 1, value: "Customer" },
-        { label: 2, value: "WholeSeller" },
-        { label: 3, value: "Mahajon" },
-      ];
-    
-      const typeList = useMemo(() => {
-        return typeArr.map((item) => ({
-          label: `${item?.value}`,
-          value: item?.label,
-        }));
-      }, [typeArr]);
-
-  const { ColorMasterList, fetchColorMaster, isColorMasterLoading } =
-    useFetchColorMaster();
   const {
-    EditColorMasterFunc,
-    ColorMasterEditSuccess,
-    ColorMasterEditError,
-    ClearStateEditColorMaster,
-  } = useEditColorMaster();
-  const {
-    DeleteColorMaster,
-    ColorMasterDeleteMsg,
-    ColorMasterDeleteErr,
-    ClearColorMasterDelete,
-  } = useDeleteColorMaster();
-  const { ColorMasterSuccess } = useAddColorMaster();
+    layout4,
+    fetchLayout4,
+    updateLayout4,
+    deleteLayout4,
 
-  // Enable editing
+    addIsSuccess,
+
+    // update
+    updateIsSuccess,
+    updateError,
+    clearUpdateState,
+
+    // delete
+    deleteIsSuccess,
+    deleteError,
+    clearDeleteState,
+
+    fetchIsLoading,
+  } = useLayout4Master();
+
+  // Enable Editing
   const ActionFunc = (tabIndex) => {
     setParams({ IsAction: true, ActionID: tabIndex });
     setIsDisable(true);
     const selected = filteredData[tabIndex];
-    if (selected)
+    if (selected) {
       setEditedData({
-        ID: selected.ID,
-        CODE: selected.CODE,
-        NAME: selected.NAME,
-        ADDRESS1: selected.ADDRESS1,
-        ADDRESS2: selected.ADDRESS2,
-        ADDRESS3: selected.ADDRESS3,
-        CONTACT: selected.CONTACT,
+        Staff_ID: selected.Staff_ID,
+        Staff_Code: selected.Staff_Code,
+        Staff_Name: selected.Staff_Name,
+        Contact: selected.Contact,
+        ID_master: selected.ID_master,
+        Address1: selected.Address1,
+        Address2: selected.Address2,
+        Address3: selected.Address3,
+        type: selected.type || type,
       });
+    }
   };
 
   // Save changes
   const SaveChange = () => {
-    const { CODE, NAME, CONTACT } = editedData;
+    const { Staff_Code, Staff_Name, Contact } = editedData;
 
-    if (!CODE || !NAME) {
+    if (!Staff_Code || !Staff_Name) {
       toast.error("Code and Name are mandatory");
       return;
     }
-    if (!/^[a-zA-Z0-9]{1,6}$/.test(CODE)) {
+    if (!/^[a-zA-Z0-9]{1,6}$/.test(Staff_Code)) {
       toast.error("Code must be alphanumeric & max 6 chars");
       return;
     }
-    if (!/^[a-zA-Z0-9 ]{1,100}$/.test(NAME)) {
+    if (!/^[a-zA-Z0-9 ]{1,100}$/.test(Staff_Name)) {
       toast.error("Name must be alphanumeric & max 100 chars");
       return;
     }
-    for (let i = 1; i <= 3; i++) {
-      if (
-        editedData[`ADDRESS${i}`] &&
-        !/^[a-zA-Z0-9 ]{0,100}$/.test(editedData[`ADDRESS${i}`])
-      ) {
-        toast.error(`Address line ${i} must be alphanumeric & max 100 chars`);
-        return;
-      }
-    }
-    if (CONTACT && !/^\d{10}$/.test(CONTACT)) {
-      toast.error("Contact No must be 10 digits only");
+  
+    if (Contact && !/^\d{10}$/.test(Contact)) {
+      toast.error("Contact No must be numeric & exactly 10 digits");
       return;
     }
 
-    EditColorMasterFunc({ ...editedData, CompanyID });
+    if (editedData.Staff_ID) {
+      updateLayout4(type, editedData.Staff_ID, editedData);
+    }
   };
 
   // Delete
   const handleDelete = (id) => {
     const obj = filteredData[id];
-    if (obj) DeleteColorMaster({ CompanyID, ID: obj.ID });
+    console.log("Deleting object:", obj);
+    if (obj) deleteLayout4(type, obj.Staff_ID);
   };
 
   // Search filter
   useEffect(() => {
     const val = search.toLowerCase();
-    const filtered = ColorMasterList.filter(
+    const filtered = layout4.filter(
       (c) =>
-        c.CODE?.toLowerCase().includes(val) ||
-        c.NAME?.toLowerCase().includes(val) ||
-        c.ADDRESS1?.toLowerCase().includes(val) ||
-        c.ADDRESS2?.toLowerCase().includes(val) ||
-        c.ADDRESS3?.toLowerCase().includes(val) ||
-        c.CONTACT?.toLowerCase().includes(val)
+        c.Staff_Code?.toLowerCase().includes(val) ||
+        c.Staff_Name?.toLowerCase().includes(val) ||
+        c.Address1?.toLowerCase().includes(val) ||
+        c.Address2?.toLowerCase().includes(val) ||
+        c.Address3?.toLowerCase().includes(val) ||
+        c.Contact?.toLowerCase().includes(val) ||
+        c.type?.toLowerCase().includes(val) ||
+        (c.Process_Code?.toLowerCase().includes(val))
     );
     setFilteredData(filtered);
-  }, [search, ColorMasterList]);
+  }, [search, layout4]);
 
-  // Fetch list
+  // Fetch list whenever type changes
   useEffect(() => {
-    fetchColorMaster({ CompanyID });
-  }, [ColorMasterSuccess]);
+    fetchLayout4(type);
+    // fetchLayout7();
+  }, [type, deleteIsSuccess, updateIsSuccess, addIsSuccess]);
 
-  // Handle edit success/error
+  // Handle update success/error
   useEffect(() => {
-    if (ColorMasterEditSuccess) {
-      toast.success("Artisan Updated Successfully");
+    if (updateIsSuccess) {
+      toast.success("Staff Updated Successfully");
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({
-        ID: null,
-        CODE: "",
-        NAME: "",
-        ADDRESS1: "",
-        ADDRESS2: "",
-        ADDRESS3: "",
-        CONTACT: "",
+        Staff_ID: null,
+        Staff_Code: "",
+        Staff_Name: "",
+        Contact: "",
+        ID_master: -1,
+        Address1: "",
+        Address2: "",
+        Address3: "",
+        type: type,
       });
       setIsDisable(false);
     }
-    if (ColorMasterEditError) toast.error(ColorMasterEditError);
-    ClearStateEditColorMaster();
-  }, [ColorMasterEditSuccess, ColorMasterEditError]);
+    if (updateError) toast.error(updateError);
+    clearUpdateState();
+  }, [updateIsSuccess, updateError]);
 
-  // Handle delete
+  // Handle delete success/error
   useEffect(() => {
-    if (ColorMasterDeleteMsg) toast.success(ColorMasterDeleteMsg);
-    if (ColorMasterDeleteErr) toast.error(ColorMasterDeleteErr);
-    ClearColorMasterDelete();
-  }, [ColorMasterDeleteMsg, ColorMasterDeleteErr]);
+    if (deleteIsSuccess) toast.success("Deleted Successfully");
+    if (deleteError) toast.error(deleteError);
+    clearDeleteState();
+  }, [deleteIsSuccess, deleteError]);
 
+  // Table Columns -> match Layout4Master.js
   const Col = [
-    { headername: "Code", fieldname: "CODE", type: "String", width: "100px" },
-    { headername: "Name", fieldname: "NAME", type: "String", width: "150px" },
-    { headername: "Address 1", fieldname: "ADDRESS1", type: "String" },
-    { headername: "Address 2", fieldname: "ADDRESS2", type: "String" },
-    { headername: "Address 3", fieldname: "ADDRESS3", type: "String" },
-    { headername: "Contact No", fieldname: "CONTACT", type: "String" },
+    {
+      headername: "Code",
+      fieldname: "Staff_Code",
+      type: "String",
+      width: "100px",
+    },
+    {
+      headername: "Name",
+      fieldname: "Staff_Name",
+      type: "String",
+      width: "150px",
+    },
+    { headername: "Address 1", fieldname: "Address1", type: "String" },
+    { headername: "Address 2", fieldname: "Address2", type: "String" },
+    { headername: "Address 3", fieldname: "Address3", type: "String" },
+    { headername: "Contact No", fieldname: "Contact", type: "String" },
     {
       headername: "Process",
-      fieldname: "id_master",
-      selectionname: "id_master",
+      fieldname: "Process_Code",
+      selectionname: "ID_master",
       type: "String",
       isSelection: true,
-      options: typeList,
+      options: dropdownList,
     },
   ];
 
@@ -180,20 +194,28 @@ function Layout4Table({ setIsDisable, search, setTextDetail }) {
         isAction={params.IsAction}
         ActionFunc={ActionFunc}
         ActionId={params.ActionID}
-        OnChangeHandler={(i, e) =>
+        OnChangeHandler={(i, e) => {
+          const { name, value } = e.target;
+          if (name === "Contact") {
+            if (value && value.length > 10) {
+              return;
+            }
+            if (!PhnoValidation(value)) {
+              return;
+            }
+          }
+
           setEditedData((prev) => ({
             ...prev,
-            [e.target.name]: e.target.value,
-          }))
-        }
-        OnSaveHandler={SaveChange}
-        getFocusText={(val) => {
-          setTextDetail(val);
+            [name]: value,
+          }));
         }}
+        OnSaveHandler={SaveChange}
+        getFocusText={(val) => setTextDetail(val)}
         Col={Col}
         isEdit={true}
         EditedData={editedData}
-        isLoading={isColorMasterLoading}
+        isLoading={fetchIsLoading}
         useInputRef={editinputref}
         isDelete={true}
         handleDelete={handleDelete}

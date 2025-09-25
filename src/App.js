@@ -16,7 +16,12 @@ import PlatingPolishMaster from "./Pages/PlatingPolishMaster/PlatingPolishMaster
 import UnitMaster from "./Pages/UnitMaster/UnitMaster";
 import Layout1Master from "./Pages/Layout1/Layout1Master";
 import Layout7Master from "./Pages/Layout7/Layout7Master";
-import LayoutMaster from "./Pages/Layout/LayoutMaster";
+import Layout11Master from "./Pages/Layout11/Layout11Master";
+import Layout13Master from "./Pages/Layout13/Layout13Master";
+import Layout6Master from "./Pages/Layout6/Layout6Master";
+import Layout8Master from "./Pages/Layout8/Layout8Mater";
+import SpcpMaster from "./Pages/Spcp/SpcpMaster";
+import Layout10Master from "./Pages/Layout10/Layout10Master";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -65,24 +70,44 @@ const router = createBrowserRouter([
         element: withSuspense(Layout1Master),
       },
       {
-        path: "artisan",
+        path: "layout3",
         element: withSuspense(Layout3Master),
       },
       {
-        path: "staff",
+        path: "layout4",
         element: withSuspense(Layout4Master),
       },
       {
-        path: "customer",
+        path: "layout5",
         element: withSuspense(Layout5Master),
       },
       {
         path: "layout6",
-        element: withSuspense(LayoutMaster),
+        element: withSuspense(Layout6Master),
       },
       {
         path: "layout7",
         element: withSuspense(Layout7Master),
+      },
+      {
+        path: "SpcpMaster",
+        element: withSuspense(SpcpMaster),
+      },
+      {
+        path: "layout8",
+        element: withSuspense(Layout8Master),
+      },
+      {
+        path: "layout11",
+        element: withSuspense(Layout11Master),
+      },
+      {
+        path: "layout10",
+        element: withSuspense(Layout10Master),
+      },
+      {
+        path: "layout13",
+        element: withSuspense(Layout13Master),
       },
       {
         path: "platingpolish",

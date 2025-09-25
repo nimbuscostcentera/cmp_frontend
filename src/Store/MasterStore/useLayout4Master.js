@@ -34,8 +34,8 @@ const useLayout4Master = create((set, get) => ({
   fetchLayout4: async (type) => {
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
-      const res = await axios.get(AddLayout4MasterAPI(type)); // type passed to API
-      set({ items: res.data, fetchIsLoading: false, fetchIsSuccess: true });
+      const res = await axios.get(`${AddLayout4MasterAPI}?type=${type}`); // type passed to API
+      set({ layout4: res.data, fetchIsLoading: false, fetchIsSuccess: true });
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch items",
@@ -48,7 +48,7 @@ const useLayout4Master = create((set, get) => ({
   addLayout4: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddLayout4MasterAPI(type), newItem);
+      await axios.post(AddLayout4MasterAPI,{ ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -62,7 +62,7 @@ const useLayout4Master = create((set, get) => ({
   updateLayout4: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout4MasterAPI(type)}/${id}/`, updatedData);
+      await axios.put(`${UpdateLayout4MasterAPI}/${id}/`, {...updatedData, type });
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -76,7 +76,7 @@ const useLayout4Master = create((set, get) => ({
   deleteLayout4: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout4MasterAPI(type)}/${id}/`);
+      await axios.delete(`${DeleteLayout4MasterAPI}/${id}/?type=${type}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
