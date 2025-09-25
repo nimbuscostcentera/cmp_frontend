@@ -1,70 +1,75 @@
-// pages/Layout1Master/Layout1Master.js
+// pages/Layout8Master/Layout8Master.js
 import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import Layout1Table from "./Layout1Table"; // replace ColorTable with generic table
-import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
+import Layout8Table from "./Layout8Table";
+import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
 import "../../Components/Table/table.css";
 import masterMapping from "../../Utils/mastermapping";
 
-function Layout1Master() {
+function Layout8Master() {
   const inputRef = useRef();
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [type, setType] = useState("mm"); // 'category' or 'brand' or any other type
+  const [type, setType] = useState("ppm"); // polish type
 
   const [itemData, setItemData] = useState({
-    Code: "",
+    Polish_Code: "",
     Description: "",
+    Rate: "",
   });
 
   const {
     addError,
     addIsLoading,
     addIsSuccess,
-    addLayout1,
-    fetchLayout1,
+    addLayout8,
+    fetchLayout8,
     clearAddState,
-  } = useLayout1Master();
+  } = useLayout8Master();
 
-  // Fetch data on mount
+  // Focus on first input
   useEffect(() => {
     inputRef.current?.focus();
   }, [type]);
 
-  // Handle input changes
+  // Input changes
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
     setItemData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Save new item
+  // Save new record
   const SaveData = () => {
-    const { Code, Description } = itemData;
-    if (!Code || !Description) {
-      toast.error("Fill the mandatory fields");
+    const { Polish_Code, Description, Rate } = itemData;
+
+    if (!Polish_Code || !Description || !Rate) {
+      toast.error("Fill all mandatory fields");
       return;
     }
-    if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
-      toast.error("Code must be max 6 chars");
+
+    if (!/^[a-zA-Z0-9]{1,6}$/.test(Polish_Code)) {
+      toast.error("Polish Code must be max 6 chars");
       return;
     }
     if (!/^[a-zA-Z0-9 ]{1,15}$/.test(Description)) {
       toast.error("Description must be max 15 chars");
       return;
     }
+    if (isNaN(Rate) || parseFloat(Rate) <= 0) {
+      toast.error("Rate must be a valid positive number");
+      return;
+    }
 
-    addLayout1(type, { Code, Description });
+    addLayout8(type, { Polish_Code, Description, Rate });
   };
 
   // Handle Add state changes
   useEffect(() => {
     if (addIsSuccess) {
-      toast.success(
-        `${type.charAt(0).toUpperCase() + type.slice(1)} Added Successfully`
-      );
-      setItemData({ Code: "", Description: "" });
+      toast.success("Plating Polish Added Successfully");
+      setItemData({ Polish_Code: "", Description: "", Rate: "" });
     }
     if (addError) {
       toast.error(addError);
@@ -93,8 +98,9 @@ function Layout1Master() {
                     <th className="w-[30px]">
                       <i className="bi bi-tag text-xs md:text-sm"></i>
                     </th>
-                    <th className="text-xs md:text-sm">Code*</th>
+                    <th className="text-xs md:text-sm">Polish Code*</th>
                     <th className="text-xs md:text-sm">Description*</th>
+                    <th className="text-xs md:text-sm">Rate*</th>
                   </tr>
                 </thead>
                 <tbody className="tab-body">
@@ -106,8 +112,8 @@ function Layout1Master() {
                       <input
                         placeholder="Enter Code"
                         className="input-cell form-input text-xs md:text-sm py-1"
-                        name="Code"
-                        value={itemData?.Code || ""}
+                        name="Polish_Code"
+                        value={itemData?.Polish_Code || ""}
                         onChange={OnChangeHandler}
                         maxLength={6}
                         ref={inputRef}
@@ -123,6 +129,18 @@ function Layout1Master() {
                         onChange={OnChangeHandler}
                         maxLength={15}
                         style={{ width: "180px" }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        placeholder="Enter Rate"
+                        type="number"
+                        step="0.01"
+                        className="input-cell form-input text-xs md:text-sm py-1"
+                        name="Rate"
+                        value={itemData?.Rate || ""}
+                        onChange={OnChangeHandler}
+                        style={{ width: "120px" }}
                       />
                     </td>
                   </tr>
@@ -172,7 +190,7 @@ function Layout1Master() {
 
         {/* Table */}
         <Col xs={12}>
-          <Layout1Table
+          <Layout8Table
             isDisable={isDisable}
             setIsDisable={setIsDisable}
             search={searchData}
@@ -185,4 +203,4 @@ function Layout1Master() {
   );
 }
 
-export default Layout1Master;
+export default Layout8Master;

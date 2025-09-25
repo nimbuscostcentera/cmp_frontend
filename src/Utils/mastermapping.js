@@ -1,5 +1,5 @@
 const masterMapping = {
-  cm: "Color Master", 
+  cm: "Color Master",
   um: "Unit Master",
   mm: "Misc Charge Master",
   dgm: "Design Group Master",
@@ -15,5 +15,9 @@ const masterMapping = {
   prm: "Process Master",
   ppm: "Plating Polish Master",
   dsm: "Design Master",
+  dlm: "Dealer Master",
+  com: "Company Master",
+  sysm: "System Master",
+  
 };
 export default masterMapping;

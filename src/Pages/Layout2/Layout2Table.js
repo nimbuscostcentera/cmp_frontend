@@ -107,14 +107,14 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
   }, [search, layout2, type]);
 
   // Fetch list + masters
-  useEffect(() => {
-    fetchLayout2(type);
-    if (type === "sm") {
-      fetchUnits();
-    } else {
-      fetchLayout7();
-    }
-  }, [type, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
+  // useEffect(() => {
+  //   fetchLayout2(type);
+  //   if (type === "sm") {
+  //     fetchUnits();
+  //   } else {
+  //     fetchLayout7();
+  //   }
+  // }, [type, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
   // Handle add/update/delete success/error
   useEffect(() => {

@@ -1,10 +1,11 @@
 // Layout3Master.js
 import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
 import "../../Components/Table/table.css";
 import Layout3Table from "./Layout3Table";
+import masterMapping from "../../Utils/mastermapping";
 
 function Layout3Master() {
   const inputRef = useRef();
@@ -12,13 +13,15 @@ function Layout3Master() {
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
 
+  const [type, setType] = useState("dlm"); // default type is "am"
+
   const [inputData, setInputData] = useState({
-    CODE: "",
-    NAME: "",
-    ADDRESS1: "",
-    ADDRESS2: "",
-    ADDRESS3: "",
-    CONTACT: "",
+    Code: "",
+    Name: "",
+    Address1: "",
+    Address2: "",
+    Address3: "",
+    Contact: "",
   });
 
   const { addLayout3, addIsLoading, addIsSuccess, addError, clearAddState } =
@@ -30,66 +33,63 @@ function Layout3Master() {
 
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if (name === "CONTACT") {
-      if (value && value.length > 10) return;
-    }
+    if (name === "Contact" && value && value.length > 10) return;
     setInputData((prev) => ({ ...prev, [name]: value }));
   };
 
   const SaveData = () => {
-    const { CODE, NAME } = inputData;
+    const { Code, Name } = inputData;
 
-    // Mandatory validations
-    if (!CODE || !NAME) {
+    if (!Code || !Name) {
       toast.error("Code and Name are mandatory");
       return;
     }
 
-    if (!/^[a-zA-Z0-9]{1,6}$/.test(CODE)) {
+    if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
       toast.error("Code must be alphanumeric & max 6 chars");
       return;
     }
 
-    if (!/^[a-zA-Z0-9 ]{1,100}$/.test(NAME)) {
+    if (!/^[a-zA-Z0-9 ]{1,100}$/.test(Name)) {
       toast.error("Name must be alphanumeric & max 100 chars");
       return;
     }
 
-    // Optional address validations
-    for (let i = 1; i <= 3; i++) {
-      if (
-        inputData[`ADDRESS${i}`] &&
-        !/^[a-zA-Z0-9 ]{0,100}$/.test(inputData[`ADDRESS${i}`])
-      ) {
-        toast.error(`Address line ${i} must be alphanumeric & max 100 chars`);
-        return;
-      }
-    }
+    // for (let i = 1; i <= 3; i++) {
+    //   if (
+    //     inputData[`Address${i}`] &&
+    //     !/^[a-zA-Z0-9 ]{0,255}$/.test(inputData[`Address${i}`])
+    //   ) {
+    //     toast.error(`Address line ${i} must be alphanumeric & max 255 chars`);
+    //     return;
+    //   }
+    // }
 
-    if (inputData.CONTACT && !/^\d{10}$/.test(inputData.CONTACT)) {
+    if (inputData.Contact && !/^\d{10}$/.test(inputData.Contact)) {
       toast.error("Contact No must be numeric & exactly 10 digits");
       return;
     }
 
-    // Call store add action
-    addLayout3("artisan", inputData); // 👈 pass type (example: artisan)
+    addLayout3(type, inputData); // Pass selected type
   };
 
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
-      toast.success("Artisan Added Successfully");
+      toast.success("Item Added Successfully");
       setInputData({
-        CODE: "",
-        NAME: "",
-        ADDRESS1: "",
-        ADDRESS2: "",
-        ADDRESS3: "",
-        CONTACT: "",
+        Code: "",
+        Name: "",
+        Address1: "",
+        Address2: "",
+        Address3: "",
+        Contact: "",
       });
     }
+
     if (addError && !addIsLoading && !addIsSuccess) {
       toast.error(addError);
     }
+
     clearAddState();
   }, [addIsLoading, addIsSuccess, addError, clearAddState]);
 
@@ -99,7 +99,7 @@ function Layout3Master() {
       <Row className="w-100">
         <Col xs={12}>
           <div className="d-flex align-items-center">
-            <h5 className="mb-0 text-sm md:text-base">Artisan Master</h5>
+            <h5 className="mb-0 text-sm md:text-base">{masterMapping[type]}</h5>
           </div>
           <hr className="my-1" />
         </Col>
@@ -126,12 +126,13 @@ function Layout3Master() {
                       <td>
                         <i className="bi bi-caret-right-fill text-xs md:text-sm"></i>
                       </td>
+
                       <td>
                         <input
                           placeholder="Enter Code"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="CODE"
-                          value={inputData?.CODE || ""}
+                          name="Code"
+                          value={inputData.Code}
                           onChange={OnChangeHandler}
                           maxLength={6}
                           ref={inputRef}
@@ -142,8 +143,8 @@ function Layout3Master() {
                         <input
                           placeholder="Enter Name"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="NAME"
-                          value={inputData?.NAME || ""}
+                          name="Name"
+                          value={inputData.Name}
                           onChange={OnChangeHandler}
                           maxLength={100}
                           style={{ width: "180px" }}
@@ -153,10 +154,10 @@ function Layout3Master() {
                         <input
                           placeholder="Address Line 1"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="ADDRESS1"
-                          value={inputData?.ADDRESS1 || ""}
+                          name="Address1"
+                          value={inputData.Address1}
                           onChange={OnChangeHandler}
-                          maxLength={100}
+                          maxLength={255}
                           style={{ width: "190px" }}
                         />
                       </td>
@@ -164,10 +165,10 @@ function Layout3Master() {
                         <input
                           placeholder="Address Line 2"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="ADDRESS2"
-                          value={inputData?.ADDRESS2 || ""}
+                          name="Address2"
+                          value={inputData.Address2}
                           onChange={OnChangeHandler}
-                          maxLength={100}
+                          maxLength={255}
                           style={{ width: "190px" }}
                         />
                       </td>
@@ -175,10 +176,10 @@ function Layout3Master() {
                         <input
                           placeholder="Address Line 3"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="ADDRESS3"
-                          value={inputData?.ADDRESS3 || ""}
+                          name="Address3"
+                          value={inputData.Address3}
                           onChange={OnChangeHandler}
-                          maxLength={100}
+                          maxLength={255}
                           style={{ width: "190px" }}
                         />
                       </td>
@@ -186,8 +187,8 @@ function Layout3Master() {
                         <input
                           placeholder="Enter Contact"
                           className="input-cell form-input text-xs md:text-sm py-1"
-                          name="CONTACT"
-                          value={inputData?.CONTACT || ""}
+                          name="Contact"
+                          value={inputData.Contact}
                           onChange={OnChangeHandler}
                           maxLength={10}
                           style={{ width: "150px" }}
@@ -249,6 +250,7 @@ function Layout3Master() {
             setIsDisable={setIsDisable}
             search={searchData}
             setTextDetail={setTextDetail}
+            type={type} // Pass type to table if needed
           />
         </Col>
       </Row>

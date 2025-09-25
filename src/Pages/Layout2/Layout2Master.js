@@ -11,7 +11,7 @@ import useLayout7Master from "../../Store/MasterStore/useLayout7Master"
 
 function Layout2Master() {
   const inputRef = useRef()
-  const [type, setType] = useState("dm") // 'sm' for Stone Master, 'dm' for Department Master
+  const [type, setType] = useState("sm") // 'sm' for Stone Master, 'dm' for Department Master
   const [searchData, setSearchData] = useState("")
   const [isDisable, setIsDisable] = useState(false)
   const [textDetail, setTextDetail] = useState("")
