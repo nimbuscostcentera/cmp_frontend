@@ -10,6 +10,7 @@ import {
 const useLayout1Master = create((set, get) => ({
   layout1: [], // generic array for any layout1 master
 
+
   // Fetch States
   fetchIsLoading: false,
   fetchError: null,
@@ -32,6 +33,8 @@ const useLayout1Master = create((set, get) => ({
 
   // Fetch all layout1 items
   fetchLayout1: async (type) => {
+ 
+    
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
       const res = await axios.get(`${AddLayout1MasterAPI}?type=${type}`); // type passed to API
@@ -47,7 +50,10 @@ const useLayout1Master = create((set, get) => ({
   // Add new item
   addLayout1: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
+    // console.log(newItem);
+    
     try {
+      console.log(type);
       await axios.post(AddLayout1MasterAPI, { ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {

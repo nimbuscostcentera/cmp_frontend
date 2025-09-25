@@ -16,6 +16,7 @@ import PlatingPolishMaster from "./Pages/PlatingPolishMaster/PlatingPolishMaster
 import UnitMaster from "./Pages/UnitMaster/UnitMaster";
 import Layout1Master from "./Pages/Layout1/Layout1Master";
 import Layout7Master from "./Pages/Layout7/Layout7Master";
+import LayoutMaster from "./Pages/Layout/LayoutMaster";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: "customer",
         element: withSuspense(Layout5Master),
+      },
+      {
+        path: "layout6",
+        element: withSuspense(LayoutMaster),
       },
       {
         path: "layout7",

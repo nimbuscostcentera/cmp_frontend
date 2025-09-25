@@ -20,7 +20,7 @@ export const UpdateLayout1MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout1`;
 export const DeleteLayout1MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout1`;
 
 
-//layout2 master
+///layout2 master
 export const AddLayout2MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout2/`;
 export const UpdateLayout2MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout2`;
 export const DeleteLayout2MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout2`;
