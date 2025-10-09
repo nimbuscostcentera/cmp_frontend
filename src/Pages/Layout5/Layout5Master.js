@@ -17,9 +17,9 @@ function Layout5Master() {
 
   const [inputData, setInputData] = useState({
     Customer_Name: "",
-    Address1: "",
-    Address2: "",
-    Address3: "",
+    // Address1: "",
+    // Address2: "",
+    // Address3: "",
     Contact: "",
     ID_Type: "2", // Default = Customer
   });

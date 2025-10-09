@@ -6,6 +6,10 @@ import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
 import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
 import useLayout4Master from "../../Store/MasterStore/useLayout4Master";
 import useLayout5Master from "../../Store/MasterStore/useLayout5Master";
+import useLayout6Master from "../../Store/MasterStore/useLayout6Master";
+import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
+import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
+import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
 import masterMapping from "../../Utils/mastermapping";
 import { masters } from "../Home/MasterInitialData";
 import LayoutTable from "./LayoutTable";
@@ -17,14 +21,14 @@ function LayoutMaster() {
   const [textDetail, setTextDetail] = useState("");
 
   // 👇 default master
-  const [mastertype, setMasterType] = useState("um");
+  const [mastertype, setMasterType] = useState("im");
 
-  // get master info
+  /// get master info
   const currentMaster = masters.find((m) => m.type === mastertype);
   const fields = currentMaster?.fields || [];
   const layout = currentMaster?.layout || "layout1";
 
-  // initialize form data
+  /// initialize form data
   const [itemData, setItemData] = useState(
     fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {})
   );
@@ -36,8 +40,10 @@ function LayoutMaster() {
     layout3: useLayout3Master(),
     layout4: useLayout4Master(),
     layout5: useLayout5Master(),
-    // layout6: useLayout6Master(),
-    // ...
+    layout6: useLayout6Master(),
+    layout7: useLayout7Master(),
+    layout8: useLayout8Master(),
+    layout9: useLayout9Master(),
   };
 
   // get correct hook for current layout
@@ -47,7 +53,8 @@ function LayoutMaster() {
     addError,
     addIsLoading,
     addIsSuccess,
-    [`add${layout.charAt(0).toUpperCase() + layout.slice(1)}`]: addFn, // dynamic fn
+    // dynamic function names (like addLayout1, addLayout9, etc.)
+    [`add${layout.charAt(0).toUpperCase() + layout.slice(1)}`]: addFn,
     [`fetch${layout.charAt(0).toUpperCase() + layout.slice(1)}`]: fetchFn,
     fetchIsLoading,
     updateIsSuccess,
@@ -68,8 +75,12 @@ function LayoutMaster() {
   }, [mastertype, fields]);
 
   const OnChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setItemData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type: elType, checked } = e.target;
+    // handle checkbox values too
+    setItemData((prev) => ({
+      ...prev,
+      [name]: elType === "checkbox" ? checked : value,
+    }));
   };
 
   ///saveData function
@@ -80,7 +91,6 @@ function LayoutMaster() {
         return;
       }
     }
-
     if (itemData.Code && !/^[a-zA-Z0-9]{1,6}$/.test(itemData.Code)) {
       toast.error("Code must be max 6 alphanumeric chars");
       return;
@@ -92,9 +102,9 @@ function LayoutMaster() {
       toast.error("Description must be max 15 chars");
       return;
     }
-
     if (addFn) {
-      addFn(mastertype, itemData); // ✅ dynamic call
+      // pass type first — store expects (type, payload)
+      addFn(mastertype, itemData);
     } else {
       toast.error("No save function available for this layout");
     }
@@ -176,10 +186,18 @@ function LayoutMaster() {
                           className={`border border-gray-300 rounded px-2 py-1 text-xs md:text-sm ${f.width} focus:outline-none focus:ring-1 focus:ring-blue-400`}
                         >
                           <option value="">Select {f.label}</option>
-                          {/* dynamic options */}
+                          {/* dynamic options placeholder — keep existing */}
                           <option value="1">Option 1</option>
                           <option value="2">Option 2</option>
                         </select>
+                      ) : f.type === "checkbox" ? (
+                        <input
+                          type="checkbox"
+                          name={f.name}
+                          checked={!!itemData[f.name]}
+                          onChange={OnChangeHandler}
+                          ref={idx === 0 ? inputRef : null}
+                        />
                       ) : (
                         <input
                           type={f.type || "text"}
@@ -223,7 +241,6 @@ function LayoutMaster() {
             className="w-full border border-blue-400 rounded p-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none min-w-[180px]"
             rows={2}
           />
-
           <div className="flex-grow min-w-[180px]">
             <div className="flex items-center border border-blue-400 rounded-md px-2 py-1 focus-within:ring-1 focus-within:ring-blue-300">
               <i className="bi bi-search text-gray-400 mr-2"></i>
@@ -246,7 +263,8 @@ function LayoutMaster() {
           setIsDisable={setIsDisable}
           search={searchData}
           setTextDetail={setTextDetail}
-          type={mastertype}
+          type={mastertype}      // master short type like 'im'
+          layout={layout}        // layout string like 'layout1' etc — important!
           layoutData={layoutData}
         />
       </div>

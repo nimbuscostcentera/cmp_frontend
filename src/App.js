@@ -22,6 +22,7 @@ import Layout6Master from "./Pages/Layout6/Layout6Master";
 import Layout8Master from "./Pages/Layout8/Layout8Mater";
 import SpcpMaster from "./Pages/Spcp/SpcpMaster";
 import Layout10Master from "./Pages/Layout10/Layout10Master";
+import LayoutMaster from "./Pages/Layout/LayoutMaster";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
       {
         path: "color",
         element: withSuspense(ColorMaster),
+      },
+      {
+        path: "layout",
+        element: withSuspense(LayoutMaster),
       },
       {
         path: "layout2",

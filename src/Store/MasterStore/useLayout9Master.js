@@ -7,8 +7,8 @@ import {
   DeleteUnitMasterAPI,
 } from "../../Apis/MasterApis";
 
-const useUnitMaster = create((set, get) => ({
-  units: [],
+const useLayout9Master = create((set, get) => ({
+  layout9: [],
 
   // Fetch States
   fetchIsLoading: false,
@@ -30,25 +30,30 @@ const useUnitMaster = create((set, get) => ({
   deleteError: null,
   deleteIsSuccess: false,
 
-  // Fetch all units
-  fetchUnits: async () => {
+  // Fetch all layout9 (type passed so same API endpoint can serve multiple masters)
+  // signature: fetchLayout9(type)
+  fetchLayout9: async (type) => {
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
-      const res = await axios.get(AddUnitMasterAPI);
-      set({ units: res.data, fetchIsLoading: false, fetchIsSuccess: true });
+      // append type as a query param so backend can handle different masters without changing endpoints
+      const res = await axios.get(`${AddUnitMasterAPI}?type=${encodeURIComponent(type)}`);
+      // keep original console for debugging
+      console.log(res.data);
+      set({ layout9: res.data, fetchIsLoading: false, fetchIsSuccess: true });
     } catch (err) {
       set({
-        fetchError: err.response?.data?.message || "Failed to fetch units",
+        fetchError: err.response?.data?.message || "Failed to fetch layout9",
         fetchIsLoading: false,
       });
     }
   },
 
   // Add new unit
-  addUnit: async (newUnit) => {
+  // signature: addLayout9(type, newUnit)
+  addLayout9: async (type, newUnit) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddUnitMasterAPI, newUnit);
+      await axios.post(`${AddUnitMasterAPI}?type=${encodeURIComponent(type)}`, newUnit);
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -58,11 +63,12 @@ const useUnitMaster = create((set, get) => ({
     }
   },
 
-  // Update unit
-  updateUnit: async (id, updatedData) => {
+  // Update
+  // signature: updateLayout9(type, id, updatedData)
+  updateLayout9: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateUnitMasterAPI}/${id}/`, updatedData); // ✅ include id and trailing slash
+      await axios.put(`${UpdateUnitMasterAPI}/${id}/?type=${encodeURIComponent(type)}`, updatedData);
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -72,11 +78,12 @@ const useUnitMaster = create((set, get) => ({
     }
   },
 
-  // Delete unit
-  deleteUnit: async (id) => {
+  // Delete
+  // signature: deleteLayout9(type, id)
+  deleteLayout9: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteUnitMasterAPI}/${id}/`); // ✅ include id and trailing slash
+      await axios.delete(`${DeleteUnitMasterAPI}/${id}/?type=${encodeURIComponent(type)}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
@@ -97,4 +104,4 @@ const useUnitMaster = create((set, get) => ({
     set({ deleteError: null, deleteIsSuccess: false, deleteIsLoading: false }),
 }));
 
-export default useUnitMaster;
+export default useLayout9Master;

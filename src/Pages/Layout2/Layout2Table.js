@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
-import useUnitMaster from "../../Store/MasterStore/useUnitMaster";
+import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
 import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
 
 function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
@@ -17,7 +17,7 @@ function Layout2Table({ setIsDisable, search, setTextDetail, type }) {
   });
 
   // Masters
-  const { units, fetchUnits } = useUnitMaster();
+  const { units, fetchUnits } = useLayout9Master();
   const { layout7, fetchLayout7 } = useLayout7Master();
 
   // Dropdown based on type

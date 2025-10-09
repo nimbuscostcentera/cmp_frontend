@@ -1,31 +1,27 @@
-
-import { useEffect, useMemo, useRef, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
-import { Container, Row, Col, Button } from "react-bootstrap"
-import "../../Components/Table/table.css"
-import Layout2Table from "./Layout2Table"
-import SearchableDropDown from "../../Components/SearchableDropDown"
-import useLayout2Master from "../../Store/MasterStore/useLayout2Master"
-import useUnitMaster from "../../Store/MasterStore/useUnitMaster"
-import useLayout7Master from "../../Store/MasterStore/useLayout7Master"
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import "../../Components/Table/table.css";
+import Layout2Table from "./Layout2Table";
+import SearchableDropDown from "../../Components/SearchableDropDown";
+import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
+import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
+import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
 
 function Layout2Master() {
-  const inputRef = useRef()
-  const [type, setType] = useState("sm") // 'sm' for Stone Master, 'dm' for Department Master
-  const [searchData, setSearchData] = useState("")
-  const [isDisable, setIsDisable] = useState(false)
-  const [textDetail, setTextDetail] = useState("")
+  const inputRef = useRef();
+  const [type, setType] = useState("sm"); // 'sm' for Stone Master, 'dm' for Department Master
+  const [searchData, setSearchData] = useState("");
+  const [isDisable, setIsDisable] = useState(false);
+  const [textDetail, setTextDetail] = useState("");
 
   const [inputData, setInputData] = useState({
     Code: "",
     Description: "",
     ID_master: -1,
-  })
-  const {
-    layout7,
-    fetchLayout7,
-  } = useLayout7Master();
-  const { units, fetchUnits } = useUnitMaster()
+  });
+  const { layout7, fetchLayout7 } = useLayout7Master();
+  const { units, fetchUnits } = useLayout9Master();
 
   const dropdownList = useMemo(() => {
     if (type === "sm") {
@@ -41,46 +37,43 @@ function Layout2Master() {
     }
   }, [units, layout7, type]);
 
-
-
-
   const { addLayout2, addIsLoading, addError, addIsSuccess, clearAddState } =
-    useLayout2Master()
+    useLayout2Master();
 
   // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus()
+    inputRef.current?.focus();
     if (type === "sm") {
-      fetchUnits() // Load units on mount
+      fetchUnits(); // Load units on mount
     } else {
       fetchLayout7(); // Load processes on mount
     }
-  }, [type])
+  }, [type]);
 
   // Handle input changes
   const OnChangeHandler = (e) => {
-    const { name, value } = e.target
-    setInputData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setInputData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Save new item
   const SaveData = () => {
-    const { Code, Description, ID_master } = inputData
+    const { Code, Description, ID_master } = inputData;
     if (!Code || !Description || ID_master === -1) {
-      toast.error("All fields are mandatory")
-      return
+      toast.error("All fields are mandatory");
+      return;
     }
     if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
-      toast.error("Code must be alphanumeric & max 6 chars")
-      return
+      toast.error("Code must be alphanumeric & max 6 chars");
+      return;
     }
     if (!/^[a-zA-Z0-9 ]{1,15}$/.test(Description)) {
-      toast.error("Description must be alphanumeric & max 15 chars")
-      return
+      toast.error("Description must be alphanumeric & max 15 chars");
+      return;
     }
 
-    addLayout2(type, inputData)
-  }
+    addLayout2(type, inputData);
+  };
 
   // Fetch layout2 data on mount and after successful add
   // useEffect(() => {
@@ -90,14 +83,14 @@ function Layout2Master() {
   // Show toast messages
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
-      toast.success("Item Added Successfully")
-      setInputData({ Code: "", Description: "", ID_master: -1 })
+      toast.success("Item Added Successfully");
+      setInputData({ Code: "", Description: "", ID_master: -1 });
     }
     if (addError && !addIsLoading) {
-      toast.error(addError)
+      toast.error(addError);
     }
-    clearAddState()
-  }, [addIsSuccess, addIsLoading, addError])
+    clearAddState();
+  }, [addIsSuccess, addIsLoading, addError]);
 
   return (
     <Container fluid className="p-0" style={{ width: "98%" }}>
@@ -105,14 +98,19 @@ function Layout2Master() {
       <Row className="w-100">
         <Col xs={12}>
           <div className="d-flex align-items-center">
-            <h5 className="mb-0 text-sm md:text-base">{type === "sm" ? "Stone Master" : "Department Master"}</h5>
+            <h5 className="mb-0 text-sm md:text-base">
+              {type === "sm" ? "Stone Master" : "Department Master"}
+            </h5>
           </div>
           <hr className="my-1" />
         </Col>
 
         <Col xs={12}>
           <div className="d-flex flex-column flex-md-row justify-content-start align-items-md-center">
-            <div className="table-wrapper me-md-3 mb-2 mb-md-0" style={{ overflowX: "auto" }}>
+            <div
+              className="table-wrapper me-md-3 mb-2 mb-md-0"
+              style={{ overflowX: "auto" }}
+            >
               <table className="text-sm">
                 <thead className="tab-head">
                   <tr>
@@ -220,7 +218,7 @@ function Layout2Master() {
         </Col>
       </Row>
     </Container>
-  )
+  );
 }
 
-export default Layout2Master
+export default Layout2Master;

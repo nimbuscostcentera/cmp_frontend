@@ -279,30 +279,30 @@ class DesignDetail(models.Model):
     def __str__(self):
         return self.ID
 
-class StoneRateSetting(models.Model):
-    ID=models.BigAutoField(primary_key=True)
-    ID_StoneM=models.ForeignKey(StoneMaster,on_delete=models.PROTECT)
-    Srl_Col=models.IntegerField()
-    ID_StoneS=models.ForeignKey(StoneSubMaster,on_delete=models.PROTECT)
-    ID_Color=models.ForeignKey(ColorMaster,on_delete=models.PROTECT)
-    Pcs=models.IntegerField()
-    Weight=models.DecimalField(max_digits=10,decimal_places=3)
-    CP=models.DecimalField(max_digits=8,decimal_places=2)
-    SP=models.DecimalField(max_digits=8,decimal_places=2)
+# class StoneRateSetting(models.Model):
+#     ID=models.BigAutoField(primary_key=True)
+#     ID_StoneM=models.ForeignKey(StoneMaster,on_delete=models.PROTECT)
+#     Srl_Col=models.IntegerField()
+#     ID_StoneS=models.ForeignKey(StoneSubMaster,on_delete=models.PROTECT)
+#     ID_Color=models.ForeignKey(ColorMaster,on_delete=models.PROTECT)
+#     Pcs=models.IntegerField()
+#     Weight=models.DecimalField(max_digits=10,decimal_places=3)
+#     CP=models.DecimalField(max_digits=8,decimal_places=2)
+#     SP=models.DecimalField(max_digits=8,decimal_places=2)
     
-    def __str__(self):
-        return self.ID
+#     def __str__(self):
+#         return self.ID
 
-class StoneRateSettingMiscCharge(models.Model):
-    ID=models.BigAutoField(primary_key=True)
-    ID_Header=models.ForeignKey(StoneRateSetting,on_delete=models.PROTECT)
-    ID_MiscCharge=models.ForeignKey(MiscChargeMaster,on_delete=models.PROTECT)
-    DamageCharge=models.DecimalField(max_digits=8,decimal_places=2)
-    SettingCharge=models.DecimalField(max_digits=8,decimal_places=2)
-    Amount=models.DecimalField(max_digits=8,decimal_places=2)
+# class StoneRateSettingMiscCharge(models.Model):
+#     ID=models.BigAutoField(primary_key=True)
+#     ID_Header=models.ForeignKey(StoneRateSetting,on_delete=models.PROTECT)
+#     ID_MiscCharge=models.ForeignKey(MiscChargeMaster,on_delete=models.PROTECT)
+#     DamageCharge=models.DecimalField(max_digits=8,decimal_places=2)
+#     SettingCharge=models.DecimalField(max_digits=8,decimal_places=2)
+#     Amount=models.DecimalField(max_digits=8,decimal_places=2)
 
-    def __str__(self):
-        return self.ID
+#     def __str__(self):
+#         return self.ID
 
 # All are mandatory except address,contact
 class ArtisanMaster(models.Model):

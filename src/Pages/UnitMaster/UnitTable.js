@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Table from "../../Components/Table";
 import { toast } from "react-toastify";
-import useUnitMaster from "../../Store/MasterStore/useUnitMaster";
+import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
 
 function UnitTable({ setIsDisable, search, setTextDetail }) {
   const editinputref = useRef(null);
@@ -29,7 +29,7 @@ function UnitTable({ setIsDisable, search, setTextDetail }) {
     deleteIsSuccess,
     deleteError,
     clearDeleteState,
-  } = useUnitMaster();
+  } = useLayout9Master();
 
   // Enable editing
   const ActionFunc = (tabIndex) => {

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import UnitTable from "./UnitTable";
-import useUnitMaster from "../../Store/MasterStore/useUnitMaster";
+import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
 import "../../Components/Table/table.css";
 
 function UnitMaster() {
@@ -25,7 +25,7 @@ function UnitMaster() {
     addUnit,
     clearAddState,
     fetchUnits,
-  } = useUnitMaster();
+  } = useLayout9Master();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -34,7 +34,7 @@ function UnitMaster() {
 
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if(name === "Conversion" && value !== "") {
+    if (name === "Conversion" && value !== "") {
       // Allow only numbers and a single decimal point also before . it can take 7 numbers and after . it can take 3 digits
       const regex = /^\d{1,7}\.?\d{0,3}$/;
       if (!regex.test(value)) {

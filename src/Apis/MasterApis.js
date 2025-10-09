@@ -9,9 +9,9 @@ export const DeleteColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster`;
 
 
 ///unit master
-export const AddUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster/`;
-export const UpdateUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster`;
-export const DeleteUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/unitmaster`;
+export const AddUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout9/`;
+export const UpdateUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout9`;
+export const DeleteUnitMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout9`;
 
 
 ///layout1 master
