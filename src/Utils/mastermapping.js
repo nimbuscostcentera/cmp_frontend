@@ -18,6 +18,7 @@ const masterMapping = {
   dlm: "Dealer Master",
   com: "Company Master",
   sysm: "System Master",
-  
+  szm: "Size Master",
+  itm: "Item Type Master",
 };
 export default masterMapping;

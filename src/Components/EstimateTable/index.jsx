@@ -202,7 +202,8 @@ const CellRenderer = memo(
         onChange={(event) => handleChange(indexrow, col.key, event)}
         placeholder={col.label}
         className="input-cell form-input"
-        style={{ width: "100%",padding:"1px 5px" }}
+        style={{ width: "100%", padding: "1px 5px" }}
+        readOnly={col?.readonly || false}
       />
     );
   }

@@ -12,21 +12,16 @@ function Layout1Master() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [type, setType] = useState("mm"); // 'category' or 'brand' or any other type
+  const [type, setType] = useState("im"); // Color, MiscCharge, DesignGroup, Item, Size, Plating
 
   const [itemData, setItemData] = useState({
     Code: "",
     Description: "",
+    Size: false,
   });
 
-  const {
-    addError,
-    addIsLoading,
-    addIsSuccess,
-    addLayout1,
-    fetchLayout1,
-    clearAddState,
-  } = useLayout1Master();
+  const { addError, addIsLoading, addIsSuccess, addLayout1, clearAddState } =
+    useLayout1Master();
 
   // Fetch data on mount
   useEffect(() => {
@@ -35,8 +30,11 @@ function Layout1Master() {
 
   // Handle input changes
   const OnChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setItemData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setItemData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   // Save new item
@@ -62,7 +60,7 @@ function Layout1Master() {
   useEffect(() => {
     if (addIsSuccess) {
       toast.success(
-        `${type.charAt(0).toUpperCase() + type.slice(1)} Added Successfully`
+        `Data Added Successfully`
       );
       setItemData({ Code: "", Description: "" });
     }
@@ -95,6 +93,14 @@ function Layout1Master() {
                     </th>
                     <th className="text-xs md:text-sm">Code*</th>
                     <th className="text-xs md:text-sm">Description*</th>
+                    {type === "im" && (
+                      <th
+                        className="text-xs md:text-sm"
+                        style={{ width: "100px" }}
+                      >
+                        Size
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="tab-body">
@@ -125,6 +131,16 @@ function Layout1Master() {
                         style={{ width: "180px" }}
                       />
                     </td>
+                    {type === "im" && (
+                      <td>
+                        <input
+                          type="checkbox"
+                          name="size"
+                          checked={itemData?.size || false}
+                          onChange={OnChangeHandler}
+                        />
+                      </td>
+                    )}
                   </tr>
                 </tbody>
               </table>

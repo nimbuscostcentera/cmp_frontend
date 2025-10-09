@@ -4,11 +4,11 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import SearchableDropDown from "../SearchableDropDown";
 import MultipleSelection from "../MultipleSelection";
-import BASE_URL from "../../Apis/ApiBaseUrl";
-// ActionButton (slightly larger icons)
+
+// ActionButton Component
 const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   <button
-    className="p-0 m-0 flex items-center justify-center h-10 w-10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    className="p-0 m-0 flex items-center justify-center h-7 w-7 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     onClick={onClick}
     disabled={disabled}
     title={title}
@@ -21,6 +21,7 @@ const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   </button>
 );
 
+// RenderCellContent Component - Updated with input-cell classes
 const RenderCellContent = ({
   item,
   field,
@@ -69,36 +70,40 @@ const RenderCellContent = ({
       : field.iconError(item);
   }
 
-  if (ActionId === index && !field?.isNotEditable) {
+  // Show input fields for new items or when in edit mode
+  if ((item.isNew || ActionId === index) && !field?.isNotEditable) {
     if (field?.isSelection) {
-     return field?.isMultiSelection ? (
-       <MultipleSelection
-         options={field.options}
-         handleChange={HandleMultiSelection}
-         selectedVal={
-           EditedData[field.selectionname] || item[field.selectionname]
-         }
-         label={field.labelname}
-         placeholder={field.placeholder}
-         defaultval={EditedData[field.labelname]}
-       />
-     ) : (
-       <SearchableDropDown
-         options={field.options}
-         handleChange={(e) => OnChangeHandler(index, e)}
-         selectedVal={
-           EditedData[field.selectionname] || item[field.selectionname]
-         }
-         label={field.selectionname}
-         placeholder={field.headername}
-         defaultval={item[field.fieldname]}
-         width={field.width || "100%"}
-       />
-     );
+      return field?.isMultiSelection ? (
+        <div className="input-cell form-input w-100">
+          <MultipleSelection
+            options={field.options}
+            handleChange={HandleMultiSelection}
+            selectedVal={
+              EditedData[field.selectionname] || item[field.selectionname]
+            }
+            label={field.labelname}
+            placeholder={field.placeholder}
+            defaultval={EditedData[field.labelname]}
+          />
+        </div>
+      ) : (
+        <div className="input-cell form-input w-100">
+          <SearchableDropDown
+            options={field.options}
+            handleChange={(e) => OnChangeHandler(index, e)}
+            selectedVal={
+              EditedData[field.selectionname] || item[field.selectionname]
+            }
+            label={field.selectionname}
+            placeholder={field.headername}
+            defaultval={item[field.fieldname]}
+          />
+        </div>
+      );
     }
     if (field?.isBongDate) {
       return (
-        <div className="flex items-center w-full">
+        <div className="input-cell form-input w-100 flex items-center">
           <input
             type="text"
             placeholder="yyyy-mm-dd"
@@ -108,8 +113,8 @@ const RenderCellContent = ({
               handleDateCheck(e);
               field?.LostFocus?.(index, e.target.value);
             }}
-            className="input-cell form-input w-100"
-            value={EditedData[field.fieldname] || item[field.fieldname]}
+            className="form-input flex-1"
+            value={EditedData[field.fieldname] || item[field.fieldname] || ""}
           />
           <button
             className="ml-0.5 p-0.5 text-gray-600 hover:text-gray-800"
@@ -120,12 +125,27 @@ const RenderCellContent = ({
         </div>
       );
     }
+
+    if (field?.type === "Img") {
+      return (
+        <input
+          type="file"
+          name={"Img"}
+          accept="image/*"
+          ref={field?.isUseInputRef ? useInputRef : null}
+          onChange={(e) => PictureHandler(index, e)}
+          className="input-cell form-input w-100 text-xs"
+          readOnly={field?.isReadOnly || false}
+        />
+      );
+    }
+
     return (
       <input
         name={field.fieldname}
         maxLength={field.max}
         placeholder={field.headername}
-        value={EditedData[field.fieldname] || ""}
+        value={EditedData[field.fieldname] || item[field.fieldname] || ""}
         ref={field?.isUseInputRef ? useInputRef : null}
         type={field.type || "text"}
         onChange={(e) => OnChangeHandler(index, e)}
@@ -135,10 +155,8 @@ const RenderCellContent = ({
     );
   }
 
-  if (field?.type === "Img" && ActionId !== index) {
-    const imageUrl = item[field.fieldname]
-      ? `${BASE_URL}/${item[field.fieldname]}`
-      : defaultimage;
+  if (field?.type === "Img") {
+    const imageUrl = item[field.fieldname] || defaultimage;
 
     return (
       <a
@@ -160,36 +178,22 @@ const RenderCellContent = ({
     );
   }
 
-  if (field?.type === "Img" && ActionId === index) {
-   return (
-     <input
-       type="file"
-       name="Img"
-       accept="image/*"
-       ref={field?.isUseInputRef ? useInputRef : null}
-       onChange={(e) => PictureHandler(index, e)}
-       className="w-32 h-7 text-[10px] file:text-[10px] file:py-1 file:px-2 file:rounded file:border file:border-gray-300"
-       readOnly={field?.isReadOnly || false}
-     />
-   );
-
-  }
-
-  return item[field.fieldname] == 0 ? "-" : item[field.fieldname];
+  return item[field.fieldname] == 0 || item[field.fieldname] == null
+    ? "-"
+    : item[field.fieldname];
 };
 
-const Table = ({
+// Enhanced Table Component with CRUD Operations
+const EditableTable = ({
   grandtotal = 0,
   checkedIds = [],
   isCheck,
   isFooter,
   isPrint,
   isView,
-  isView1,
   isDelete,
   isEdit,
   viewPref,
-  viewPref1,
   tab = [],
   ActionId,
   ActionFunc,
@@ -204,7 +208,6 @@ const Table = ({
   rowsperpage,
   height,
   handleViewClick,
-  handleViewClick1,
   handleprint,
   handleDelete,
   onCheckChange,
@@ -219,10 +222,131 @@ const Table = ({
   isUseInputRef,
   actions = [],
   PictureHandler,
+  // New props for CRUD operations
+  onAddNew = () => {},
+  onBulkSave = () => {},
+  showBulkSave = true,
+  addButtonText = "Add New",
+  saveButtonText = "Save All Changes",
 }) => {
   const scrollRef = useRef(null);
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [newItems, setNewItems] = useState([]);
+  const [updatedItems, setUpdatedItems] = useState([]);
+  const [deletedItems, setDeletedItems] = useState([]);
+
+  // Handle adding new item - Modified to auto-edit new items
+  const handleAddNew = useCallback(() => {
+    const newItem = {
+      id: `new-${Date.now()}`,
+      isNew: true,
+      // Initialize all fields with empty values
+      ...Object.fromEntries(Col.map((col) => [col.fieldname, ""])),
+    };
+    setNewItems((prev) => [...prev, newItem]);
+    onAddNew(newItem);
+
+    // Auto-set edit mode for new items by calling ActionFunc if available
+    if (ActionFunc) {
+      const newIndex = tab.length + newItems.length;
+      // Use setTimeout to ensure the item is added before setting edit mode
+      setTimeout(() => ActionFunc(newIndex), 0);
+    }
+  }, [onAddNew, Col, ActionFunc, tab.length, newItems.length]);
+
+  // Handle item update
+  const handleItemUpdate = useCallback(
+    (index, updates) => {
+      const item = tab[index];
+      if (item.isNew) {
+        // Update in new items
+        setNewItems((prev) =>
+          prev.map((i) => (i.id === item.id ? { ...i, ...updates } : i))
+        );
+      } else {
+        // Update in existing items
+        setUpdatedItems((prev) => {
+          const existingUpdate = prev.find((u) => u.id === item.id);
+          if (existingUpdate) {
+            return prev.map((u) =>
+              u.id === item.id ? { ...u, ...updates } : u
+            );
+          }
+          return [...prev, { ...item, ...updates }];
+        });
+      }
+    },
+    [tab]
+  );
+
+  // Handle item delete
+  const handleItemDelete = useCallback(
+    (index) => {
+      const item = tab[index];
+      if (item.isNew) {
+        // Remove from new items
+        setNewItems((prev) => prev.filter((i) => i.id !== item.id));
+      } else {
+        // Add to deleted items
+        setDeletedItems((prev) => [...prev, item]);
+      }
+      handleDelete(index);
+    },
+    [tab, handleDelete]
+  );
+
+  // Handle bulk save
+  const handleBulkSave = useCallback(() => {
+    const changes = {
+      new: newItems,
+      updated: updatedItems,
+      deleted: deletedItems,
+    };
+
+    onBulkSave(changes);
+
+    // Reset tracking arrays after successful save
+    setNewItems([]);
+    setUpdatedItems([]);
+    setDeletedItems([]);
+  }, [newItems, updatedItems, deletedItems, onBulkSave]);
+
+  // Enhanced OnChangeHandler to track updates
+  const enhancedOnChangeHandler = useCallback(
+    (index, event) => {
+      const { name, value } = event.target;
+      OnChangeHandler(index, event);
+      handleItemUpdate(index, { [name]: value });
+    },
+    [OnChangeHandler, handleItemUpdate]
+  );
+
+  // Enhanced handleDelete to track deletions
+  const enhancedHandleDelete = useCallback(
+    (index) => {
+      handleItemDelete(index);
+    },
+    [handleItemDelete]
+  );
+
+  // Check if there are pending changes
+  const hasPendingChanges =
+    newItems.length > 0 || updatedItems.length > 0 || deletedItems.length > 0;
+
+  // Enhanced actions with tracking
+  const enhancedActions = [
+    ...actions,
+    {
+      type: "add",
+      icon: "plus-circle",
+      color: "#10b981",
+      onClick: handleAddNew,
+      title: addButtonText,
+      label: "Add",
+      showAsButton: true,
+    },
+  ];
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
@@ -257,6 +381,10 @@ const Table = ({
             />
           </td>
         );
+      }
+
+      if (action.showAsButton) {
+        return null; // These will be rendered separately
       }
 
       return (
@@ -307,7 +435,6 @@ const Table = ({
       Col.length +
       (isEdit ? 2 : 0) +
       (isView ? 1 : 0) +
-      (isView1 ? 1 : 0) +
       (isPrint ? 1 : 0) +
       (isCheck ? 1 : 0) +
       (isDelete ? 1 : 0) +
@@ -316,9 +443,7 @@ const Table = ({
 
     return (
       <tr>
-        <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10">
-          {/* {renderRowNumber(0)} */}
-        </td>
+        <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10"></td>
         <td
           colSpan={colspan}
           className="text-center text-gray-500 bg-gray-100 py-3 text-xs"
@@ -337,10 +462,19 @@ const Table = ({
     tab.map((item, index) => (
       <tr
         key={index}
-        className="border-b border-gray-200 hover:bg-gray-50 text-sm"
+        className={`border-b border-gray-200 hover:bg-gray-50 text-sm ${
+          item.isNew
+            ? "bg-green-50"
+            : updatedItems.some((u) => u.id === item.id)
+            ? "bg-blue-50"
+            : ""
+        }`}
       >
         <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10">
           {renderRowNumber(index)}
+          {item.isNew && (
+            <span className="block text-xs text-green-300">New</span>
+          )}
         </td>
         {Col?.map((field, indexfield) => (
           <td
@@ -365,7 +499,7 @@ const Table = ({
                 ActionId={ActionId}
                 HandleMultiSelection={HandleMultiSelection}
                 EditedData={EditedData}
-                OnChangeHandler={OnChangeHandler}
+                OnChangeHandler={enhancedOnChangeHandler}
                 bongView={bongView}
                 setBongView={setBongView}
                 useInputRef={useInputRef}
@@ -414,18 +548,6 @@ const Table = ({
             </div>
           </td>
         )}
-        {isView1 && (
-          <td className="px-1 py-1 text-center w-12">
-            <div className="flex justify-center">
-              <ActionButton
-                icon="eye"
-                color="#ac4bec"
-                onClick={() => handleViewClick1(index)}
-                title={`${viewPref1} View`}
-              />
-            </div>
-          </td>
-        )}
 
         {isPrint && (
           <td className="px-1 py-1 text-center w-12">
@@ -461,7 +583,7 @@ const Table = ({
               <ActionButton
                 icon="trash"
                 color="#ff0000"
-                onClick={() => handleDelete(index)}
+                onClick={() => enhancedHandleDelete(index)}
                 title="Delete"
               />
             </div>
@@ -474,6 +596,73 @@ const Table = ({
 
   return (
     <div className="relative">
+      {/* Action Buttons Header */}
+      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg border">
+        <div className="flex space-x-2">
+          {enhancedActions
+            .filter((action) => action.showAsButton)
+            .map((action, index) => (
+              <button
+                key={index}
+                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+                onClick={action.onClick}
+                title={action.title}
+              >
+                <i className={`bi bi-${action.icon} mr-2`} />
+                {action.title}
+              </button>
+            ))}
+        </div>
+
+        {showBulkSave && (
+          <button
+            className={`flex items-center px-4 py-2 rounded-md transition-colors text-sm ${
+              hasPendingChanges
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={handleBulkSave}
+            disabled={!hasPendingChanges}
+          >
+            <i className="bi bi-check-circle mr-2" />
+            {saveButtonText}
+            {(newItems.length > 0 ||
+              updatedItems.length > 0 ||
+              deletedItems.length > 0) && (
+              <span className="ml-2 bg-white text-green-600 rounded-full px-2 py-1 text-xs">
+                {newItems.length + updatedItems.length + deletedItems.length}
+              </span>
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* Changes Summary */}
+      {hasPendingChanges && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+          <div className="flex space-x-4 text-xs">
+            {newItems.length > 0 && (
+              <span className="flex items-center">
+                <i className="bi bi-plus-circle text-green-600 mr-1" />
+                {newItems.length} new item(s)
+              </span>
+            )}
+            {updatedItems.length > 0 && (
+              <span className="flex items-center">
+                <i className="bi bi-pencil-square text-blue-600 mr-1" />
+                {updatedItems.length} updated item(s)
+              </span>
+            )}
+            {deletedItems.length > 0 && (
+              <span className="flex items-center">
+                <i className="bi bi-trash text-red-600 mr-1" />
+                {deletedItems.length} deleted item(s)
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div
         ref={scrollRef}
         className="overflow-auto border border-gray-200 rounded"
@@ -516,13 +705,8 @@ const Table = ({
                 </>
               )}
               {isView && (
-                <th className="px-1 py-1 text-center w-40 font-normal ">
-                  {viewPref} V.
-                </th>
-              )}
-              {isView1 && (
-                <th className="px-1 py-1 text-center w-40 font-normal">
-                  {viewPref1} V.
+                <th className="px-1 py-1 text-center w-12 font-normal">
+                  {viewPref} View
                 </th>
               )}
               {isPrint && (
@@ -599,4 +783,4 @@ const Table = ({
   );
 };
 
-export default Table;
+export default EditableTable;

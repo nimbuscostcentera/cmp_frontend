@@ -18,7 +18,7 @@ function Layout10Master() {
     Sub_Code: "",
     Description: "",
     Pcs: 1, // ✅ default 1
-    WgtPerPcs: "",
+    Weight: "",
     ID_Group: "",
     Unit: "",
   });
@@ -52,7 +52,7 @@ function Layout10Master() {
   // Handle input change
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if (name === "WgtPerPcs" && value !== "") {
+    if (name === "Weight" && value !== "") {
       const regex = /^\d{1,6}\.?\d{0,3}$/; // up to 3 decimal places and before . 6 place can be filled
       if (!regex.test(value)) {
         return;
@@ -63,9 +63,9 @@ function Layout10Master() {
 
   // Save item
   const SaveData = () => {
-    const { Sub_Code, Description, Pcs, WgtPerPcs, ID_Group } = itemData;
+    const { Sub_Code, Description, Pcs, Weight, ID_Group } = itemData;
 
-    if (!Sub_Code || !Description || !Pcs || !WgtPerPcs || !ID_Group) {
+    if (!Sub_Code || !Description || !Pcs || !Weight || !ID_Group) {
       toast.error("All fields are mandatory");
       return;
     }
@@ -77,7 +77,7 @@ function Layout10Master() {
       toast.error("Description must be max 15 alphanumeric");
       return;
     }
-    if (isNaN(WgtPerPcs) || parseFloat(WgtPerPcs) <= 0) {
+    if (isNaN(Weight) || parseFloat(Weight) <= 0) {
       toast.error("Weight/Pcs must be a valid decimal");
       return;
     }
@@ -86,7 +86,7 @@ function Layout10Master() {
       Sub_Code,
       Description,
       Pcs,
-      WgtPerPcs,
+      Weight,
       ID_Group,
       Unit: itemData.Unit,
     });
@@ -100,7 +100,7 @@ function Layout10Master() {
         Sub_Code: "",
         Description: "",
         Pcs: 1,
-        WgtPerPcs: "",
+        Weight: "",
         ID_Group: "",
         Unit: "",
       });
@@ -130,7 +130,9 @@ function Layout10Master() {
               <table className="text-sm min-w-[700px]">
                 <thead className="tab-head">
                   <tr>
-                    <th></th>
+                    <th className="w-[30px]">
+                      <i className="bi bi-tag text-xs md:text-sm"></i>
+                    </th>
                     <th>Sub Code*</th>
                     <th>Description*</th>
                     <th>Pcs*</th>
@@ -183,8 +185,8 @@ function Layout10Master() {
                         step="0.001"
                         placeholder="Weight/Pcs"
                         className="input-cell form-input text-xs md:text-sm py-1"
-                        name="WgtPerPcs"
-                        value={itemData?.WgtPerPcs || ""}
+                        name="Weight"
+                        value={itemData?.Weight || ""}
                         onChange={OnChangeHandler}
                         style={{ width: "100px" }}
                       />

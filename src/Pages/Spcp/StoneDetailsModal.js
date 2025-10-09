@@ -1,9 +1,17 @@
-import React, { useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { toast } from "react-toastify";
 import ReusableModal from "../../Components/ReusableModal";
 import EstimateTable from "../../Components/EstimateTable";
+import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 
-function StoneDetailsModal({ show, handleClose, headerId, rows, setRows }) {
+function StoneDetailsModal({
+  show,
+  handleClose,
+  headerId,
+  rows,
+  setRows,
+  mischargelist,
+}) {
   const srlPrnInputRef = useRef();
 
   // Add new row
@@ -14,10 +22,7 @@ function StoneDetailsModal({ show, handleClose, headerId, rows, setRows }) {
       {
         rowid: newRowId,
         srl_Prn: newRowId,
-        ID_Header: headerId,
         ID_MiscCharge: null,
-        DamageCharge: 0,
-        SettingCharge: 0,
         Amount: 0,
       },
     ]);
@@ -31,10 +36,7 @@ function StoneDetailsModal({ show, handleClose, headerId, rows, setRows }) {
   // Handle field changes
   const handleDetailModalChange = (rowIndex, colKey, e) => {
     const regex = {
-      Amount: /^(\d*\.?\d{0,2})?$/,
-      DamageCharge: /^(\d*\.?\d{0,2})?$/,
-      SettingCharge: /^(\d*\.?\d{0,2})?$/,
-      Pcs: /^\d*$/,
+      Amount: /^\d{1,6}(\.\d{0,2})?$/,
     };
 
     let value = e?.target ? e.target.value : e;
@@ -52,26 +54,21 @@ function StoneDetailsModal({ show, handleClose, headerId, rows, setRows }) {
 
   // Save rows back to parent
   const saveItem = () => {
-   
     handleClose();
   };
 
   // Dropdown data (static for now)
-  const miscChargeOptions = [
-    { label: "Polish", value: 1 },
-    { label: "Cutting", value: 2 },
-    { label: "Stone Fitting", value: 3 },
-  ];
+  const miscChargeOptions = useMemo(
+    () =>
+      mischargelist.map((item) => ({
+        label: `${item.Code}: ${item.Description}`,
+        value: item.ID,
+      })),
+    [mischargelist]
+  );
 
   // Table columns
   const detailColumns = [
-    {
-      label: "SRL_PRN",
-      key: "srl_Prn",
-      type: "text",
-      width: "65px",
-      isReadOnly: true,
-    },
     {
       label: "Misc Charge",
       key: "ID_MiscCharge",
@@ -81,18 +78,6 @@ function StoneDetailsModal({ show, handleClose, headerId, rows, setRows }) {
       PlaceHolder: "Select Misc Charge",
       data: miscChargeOptions,
       width: "200px",
-    },
-    {
-      label: "Damage Charge",
-      key: "DamageCharge",
-      type: "number",
-      width: "150px",
-    },
-    {
-      label: "Setting Charge",
-      key: "SettingCharge",
-      type: "number",
-      width: "150px",
     },
     {
       label: "Amount",

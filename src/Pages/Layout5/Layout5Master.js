@@ -13,7 +13,7 @@ function Layout5Master() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [type , setType] = useState("csm"); // Default = Customer
+  const [type, setType] = useState("csm"); // Customer MASTER
 
   const [inputData, setInputData] = useState({
     Customer_Name: "",
@@ -50,7 +50,7 @@ function Layout5Master() {
       if (value && value.length > 10) {
         return;
       }
-      if(!PhnoValidation(value)) {
+      if (!PhnoValidation(value)) {
         return;
       }
     }

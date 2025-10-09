@@ -1,42 +1,46 @@
-// store/useLayout1Master.js
 import { create } from "zustand";
 import axios from "axios";
 import {
-  AddLayout1MasterAPI,
-  UpdateLayout1MasterAPI,
-  DeleteLayout1MasterAPI,
+  AddDesignMasterAPI,
+  UpdateDesignMasterAPI,
+  DeleteDesignMasterAPI,
 } from "../../Apis/MasterApis";
 
-const useLayout1Master = create((set, get) => ({
-  layout1: [], // generic array for any layout1 master
+const useDesignMaster = create((set, get) => ({
+  Design: [],
 
-  // Fetch States
+  // --- FETCH STATES ---
   fetchIsLoading: false,
   fetchError: null,
   fetchIsSuccess: false,
 
-  // Add States
+  // --- ADD STATES ---
   addIsLoading: false,
   addError: null,
   addIsSuccess: false,
 
-  // Update States
+  // --- UPDATE STATES ---
   updateIsLoading: false,
   updateError: null,
   updateIsSuccess: false,
 
-  // Delete States
+  // --- DELETE STATES ---
   deleteIsLoading: false,
   deleteError: null,
   deleteIsSuccess: false,
 
-  // Fetch all layout1 items
-  fetchLayout1: async (type) => {
+  // =====================================================
+  // FETCH DESIGN LIST
+  // =====================================================
+  fetchDesign: async (type) => {
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
-      const res = await axios.get(`${AddLayout1MasterAPI}?type=${type}`); // type passed to API
-      set({ layout1: res.data, fetchIsLoading: false, fetchIsSuccess: true });
-      return res.data;
+      const res = await axios.get(`${AddDesignMasterAPI}?type=${type}`);
+      set({
+        Design: res.data,
+        fetchIsLoading: false,
+        fetchIsSuccess: true,
+      });
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch items",
@@ -45,11 +49,19 @@ const useLayout1Master = create((set, get) => ({
     }
   },
 
-  // Add new item
-  addLayout1: async (type, newItem) => {
+  // =====================================================
+  // ADD DESIGN (FormData)
+  // =====================================================
+  addDesign: async (type, formData) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddLayout1MasterAPI, { ...newItem, type });
+      // Append type to FormData
+      formData.append("type", type);
+
+      await axios.post(AddDesignMasterAPI, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -59,11 +71,19 @@ const useLayout1Master = create((set, get) => ({
     }
   },
 
-  // Update item
-  updateLayout1: async (type, id, updatedData) => {
+  // =====================================================
+  // UPDATE DESIGN (FormData)
+  // =====================================================
+  updateDesign: async (type, id, formData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout1MasterAPI}/${id}/`,{ ...updatedData, type });
+      // Append type to FormData
+      formData.append("type", type);
+
+      await axios.put(`${UpdateDesignMasterAPI}/${id}/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -73,11 +93,13 @@ const useLayout1Master = create((set, get) => ({
     }
   },
 
-  // Delete item
-  deleteLayout1: async (type, id) => {
+  // =====================================================
+  // DELETE DESIGN
+  // =====================================================
+  deleteDesign: async (type = "prm", id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout1MasterAPI}/${id}/?type=${type}`);
+      await axios.delete(`${DeleteDesignMasterAPI}/${id}/?type=${type}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
@@ -87,7 +109,9 @@ const useLayout1Master = create((set, get) => ({
     }
   },
 
-  // Clear States
+  // =====================================================
+  // CLEAR STATE METHODS
+  // =====================================================
   clearFetchState: () =>
     set({ fetchError: null, fetchIsSuccess: false, fetchIsLoading: false }),
   clearAddState: () =>
@@ -98,4 +122,4 @@ const useLayout1Master = create((set, get) => ({
     set({ deleteError: null, deleteIsSuccess: false, deleteIsLoading: false }),
 }));
 
-export default useLayout1Master;
+export default useDesignMaster;
