@@ -22,7 +22,6 @@ function DesignDetailTable({
       ID_StoneS: "",
       Pcs: "",
       Weight: "",
-      ID_Header: selectedDesignId,
     },
   ]);
 
@@ -35,7 +34,6 @@ function DesignDetailTable({
     ID_StoneS: "",
     Pcs: "",
     Weight: "",
-    ID_Header: selectedDesignId,
   });
 
   const {
@@ -84,7 +82,6 @@ function DesignDetailTable({
           ...prev,
           [name]: value,
           Weight: weightS.toFixed(2),
-          ID_Header: selectedDesignId,
         };
       }
 
@@ -92,7 +89,6 @@ function DesignDetailTable({
       return {
         ...prev,
         [name]: value,
-        ID_Header: selectedDesignId,
       };
     });
   };
@@ -143,7 +139,6 @@ function DesignDetailTable({
         ID_StoneS: "",
         Pcs: "",
         Weight: "",
-        ID_Header: selectedDesignId,
       },
     ]);
   };
@@ -174,6 +169,20 @@ function DesignDetailTable({
 
     return true;
   };
+const isFormValid1 = () => {
+  for (const row of rows) {
+    if (
+      !row.ID_Size ||
+      !row.ID_StoneM ||
+      !row.ID_StoneS ||
+      !row.Weight
+    ) {
+      return false; // ❌ Return false if any required field is missing
+    }
+  }
+  return true; // ✅ All fields are filled
+};
+
   const saveNewRows = async () => {
     if (!isFormValid()) {
       toast.error("Please fill all required fields.");
@@ -199,7 +208,6 @@ function DesignDetailTable({
         ID_StoneS: "",
         Pcs: "",
         Weight: "",
-        ID_Header: selectedDesignId,
       },
     ]);
 
@@ -244,7 +252,6 @@ function DesignDetailTable({
 
   // 🧱 Columns for main table
   const Col = [
-    { headername: "Srl", fieldname: "Srl_Col", type: "number", width: "80px" },
     {
       headername: "Size",
       fieldname: "Size_Name",
@@ -288,6 +295,7 @@ function DesignDetailTable({
       AutoSearch: true,
       data: sizeOptions,
       width: "180px",
+      PlaceHolder: "Select Size",
     },
     {
       label: "Stone M",
@@ -295,6 +303,7 @@ function DesignDetailTable({
       AutoSearch: true,
       data: stoneMOptions,
       width: "180px",
+      PlaceHolder: "Select Stone M",
     },
     {
       label: "Stone S",
@@ -302,9 +311,10 @@ function DesignDetailTable({
       AutoSearch: true,
       data: stoneSOptions,
       width: "180px",
+      PlaceHolder: "Select Stone S",
     },
-    { label: "Pcs", key: "Pcs", type: "number", width: "100px" },
-    { label: "Weight", key: "Weight", type: "number", width: "120px" },
+    { label: "Pcs", key: "Pcs", type: "number", width: "100px", PlaceHolder: "Enter Pcs" },
+    { label: "Weight", key: "Weight", type: "number", width: "120px", PlaceHolder: "Enter Weight" },
   ];
 
   return (
@@ -346,7 +356,7 @@ function DesignDetailTable({
               <button
                 className="btn btn-primary"
                 onClick={saveNewRows}
-                disabled={!isFormValid()}
+                disabled={!isFormValid1()}
               >
                 Save
               </button>

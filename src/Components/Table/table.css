@@ -79,3 +79,17 @@
   outline: 3px solid #25a35367;
 }
 
+
+.small-dropdown select,
+.small-dropdown input {
+  height: 22px !important;
+  font-size: 12px !important;
+  padding: 0 3px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.small-dropdown select:focus,
+.small-dropdown input:focus {
+  box-shadow: 0 0 0 2px rgba(172, 75, 236, 0.2);
+}

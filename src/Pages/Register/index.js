@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Form, Card } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Form, Card, Spinner } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./Register.css"; // We'll create this CSS file
+import "./Register.css";
+import useAuth from "../../Store/AuthStore/useAuth"; // ✅ Import Zustand store
 
 function Register() {
   const [showPass, setShowPass] = useState(false);
@@ -14,6 +15,16 @@ function Register() {
     active: true,
   });
 
+  // ✅ Zustand actions and states
+  const {
+    registerUser,
+    registerIsLoading,
+    registerIsSuccess,
+    registerError,
+    clearRegisterState,
+  } = useAuth();
+
+  // ✅ Handle input change
   const InputHandler = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -22,44 +33,35 @@ function Register() {
     }));
   };
 
-  const SubmitHandler = async (event) => {
-    event.preventDefault();
-
-    // Validation
+  // ✅ Form validation
+  const validateForm = () => {
     if (!formData.User_Name || !formData.Contact || !formData.Password) {
-      toast.error("Please fill all required fields", {
-        autoClose: 3000,
-        position: "top-right",
-      });
-      return;
+      toast.error("Please fill all required fields");
+      return false;
     }
-
     if (formData.Contact.length !== 10) {
-      toast.error("Contact number must be 10 digits", {
-        autoClose: 3000,
-        position: "top-right",
-      });
-      return;
+      toast.error("Contact number must be 10 digits");
+      return false;
     }
-
     if (formData.Password.length > 8) {
-      toast.error("Password must be maximum 8 characters", {
-        autoClose: 3000,
-        position: "top-right",
-      });
-      return;
+      toast.error("Password must be maximum 8 characters");
+      return false;
     }
+    return true;
+  };
 
-    try {
-      // Here you would call your registration API
-      // const response = await api.post('/api/register/', formData);
+  // ✅ Submit Handler (Calls Zustand action)
+  const SubmitHandler = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-      toast.success("Registration successful!", {
-        autoClose: 2000,
-        position: "top-right",
-      });
+    await registerUser(formData);
+  };
 
-      // Reset form after successful registration
+  // ✅ React to registration result
+  useEffect(() => {
+    if (registerIsSuccess) {
+      toast.success("Registration successful!", { autoClose: 2000 });
       setFormData({
         User_Name: "",
         Contact: "",
@@ -67,13 +69,13 @@ function Register() {
         UType: "U",
         active: true,
       });
-    } catch (error) {
-      toast.error("Registration failed. Please try again.", {
-        autoClose: 3000,
-        position: "top-right",
-      });
+      clearRegisterState();
     }
-  };
+    if (registerError) {
+      toast.error(registerError || "Registration failed");
+      clearRegisterState();
+    }
+  }, [registerIsSuccess, registerError, clearRegisterState]);
 
   return (
     <Container fluid className="register-container">
@@ -114,7 +116,7 @@ function Register() {
                       <i className="bi bi-telephone"></i>
                     </span>
                     <Form.Control
-                      type="text"
+                      type="number"
                       placeholder="Contact Number *"
                       name="Contact"
                       value={formData.Contact}
@@ -206,12 +208,20 @@ function Register() {
                   type="submit"
                   className="register-btn w-100"
                   disabled={
+                    registerIsLoading ||
                     !formData.User_Name ||
                     !formData.Contact ||
                     !formData.Password
                   }
                 >
-                  Create Account
+                  {registerIsLoading ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />{" "}
+                      Registering...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </button>
               </Form>
 

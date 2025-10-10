@@ -230,15 +230,7 @@ function SpcpDetailTable({
     await fetchSpcp("header");
   };
 
-  // Dropdown options for misc charges
-  const miscChargeOptions = useMemo(
-    () =>
-      dropdownListMiscCharge.map((item) => ({
-        label: item.MisCharge_Name,
-        value: item.ID,
-      })),
-    [dropdownListMiscCharge]
-  );
+ 
 
   // Table columns
   const Col = [

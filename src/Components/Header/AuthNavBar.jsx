@@ -20,7 +20,18 @@ function AuthNavBar() {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
-
+  const [user, setUser] = useState(null); // ✅ add user state
+  // ✅ Load user info from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Invalid user data in localStorage", error);
+      }
+    }
+  }, []);
   // Close search when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -36,8 +47,10 @@ function AuthNavBar() {
   }, [searchExpanded]);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth-token");
-    navigate("/");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
   };
 
   const handleSearch = (e) => {
@@ -134,13 +147,10 @@ function AuthNavBar() {
 
             {/* Profile + Settings + Logout (always visible) */}
             <Nav className="align-items-center d-none d-lg-flex">
-              <Nav.Link
-                as={Link}
-                to="/auth/profile"
-                className="nav-link-custom"
-              >
-                <i className="bi bi-person-circle"></i>
+              <Nav.Link disabled className="nav-link-custom">
+                <i className="bi bi-person"></i> {user?.User_Name || "User"}
               </Nav.Link>
+
               <Nav.Link as={Link} to="/auth/setup" className="nav-link-custom">
                 <i className="bi bi-gear-fill"></i>
               </Nav.Link>
@@ -233,7 +243,7 @@ function AuthNavBar() {
               className="offcanvas-nav-link"
               onClick={() => setShowOffcanvas(false)}
             >
-              <i className="bi bi-person-circle me-2"></i> Profile
+              <i className="bi bi-person-circle me-2"></i> {user?.User_Name || "User"}
             </Nav.Link>
             <Nav.Link
               as={Link}

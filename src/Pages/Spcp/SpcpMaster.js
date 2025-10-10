@@ -11,7 +11,6 @@ import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 import SearchableDropDown from "../../Components/SearchableDropDown";
 import SpcpMasterTable from "./SpcpMasterTable";
 
-
 function StoneRateMaster() {
   const inputRef = useRef();
   const [searchData, setSearchData] = useState("");
@@ -19,7 +18,7 @@ function StoneRateMaster() {
   const [textDetail, setTextDetail] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [colorList, setColorList] = useState([]);
-  const [mischargeList , setMischargeList] = useState([]);
+  const [mischargeList, setMischargeList] = useState([]);
 
   // ✅ single object state (not array)
   const [stoneRateHeaders, setStoneRateHeaders] = useState({
@@ -41,7 +40,7 @@ function StoneRateMaster() {
 
   const { layout2, fetchLayout2 } = useLayout2Master(); // Stone Master
   const { layout10, fetchLayout10 } = useLayout10Master(); // Stone Sub Master
-  const {  fetchLayout1 } = useLayout1Master(); // Color
+  const { fetchLayout1 } = useLayout1Master(); // Color
 
   const dropdownListStoneS = useMemo(
     () =>
@@ -79,23 +78,21 @@ function StoneRateMaster() {
     [mischargeList]
   );
 
-
-
   useEffect(() => {
     inputRef.current?.focus();
     fetchLayout10("ssm");
     fetchLayout2("sm");
 
-       async function fetchLayout() {
-         const res = await fetchLayout1("cm");
-         //    console.log(res,"res")
-         setColorList(res);
+    async function fetchLayout() {
+      const res = await fetchLayout1("cm");
+      //    console.log(res,"res")
+      setColorList(res);
 
-         const res1 = await fetchLayout1("mm");
-         //    console.log(res1,"res1")
-         setMischargeList(res1);
-       }
-       fetchLayout();
+      const res1 = await fetchLayout1("mm");
+      //    console.log(res1,"res1")
+      setMischargeList(res1);
+    }
+    fetchLayout();
   }, []);
 
   // Handle input changes
@@ -131,28 +128,27 @@ function StoneRateMaster() {
       return;
     }
 
-    console.log(stoneRateHeaders, "🚀 Final Payload (header + details)");
-    addSpcp("stoneRate", stoneRateHeaders);
+    // console.log(stoneRateHeaders, "🚀 Final Payload (header + details)");
+    addSpcp("header", stoneRateHeaders);
   };
 
   // Handle success & error
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Stone Rate Setting Added Successfully");
-    setStoneRateHeaders({
-      type: "header",
-      ID_StoneM: null,
-      Srl_Col: 1,
-      ID_StoneS: null,
-      ID_Color: null,
-      Pcs: "",
-      Weight: "",
-      CP: "",
-      SP: "",
-      totalcharge: "",
-      Details: [],
-    });
-
+      setStoneRateHeaders({
+        type: "header",
+        ID_StoneM: null,
+        Srl_Col: 1,
+        ID_StoneS: null,
+        ID_Color: null,
+        Pcs: "",
+        Weight: "",
+        CP: "",
+        SP: "",
+        totalcharge: "",
+        Details: [],
+      });
     }
     if (addError && !addIsLoading && !addIsSuccess) {
       toast.error(addError);
@@ -331,7 +327,7 @@ function StoneRateMaster() {
               </tbody>
             </table>
           </div>
-
+          {/* 
           <div>
             <Button
               variant="success"
@@ -342,6 +338,34 @@ function StoneRateMaster() {
             >
               {addIsLoading ? "Please wait..." : "Submit"}
             </Button>
+          </div> */}
+        </Col>
+
+        <Col
+          xs={12}
+          className="d-flex justify-content-between align-items-center mb-2"
+        >
+          {/* Save Button */}
+          <Button
+            variant="success"
+            onClick={SaveData}
+            disabled={isDisable}
+            size="sm"
+          >
+            {addIsLoading ? "Please wait..." : "Submit"}
+          </Button>
+          {/* Search Field */}
+          <div className="flex-grow" style={{ maxWidth: "250px" }}>
+            <div className="d-flex align-items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm">
+              <i className="bi bi-search text-gray-400 mx-1"></i>
+              <input
+                value={searchData}
+                type="search"
+                placeholder="Search here..."
+                onChange={(e) => setSearchData(e.target.value)}
+                className="w-100 border-0 outline-none bg-transparent px-1"
+              />
+            </div>
           </div>
         </Col>
 
@@ -377,4 +401,3 @@ function StoneRateMaster() {
 }
 
 export default StoneRateMaster;
-

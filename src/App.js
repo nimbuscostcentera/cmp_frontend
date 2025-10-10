@@ -24,6 +24,7 @@ import SpcpMaster from "./Pages/Spcp/SpcpMaster";
 import Layout10Master from "./Pages/Layout10/Layout10Master";
 import DesignMaster from "./Pages/DesignMaster/DesignMaster";
 import Register from "./Pages/Register";
+import UserMaster from "./Pages/UserMaster/UserMaster";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -127,6 +128,10 @@ const router = createBrowserRouter([
       {
         path: "unit",
         element: withSuspense(UnitMaster),
+      },
+      {
+        path: "user",
+        element: withSuspense(UserMaster),
       },
     ],
   },

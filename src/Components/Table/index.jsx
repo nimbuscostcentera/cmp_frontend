@@ -83,17 +83,20 @@ const RenderCellContent = ({
          defaultval={EditedData[field.labelname]}
        />
      ) : (
-       <SearchableDropDown
-         options={field.options}
-         handleChange={(e) => OnChangeHandler(index, e)}
-         selectedVal={
-           EditedData[field.selectionname] || item[field.selectionname]
-         }
-         label={field.selectionname}
-         placeholder={field.headername}
-         defaultval={item[field.fieldname]}
-         width={field.width || "100%"}
-       />
+       <div className="transition-all duration-200 ease-in-out transform scale-95">
+         <SearchableDropDown
+           options={field.options}
+           handleChange={(e) => OnChangeHandler(index, e)}
+           selectedVal={
+             EditedData[field.selectionname] || item[field.selectionname]
+           }
+           label={field.selectionname}
+           placeholder={field.headername}
+           defaultval={item[field.fieldname]}
+           width={field.width || "100%"}
+           className="small-dropdown"
+         />
+       </div>
      );
     }
     if (field?.isBongDate) {
@@ -121,17 +124,19 @@ const RenderCellContent = ({
       );
     }
     return (
-      <input
-        name={field.fieldname}
-        maxLength={field.max}
-        placeholder={field.headername}
-        value={EditedData[field.fieldname] || ""}
-        ref={field?.isUseInputRef ? useInputRef : null}
-        type={field.type || "text"}
-        onChange={(e) => OnChangeHandler(index, e)}
-        className="input-cell form-input w-100"
-        readOnly={field?.isReadOnly || false}
-      />
+      <div className="flex items-center w-full  mx-3" style={{ maxWidth:  "75%" }}>
+        <input
+          name={field.fieldname}
+          maxLength={field.max}
+          placeholder={field.headername}
+          value={EditedData[field.fieldname] || ""}
+          ref={field?.isUseInputRef ? useInputRef : null}
+          type={field.type || "text"}
+          onChange={(e) => OnChangeHandler(index, e)}
+          className="input-cell form-input w-100"
+          readOnly={field?.isReadOnly || false}
+        />
+      </div>
     );
   }
 
@@ -480,9 +485,9 @@ const Table = ({
         style={{ maxHeight: height || "auto" }}
       >
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-indigo-900 text-white sticky top-0 z-20">
+          <thead className="bg-indigo-900 text-white sticky top-0 z-500">
             <tr>
-              <th className="sticky left-0 px-1 py-1 text-center z-30 w-8 font-normal">
+              <th className="sticky left-0 px-1 py-1 text-center z-9000 w-8 font-normal">
                 Row
               </th>
               {Col.map((col, index) => (

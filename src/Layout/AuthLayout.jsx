@@ -1,20 +1,9 @@
-import { Outlet } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Container, Row, Col } from "react-bootstrap";
+// Layout/AuthLayout.jsx
+import { Outlet, Navigate } from "react-router-dom";
 
 function AuthLayout() {
-  return (
-    <Container fluid style={{ height: "100vh", padding: 0, margin: 0 }}>
-      <Row className="w-100 h-100 m-0">
-        <Col
-          xs={12}
-          className="d-flex justify-content-center align-items-center p-0 m-0"
-        >
-          <Outlet />
-        </Col>
-      </Row>
-    </Container>
-  );
+  const token = localStorage.getItem("accessToken");
+  return token ? <Navigate to="/auth/home" replace /> : <Outlet />;
 }
 
 export default AuthLayout;

@@ -67,10 +67,7 @@ function SpcpMasterTable({
       toast.error("Stone Master, Sub Master and Color are required");
       return;
     }
-    if (!Srl_Col || isNaN(Srl_Col)) {
-      toast.error("Serial must be a number");
-      return;
-    }
+
     if (!Pcs || isNaN(Pcs)) {
       toast.error("Pcs must be a number");
       return;
@@ -157,21 +154,17 @@ function SpcpMasterTable({
       fieldname: "StoneM_Name",
       selectionname: "ID_StoneM",
       type: "number",
-      width: "150px",
+      width: "200px",
       isSelection: true,
       options: dropdownListStoneM,
+      
     },
-    {
-      headername: "Serial",
-      fieldname: "Srl_Col",
-      type: "number",
-      width: "100px",
-    },
+  
     {
       headername: "Stone Sub Master",
       fieldname: "StoneS_Name",
       type: "Number",
-      width: "150px",
+      width: "200px",
       isSelection: true,
       selectionname: "ID_StoneS",
       options: dropdownListStoneS,
@@ -183,7 +176,7 @@ function SpcpMasterTable({
       selectionname: "ID_Color",
       options: dropdownListColor,
       type: "number",
-      width: "150px",
+      width: "200px",
     },
     { headername: "Pcs", fieldname: "Pcs", type: "number", width: "100px" },
     {
@@ -249,6 +242,7 @@ function SpcpMasterTable({
         height={"45vh"}
         isView={true}
         handleViewClick={handleViewClick}
+        viewPref={"St."}
       />
 
       {/* --- Layout10 Modal --- */}

@@ -140,10 +140,26 @@ function DesignMaster() {
       toast.error("All mandatory fields must be filled");
       return;
     }
-    if (designHeader?.Tolerance_Lower >= designHeader?.Tolerance_Upper) {
-      toast.error("Tolerance Lower cannot be greater than or equal to Tolerance Upper");
-      return;
-    }
+    if (
+      designHeader?.Tolerance_Lower !== "" &&
+      designHeader?.Tolerance_Upper !== ""
+    ) {
+      if (designHeader?.Tolerance_Lower >= designHeader?.Tolerance_Upper) {
+        toast.error(
+          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+        );
+        return;
+      }
+      if (
+        designHeader?.Tolerance_Lower < 0 ||
+        designHeader?.Tolerance_Upper < 0
+      ) {
+        toast.error("Tolerance values cannot be negative");
+        return;
+      }
+    } 
+  
+
 
     const formData = new FormData();
     formData.append("Design_Code", designHeader.Design_Code);

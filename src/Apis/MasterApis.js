@@ -1,6 +1,5 @@
 import  BASE_URL  from "./ApiBaseUrl";
 const MASTER_BASE_URL = "api/v1/masters";
-
 //color master
 export const AddColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster/`;
 export const UpdateColorMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/colormaster`;
@@ -98,3 +97,6 @@ export const DeleteSpcpMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/SpcpmasterList
 export const AddDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList/`;
 export const UpdateDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList`;
 export const DeleteDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList`;
+
+
+
