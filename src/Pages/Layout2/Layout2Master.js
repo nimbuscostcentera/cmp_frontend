@@ -7,10 +7,11 @@ import SearchableDropDown from "../../Components/SearchableDropDown";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
 import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
 import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
+import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
 
 function Layout2Master() {
   const inputRef = useRef();
-  const [type, setType] = useState("sm"); // 'sm' for Stone Master, 'dm' for Department Master
+  const [type, setType] = useState("sm"); // 'sm' = Stone Master, 'dm' = Department Master
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
@@ -20,12 +21,15 @@ function Layout2Master() {
     Description: "",
     ID_master: -1,
   });
-  const { layout7, fetchLayout7 } = useLayout7Master();
-  const { units, fetchUnits } = useLayout9Master();
 
+  // ✅ Use empty array fallback to avoid "undefined.map" error
+  const { layout7 = [], fetchLayout7 } = useLayout7Master();
+  const { layout11 = [], fetchLayout11 } = useLayout11Master();
+
+  // Dynamically prepare dropdown based on master type
   const dropdownList = useMemo(() => {
     if (type === "sm") {
-      return units.map((item) => ({
+      return layout11.map((item) => ({
         label: `${item.Unit_Code}`,
         value: item.Unit_ID,
       }));
@@ -35,38 +39,42 @@ function Layout2Master() {
         value: item.Process_ID,
       }));
     }
-  }, [units, layout7, type]);
+  }, [layout11, layout7, type]);
 
   const { addLayout2, addIsLoading, addError, addIsSuccess, clearAddState } =
     useLayout2Master();
 
-  // Focus input on mount
+  // Focus and fetch initial data
   useEffect(() => {
     inputRef.current?.focus();
+
     if (type === "sm") {
-      fetchUnits(); // Load units on mount
+      fetchLayout11?.(); // ✅ optional chaining ensures safety
     } else {
-      fetchLayout7(); // Load processes on mount
+      fetchLayout7?.();
     }
   }, [type]);
 
-  // Handle input changes
+  // Input change handler
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
     setInputData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Save new item
+  // Save data with validation
   const SaveData = () => {
     const { Code, Description, ID_master } = inputData;
+
     if (!Code || !Description || ID_master === -1) {
       toast.error("All fields are mandatory");
       return;
     }
+
     if (!/^[a-zA-Z0-9]{1,6}$/.test(Code)) {
       toast.error("Code must be alphanumeric & max 6 chars");
       return;
     }
+
     if (!/^[a-zA-Z0-9 ]{1,15}$/.test(Description)) {
       toast.error("Description must be alphanumeric & max 15 chars");
       return;
@@ -75,20 +83,17 @@ function Layout2Master() {
     addLayout2(type, inputData);
   };
 
-  // Fetch layout2 data on mount and after successful add
-  // useEffect(() => {
-  //   fetchLayout2(type);
-  // }, [type, addIsSuccess]);
-
-  // Show toast messages
+  // Toast handling after add success or error
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Item Added Successfully");
       setInputData({ Code: "", Description: "", ID_master: -1 });
     }
+
     if (addError && !addIsLoading) {
       toast.error(addError);
     }
+
     clearAddState();
   }, [addIsSuccess, addIsLoading, addError]);
 
@@ -105,12 +110,10 @@ function Layout2Master() {
           <hr className="my-1" />
         </Col>
 
+        {/* Input section */}
         <Col xs={12}>
           <div className="d-flex flex-column flex-md-row justify-content-start align-items-md-center">
-            <div
-              className="table-wrapper me-md-3 mb-2 mb-md-0"
-              style={{ overflowX: "auto" }}
-            >
+            <div className="table-wrapper me-md-3 mb-2 mb-md-0" style={{ overflowX: "auto" }}>
               <table className="text-sm">
                 <thead className="tab-head">
                   <tr>
@@ -180,6 +183,7 @@ function Layout2Master() {
           </div>
         </Col>
 
+        {/* Detail & Search */}
         <Col xs={12} className="my-2">
           <div className="d-flex flex-column flex-md-row align-items-md-center gap-3 flex-grow-1 w-100">
             <div className="flex-grow-1" style={{ minWidth: "180px" }}>
@@ -207,6 +211,7 @@ function Layout2Master() {
           </div>
         </Col>
 
+        {/* Table section */}
         <Col xs={12}>
           <Layout2Table
             isDisable={isDisable}

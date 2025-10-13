@@ -45,7 +45,7 @@ const useLayout8Master = create((set, get) => ({
   },
 
   // Add new item
-  addLayout8: async (type = "prm", newItem) => {
+  addLayout8: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
       await axios.post(AddLayout8MasterAPI, { ...newItem, type });

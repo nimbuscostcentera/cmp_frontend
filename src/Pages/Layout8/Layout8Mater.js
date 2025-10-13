@@ -13,7 +13,7 @@ function Layout8Master() {
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
   const [type, setType] = useState("ppm"); // polish type
-
+  //PlatingPolishMaster (PPM)
   const [itemData, setItemData] = useState({
     Polish_Code: "",
     Description: "",

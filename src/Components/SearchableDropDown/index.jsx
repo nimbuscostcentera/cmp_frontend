@@ -99,7 +99,7 @@ const SearchableDropDown = ({
   }, [show]);
 
   return (
-    <div className={`relative z-10 ${width}`}>
+    <div className={`relative  ${width}`}>
       {/* Input */}
       <div className="flex w-full">
         <input

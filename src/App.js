@@ -41,7 +41,12 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        path: "login",
         element: withSuspense(LoginPage),
+      },
+      {
+        path: "register",
+        // element: withSuspense(Register),
       },
     ],
   },
@@ -95,8 +100,12 @@ const router = createBrowserRouter([
         element: withSuspense(Layout7Master),
       },
       {
-        path: "SpcpMaster",
+        path: "spcp",
         element: withSuspense(SpcpMaster),
+      },
+      {
+        path: "design",
+        // element: withSuspense(DesignMaster),
       },
       {
         path: "layout8",

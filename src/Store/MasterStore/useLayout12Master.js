@@ -1,14 +1,14 @@
-// store/useLayout13Master.js
+// store/useLayout8Master.js
 import { create } from "zustand";
 import axios from "axios";
 import {
-  AddLayout13MasterAPI,
-  UpdateLayout13MasterAPI,
-  DeleteLayout13MasterAPI,
+  AddLayout12MasterAPI,
+  UpdateLayout12MasterAPI,
+  DeleteLayout12MasterAPI,
 } from "../../Apis/MasterApis";
 
-const useLayout13Master = create((set, get) => ({
-  layout13: [], // generic array for any layout13 master
+const useLayout12Master = create((set, get) => ({
+  layout12: [], // generic array for any layout12 master
 
   // Fetch States
   fetchIsLoading: false,
@@ -30,12 +30,12 @@ const useLayout13Master = create((set, get) => ({
   deleteError: null,
   deleteIsSuccess: false,
 
-  // Fetch all layout13 items
-  fetchLayout13: async (type) => {
+  // Fetch all layout12 items
+  fetchLayout12: async (type) => {
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
-      const res = await axios.get(`${AddLayout13MasterAPI}?type=${type}`); // type passed to API
-      set({ layout13: res.data, fetchIsLoading: false, fetchIsSuccess: true });
+      const res = await axios.get(`${AddLayout12MasterAPI}?type=${type}`); // type passed to API
+      set({ layout12: res.data, fetchIsLoading: false, fetchIsSuccess: true });
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch items",
@@ -45,10 +45,10 @@ const useLayout13Master = create((set, get) => ({
   },
 
   // Add new item
-  addLayout13: async (type , newItem) => {
+  addLayout12: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddLayout13MasterAPI, { ...newItem, type });
+      await axios.post(AddLayout12MasterAPI, { ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -59,10 +59,10 @@ const useLayout13Master = create((set, get) => ({
   },
 
   // Update item
-  updateLayout13: async (type, id, updatedData) => {
+  updateLayout12: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout13MasterAPI}/${id}/`, {
+      await axios.put(`${UpdateLayout12MasterAPI}/${id}/`, {
         ...updatedData,
         type,
       });
@@ -76,10 +76,10 @@ const useLayout13Master = create((set, get) => ({
   },
 
   // Delete item
-  deleteLayout13: async (type, id) => {
+  deleteLayout12: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout13MasterAPI}/${id}/?type=${type}`);
+      await axios.delete(`${DeleteLayout12MasterAPI}/${id}/?type=${type}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
@@ -100,4 +100,4 @@ const useLayout13Master = create((set, get) => ({
     set({ deleteError: null, deleteIsSuccess: false, deleteIsLoading: false }),
 }));
 
-export default useLayout13Master;
+export default useLayout12Master;

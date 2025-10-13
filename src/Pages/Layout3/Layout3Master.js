@@ -13,7 +13,7 @@ function Layout3Master() {
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
 
-  const [type, setType] = useState("dlm"); // default type is "am"
+  const [type, setType] = useState("dlm"); // default type is ARTISAN AND DEALER MASTER
 
   const [inputData, setInputData] = useState({
     Code: "",

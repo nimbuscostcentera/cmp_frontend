@@ -1,4 +1,4 @@
-// store/useLayout11Master.js
+// store/useUnitMaster.js
 import { create } from "zustand";
 import axios from "axios";
 import {
@@ -8,7 +8,7 @@ import {
 } from "../../Apis/MasterApis";
 
 const useLayout11Master = create((set, get) => ({
-  layout11: [], // generic array for any layout11 master
+  layout11: [],
 
   // Fetch States
   fetchIsLoading: false,
@@ -30,66 +30,70 @@ const useLayout11Master = create((set, get) => ({
   deleteError: null,
   deleteIsSuccess: false,
 
-  // Fetch all layout11 items
-  fetchLayout11: async (type = "prm") => {
+  // Fetch all layout11 (type passed so same API endpoint can serve multiple masters)
+  // signature: fetchLayout11(type)
+  fetchLayout11: async (type) => {
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
-      const res = await axios.get(`${AddLayout11MasterAPI}?type=${type}`); // type passed to API
+      // append type as a query param so backend can handle different masters without changing endpoints
+      const res = await axios.get(`${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`);
+      // keep original console for debugging
+      console.log(res.data);
       set({ layout11: res.data, fetchIsLoading: false, fetchIsSuccess: true });
     } catch (err) {
       set({
-        fetchError: err.response?.data?.message || "Failed to fetch items",
+        fetchError: err.response?.data?.message || "Failed to fetch layout11",
         fetchIsLoading: false,
       });
     }
   },
 
-  // Add new item
-  addLayout11: async (type = "prm", newItem) => {
+  // Add new unit
+  // signature: addLayout11(type, newUnit)
+  addLayout11: async (type, newUnit) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddLayout11MasterAPI, { ...newItem, type });
+      await axios.post(`${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`, newUnit);
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
-        addError: err.response?.data?.message || "Failed to add item",
+        addError: err.response?.data?.message || "Failed to add unit",
         addIsLoading: false,
       });
     }
   },
 
-  // Update item
-  updateLayout11: async (type = "prm", id, updatedData) => {
+  // Update
+  // signature: updateLayout11(type, id, updatedData)
+  updateLayout11: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout11MasterAPI}/${id}/`, {
-        ...updatedData,
-        type,
-      });
+      await axios.put(`${UpdateLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`, updatedData);
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
-        updateError: err.response?.data?.message || "Failed to update item",
+        updateError: err.response?.data?.message || "Failed to update unit",
         updateIsLoading: false,
       });
     }
   },
 
-  // Delete item
-  deleteLayout11: async (type = "prm", id) => {
+  // Delete
+  // signature: deleteLayout11(type, id)
+  deleteLayout11: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout11MasterAPI}/${id}/?type=${type}`);
+      await axios.delete(`${DeleteLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
-        deleteError: err.response?.data?.message || "Failed to delete item",
+        deleteError: err.response?.data?.message || "Failed to delete unit",
         deleteIsLoading: false,
       });
     }
   },
 
-  // Clear States
+  // Clear all states
   clearFetchState: () =>
     set({ fetchError: null, fetchIsSuccess: false, fetchIsLoading: false }),
   clearAddState: () =>

@@ -72,7 +72,10 @@ export const AddLayout11MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout11/`;
 export const UpdateLayout11MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout11`;
 export const DeleteLayout11MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout11`;
 
-
+//layout12 master
+export const AddLayout12MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout12/`;
+export const UpdateLayout12MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout12`;
+export const DeleteLayout12MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout12`;
 
 //layout13 master
 export const AddLayout13MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout13/`;
@@ -85,3 +88,16 @@ export const DeleteLayout13MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout13`;
 export const AddLayout14MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout14/`;
 export const UpdateLayout14MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout14`;
 export const DeleteLayout14MasterAPI = `${BASE_URL}${MASTER_BASE_URL}/layout14`;
+
+
+//layout14 master
+export const AddSpcpMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/SpcpmasterList/`;
+export const UpdateSpcpMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/SpcpmasterList`;
+export const DeleteSpcpMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/SpcpmasterList`;
+
+
+
+//layout15 master
+export const AddDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList/`;
+export const UpdateDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList`;
+export const DeleteDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList`;

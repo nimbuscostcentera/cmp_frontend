@@ -10,7 +10,7 @@ function Layout7Master() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-
+  //ProcessMaster (PRM)
   const [processData, setProcessData] = useState({
     Process_Code: "",
     Description: "",

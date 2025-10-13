@@ -14,7 +14,7 @@ function Layout4Master() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [type] = useState("stm"); // <-- type state (am / dlm)
+  const [type] = useState("stm"); // <-- Staff MASTER
 
   const [inputData, setInputData] = useState({
     Staff_Code: "",
@@ -36,9 +36,7 @@ function Layout4Master() {
   }, [layout7]);
 
   const {
- 
     fetchLayout4,
-
 
     // Add
     addIsLoading,
@@ -46,8 +44,6 @@ function Layout4Master() {
     addIsSuccess,
     addLayout4,
     clearAddState,
-
-  
   } = useLayout4Master();
 
   useEffect(() => {
@@ -59,13 +55,11 @@ function Layout4Master() {
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
     if (name === "Contact" && value && value.length > 10) {
-     
-
       if (!PhnoValidation(value)) {
         return;
       }
-       return;
-    } 
+      return;
+    }
     setInputData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -223,7 +217,6 @@ function Layout4Master() {
                           options={dropdownList}
                           handleChange={(e) =>
                             setInputData((prev) => ({
-
                               ...prev,
                               ID_master: e.target.value,
                             }))

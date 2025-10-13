@@ -13,14 +13,18 @@ import useLayout6Master from "../../Store/MasterStore/useLayout6Master";
 import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
 import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
 import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
+import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
+import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
+import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
+import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
 
 function LayoutTable({
   Col,
   setIsDisable,
   search,
   setTextDetail,
-  type, // mastertype (e.g. 'im', 'um' etc)
-  layout, // layout string (e.g. 'layout1', 'layout9')
+  type, // mastertype (like 'im', 'um', etc.)
+  layout, // layout string (like 'layout1', 'layout8', etc.)
   layoutData: items = [],
 }) {
   const editInputRef = useRef(null);
@@ -28,7 +32,7 @@ function LayoutTable({
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [editedData, setEditedData] = useState({});
 
-  // All layout hooks
+  // ✅ All layout hooks map
   const hooks = {
     layout1: useLayout1Master(),
     layout2: useLayout2Master(),
@@ -39,17 +43,22 @@ function LayoutTable({
     layout7: useLayout7Master(),
     layout8: useLayout8Master(),
     layout9: useLayout9Master(),
+    layout10: useLayout10Master(),
+    layout11: useLayout11Master(),
+    layout12: useLayout12Master(),
+    layout13: useLayout13Master(),
   };
 
-  // Determine active hook using the layout prop (not master type)
   const layoutKey = layout || "layout1";
   const activeHook = hooks[layoutKey] || {};
 
-  // Dynamic functions: (store naming convention: updateLayout1, deleteLayout1, etc.)
-  const updateFn = activeHook[`update${layoutKey.charAt(0).toUpperCase() + layoutKey.slice(1)}`];
-  const deleteFn = activeHook[`delete${layoutKey.charAt(0).toUpperCase() + layoutKey.slice(1)}`];
+  // ✅ Safe dynamic function detection
+  const fnName = layoutKey.charAt(0).toUpperCase() + layoutKey.slice(1); // Layout1, Layout2...
+  const updateFn = activeHook[`update${fnName}`];
+  const deleteFn = activeHook[`delete${fnName}`];
+  const fetchFn = activeHook[`fetch${fnName}`];
 
-  // Extract states from active hook
+  // ✅ Extract states
   const {
     updateIsLoading,
     updateError,
@@ -62,7 +71,16 @@ function LayoutTable({
     fetchIsLoading,
   } = activeHook;
 
-  // Normalize columns
+  // ✅ Smart ID detector (works for any layout)
+  const getIdField = (obj) => {
+    if (!obj) return null;
+    const key = Object.keys(obj).find(
+      (k) => k.toLowerCase().endsWith("_id") || k === "ID"
+    );
+    return key ? obj[key] : null;
+  };
+
+  // ✅ Normalize columns
   const normalizedCols = Col?.map((col) => ({
     fieldname: col.name,
     label: col.label,
@@ -71,65 +89,46 @@ function LayoutTable({
     type: "text",
   }));
 
-  // Edit action
+  // ✏️ Edit
   const ActionFunc = (tabIndex) => {
-    setParams({ IsAction: true, ActionID: tabIndex });
-    setIsDisable(true);
     const selected = filteredData[tabIndex];
-    if (selected) setEditedData({ ...selected });
-    // focus to edit input if present
+    if (!selected) return;
+    setParams({ IsAction: true, ActionID: tabIndex });
+    setEditedData({ ...selected });
+    setIsDisable(true);
     setTimeout(() => editInputRef.current?.focus?.(), 50);
   };
 
-  // Save changes
- const SaveChange = () => {
-  // ✅ Dynamic required field check
-  const missingField = Col.find((f) => {
-    const val = editedData?.[f.name];
-    return val === undefined || val === null || val === "";
-  });
+  // 💾 Save
+  const SaveChange = () => {
+    const missingField = Col.find(
+      (f) =>
+        editedData?.[f.name] === undefined ||
+        editedData?.[f.name] === null ||
+        editedData?.[f.name] === ""
+    );
+    if (missingField) {
+      toast.error(`${missingField.label} is required`);
+      return;
+    }
 
-  if (missingField) {
-    toast.error(`${missingField.label} is required`);
-    return;
-  }
-
-  // Optional — only validate Code/Description if they exist
-  if (editedData.Code && !/^[a-zA-Z0-9]{1,6}$/.test(editedData.Code)) {
-    toast.error("Code must be max 6 alphanumeric chars");
-    return;
-  }
-  if (editedData.Description && !/^[a-zA-Z0-9 ]{1,15}$/.test(editedData.Description)) {
-    toast.error("Description must be max 15 chars");
-    return;
-  }
-
-  if (typeof updateFn === "function") {
-    const idField =
-      editedData.ID ||
-      editedData.Unit_ID ||
-      editedData.Year_ID ||
-      editedData.Company_ID ||
-      editedData.User_ID;
-
+    const idField = getIdField(editedData);
     if (!idField) {
       toast.error("Unable to determine ID for update");
       return;
     }
 
-    // store signature expects (type, id, updatedData)
-    updateFn(type, idField, editedData);
-  } else {
-    toast.error("Update function not found for this layout");
-    console.warn(`Update function not found for layout: ${layoutKey}`);
-  }
-};
+    if (typeof updateFn === "function") {
+      updateFn(type, idField, editedData);
+    } else {
+      toast.error("Update function not found for this layout");
+    }
+  };
 
-
-  // Delete action
+  // 🗑️ Delete
   const handleDelete = (tabIndex) => {
     const obj = filteredData[tabIndex];
-    const idField = obj?.ID || obj?.Unit_ID || obj?.Year_ID || obj?.Company_ID || obj?.User_ID;
+    const idField = getIdField(obj);
     if (!idField) {
       toast.error("Unable to determine ID for delete");
       return;
@@ -137,16 +136,14 @@ function LayoutTable({
 
     if (window.confirm("Are you sure you want to delete this item?")) {
       if (typeof deleteFn === "function") {
-        // store signature expects (type, id)
         deleteFn(type, idField);
       } else {
         toast.error("Delete function not found for this layout");
-        console.warn(`Delete function not found for layout: ${layoutKey}`);
       }
     }
   };
 
-  // Search filter
+  // 🔍 Search
   useEffect(() => {
     const val = (search || "").toLowerCase();
     const filtered = (items || []).filter(
@@ -157,7 +154,7 @@ function LayoutTable({
     setFilteredData(filtered);
   }, [search, items]);
 
-  // Handle update success/error
+  // ✅ Update success
   useEffect(() => {
     if (updateIsSuccess) {
       toast.success(`${type} updated successfully`);
@@ -165,6 +162,7 @@ function LayoutTable({
       setEditedData({});
       setIsDisable(false);
       clearUpdateState && clearUpdateState();
+      fetchFn && fetchFn(type); // refresh
     }
     if (updateError) {
       toast.error(updateError);
@@ -172,7 +170,7 @@ function LayoutTable({
     }
   }, [updateIsSuccess, updateError]);
 
-  // Handle delete success/error
+  // ✅ Delete success
   useEffect(() => {
     if (deleteIsSuccess) {
       toast.success(`${type} deleted successfully`);
@@ -180,6 +178,7 @@ function LayoutTable({
       setEditedData({});
       setIsDisable(false);
       clearDeleteState && clearDeleteState();
+      fetchFn && fetchFn(type); // refresh after delete
     }
     if (deleteError) {
       toast.error(deleteError);
@@ -194,11 +193,14 @@ function LayoutTable({
         Col={normalizedCols}
         isAction={params.IsAction}
         ActionId={params.ActionID}
-        ActionFunc={ActionFunc} // Edit
-        OnSaveHandler={SaveChange} // Save
-        handleDelete={handleDelete} // Delete
+        ActionFunc={ActionFunc}
+        OnSaveHandler={SaveChange}
+        handleDelete={handleDelete}
         OnChangeHandler={(i, e) =>
-          setEditedData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+          setEditedData((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+          }))
         }
         getFocusText={(val) => setTextDetail(val)}
         isEdit={true}
@@ -206,7 +208,7 @@ function LayoutTable({
         EditedData={editedData}
         isLoading={updateIsLoading || deleteIsLoading || fetchIsLoading}
         useInputRef={editInputRef}
-        height={"40vh"}
+        height="40vh"
       />
     </div>
   );

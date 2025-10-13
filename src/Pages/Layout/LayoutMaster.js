@@ -1,6 +1,7 @@
 // pages/LayoutMaster/LayoutMaster.js
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { toast, ToastContainer } from "react-toastify";
+
 import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
 import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
@@ -10,30 +11,29 @@ import useLayout6Master from "../../Store/MasterStore/useLayout6Master";
 import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
 import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
 import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
-import masterMapping from "../../Utils/mastermapping";
+import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
+import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
+import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
+import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
+
 import { masters } from "../Home/MasterInitialData";
 import LayoutTable from "./LayoutTable";
+import masterMapping from "../../Utils/mastermapping";
 
 function LayoutMaster() {
   const inputRef = useRef();
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-
-  // 👇 default master
   const [mastertype, setMasterType] = useState("im");
+  const [foreignData, setForeignData] = useState({});
 
-  /// get master info
+  // Active master config
   const currentMaster = masters.find((m) => m.type === mastertype);
   const fields = currentMaster?.fields || [];
   const layout = currentMaster?.layout || "layout1";
 
-  /// initialize form data
-  const [itemData, setItemData] = useState(
-    fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {})
-  );
-
-  // all layout hooks grouped
+  // ✅ Centralized layout hooks
   const layoutHooks = {
     layout1: useLayout1Master(),
     layout2: useLayout2Master(),
@@ -44,83 +44,141 @@ function LayoutMaster() {
     layout7: useLayout7Master(),
     layout8: useLayout8Master(),
     layout9: useLayout9Master(),
+    layout10: useLayout10Master(),
+    layout11: useLayout11Master(),
+    layout12: useLayout12Master(),
+    layout13: useLayout13Master(),
   };
 
-  // get correct hook for current layout
+  // ✅ Active hook and states
   const activeHook = layoutHooks[layout] || {};
-
   const {
     addError,
     addIsLoading,
     addIsSuccess,
-    // dynamic function names (like addLayout1, addLayout9, etc.)
-    [`add${layout.charAt(0).toUpperCase() + layout.slice(1)}`]: addFn,
-    [`fetch${layout.charAt(0).toUpperCase() + layout.slice(1)}`]: fetchFn,
     fetchIsLoading,
     updateIsSuccess,
     deleteIsSuccess,
     clearAddState,
-    [layout]: layoutData,
   } = activeHook;
 
-  // fetch on change
-  useEffect(() => {
-    if (mastertype && fetchFn) fetchFn(mastertype);
-  }, [mastertype, addIsSuccess, updateIsSuccess, deleteIsSuccess]);
+  const layoutData = activeHook[layout] || [];
+  const capitalizedLayout = layout.charAt(0).toUpperCase() + layout.slice(1);
 
-  // reset form when mastertype changes
+  const fetchFn =
+    activeHook[`fetch${capitalizedLayout}`] ||
+    activeHook[`fetch${capitalizedLayout}Master`];
+  const addFn =
+    activeHook[`add${capitalizedLayout}`] ||
+    activeHook[`add${capitalizedLayout}Master`];
+
+  // ✅ Controlled form data
+  const [itemData, setItemData] = useState(
+    fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {})
+  );
+
+  // Reset when master changes
   useEffect(() => {
     setItemData(fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {}));
     inputRef.current?.focus();
   }, [mastertype, fields]);
 
+  // 🧠 Smart unified data fetcher (main + foreign)
+  const fetchAllRequiredData = useCallback(async () => {
+    if (!fetchFn) return;
+
+    try {
+      await fetchFn(mastertype);
+    } catch {
+      await fetchFn();
+    }
+
+    // 🔹 Fetch foreign key layouts
+    const foreignLayouts = fields
+      .filter((f) => f.foreignKey && f.foreignKeyType)
+      .map((f) => ({
+        layoutKey: f.foreignKey,
+        type: f.foreignKeyType,
+        field: f.name,
+        labelField: f.optionLabelField,
+        valueField: f.optionValueField,
+      }));
+
+    for (const fk of foreignLayouts) {
+      const fkHook = layoutHooks[fk.layoutKey];
+      if (!fkHook) continue;
+
+      const cap = fk.layoutKey.charAt(0).toUpperCase() + fk.layoutKey.slice(1);
+      const fkFetchFn =
+        fkHook[`fetch${cap}`] || fkHook[`fetch${cap}Master`];
+
+      if (fkFetchFn) {
+        try {
+          await fkFetchFn(fk.type);
+          const data = fkHook[fk.layoutKey] || [];
+          setForeignData((prev) => ({ ...prev, [fk.field]: data }));
+        } catch (err) {
+          console.error(`Foreign fetch failed for ${fk.layoutKey}`, err);
+        }
+      }
+    }
+  }, [fetchFn, fields, layoutHooks, mastertype]);
+
+  // 🔁 Fetch on master change
+  useEffect(() => {
+    fetchAllRequiredData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mastertype]);
+
+  // 🔁 Refresh after CRUD actions
+  useEffect(() => {
+    if (addIsSuccess || updateIsSuccess || deleteIsSuccess) {
+      fetchAllRequiredData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addIsSuccess, updateIsSuccess, deleteIsSuccess]);
+
+  // 🧾 Input change
   const OnChangeHandler = (e) => {
-    const { name, value, type: elType, checked } = e.target;
-    // handle checkbox values too
+    const { name, value, type, checked } = e.target;
     setItemData((prev) => ({
       ...prev,
-      [name]: elType === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  ///saveData function
+  // 💾 Save handler
   const SaveData = () => {
     for (const f of fields) {
+      if (f.type === "checkbox") continue;
       if (!itemData[f.name]) {
         toast.error(`${f.label} is mandatory`);
         return;
       }
     }
-    if (itemData.Code && !/^[a-zA-Z0-9]{1,6}$/.test(itemData.Code)) {
-      toast.error("Code must be max 6 alphanumeric chars");
-      return;
-    }
-    if (
-      itemData.Description &&
-      !/^[a-zA-Z0-9 ]{1,15}$/.test(itemData.Description)
-    ) {
-      toast.error("Description must be max 15 chars");
-      return;
-    }
+
     if (addFn) {
-      // pass type first — store expects (type, payload)
-      addFn(mastertype, itemData);
+      try {
+        addFn(mastertype, itemData);
+      } catch {
+        addFn(itemData);
+      }
     } else {
       toast.error("No save function available for this layout");
     }
   };
 
+  // ✅ Success/error toasts
   useEffect(() => {
     if (addIsSuccess) {
-      toast.success(`${mastertype} Added Successfully`);
+      toast.success(`${mastertype} added successfully`);
       setItemData(fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {}));
     }
-    if (addError) {
-      toast.error(addError);
-    }
+    if (addError) toast.error(addError);
     clearAddState && clearAddState();
-  }, [addIsSuccess, addError, fields, mastertype]);
+  }, [addIsSuccess, addError]);
 
+  // 🖼️ Render UI
   return (
     <div className="w-[98%] p-2">
       <ToastContainer />
@@ -143,9 +201,8 @@ function LayoutMaster() {
         </select>
       </div>
 
-      {/* Header */}
       <div className="w-full">
-        <h1 className="mb-0 text-sm md:text-base font-semibold">
+        <h1 className="mb-0 text-sm font-semibold">
           {masterMapping[mastertype] || mastertype}
         </h1>
         <hr className="my-1" />
@@ -158,37 +215,45 @@ function LayoutMaster() {
             <table className="text-sm min-w-[300px] border border-gray-300">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="w-[30px] px-2 py-1">
-                    <i className="bi bi-tag text-xs md:text-sm"></i>
-                  </th>
+                  <th className="px-2 py-1">#</th>
                   {fields.map((f) => (
-                    <th
-                      key={f.name}
-                      className="text-left px-2 py-1 text-xs md:text-sm"
-                    >
+                    <th key={f.name} className="px-2 py-1">
                       {f.label}*
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-t border-gray-300">
-                  <td className="px-2 py-1">
-                    <i className="bi bi-caret-right-fill text-xs md:text-sm"></i>
-                  </td>
+                <tr>
+                  <td className="px-2 py-1">→</td>
                   {fields.map((f, idx) => (
                     <td key={f.name} className="px-2 py-1">
                       {f.type === "select" ? (
                         <select
                           name={f.name}
-                          value={itemData[f.name]}
+                          value={itemData[f.name] ?? ""}
                           onChange={OnChangeHandler}
-                          className={`border border-gray-300 rounded px-2 py-1 text-xs md:text-sm ${f.width} focus:outline-none focus:ring-1 focus:ring-blue-400`}
+                          className="border border-gray-300 rounded px-2 py-1 text-xs"
                         >
                           <option value="">Select {f.label}</option>
-                          {/* dynamic options placeholder — keep existing */}
-                          <option value="1">Option 1</option>
-                          <option value="2">Option 2</option>
+
+                          {/* Dynamic options */}
+                          {f.foreignKey &&
+                          Array.isArray(foreignData[f.name]) &&
+                          foreignData[f.name].length > 0
+                            ? foreignData[f.name].map((d, i) => (
+                                <option
+                                  key={i}
+                                  value={d[f.optionValueField]}
+                                >
+                                  {d[f.optionLabelField]}
+                                </option>
+                              ))
+                            : f.options?.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
                         </select>
                       ) : f.type === "checkbox" ? (
                         <input
@@ -201,13 +266,11 @@ function LayoutMaster() {
                       ) : (
                         <input
                           type={f.type || "text"}
-                          placeholder={`Enter ${f.name}`}
                           name={f.name}
-                          value={itemData[f.name]}
+                          value={itemData[f.name] ?? ""}
                           onChange={OnChangeHandler}
-                          maxLength={f.maxLength}
                           ref={idx === 0 ? inputRef : null}
-                          className={`border border-gray-300 rounded px-2 py-1 text-xs md:text-sm ${f.width} focus:outline-none focus:ring-1 focus:ring-blue-400`}
+                          className="border border-gray-300 rounded px-2 py-1 text-xs"
                         />
                       )}
                     </td>
@@ -220,9 +283,9 @@ function LayoutMaster() {
           <button
             onClick={SaveData}
             disabled={isDisable || addIsLoading}
-            className={`px-4 py-1 rounded text-white text-xs md:text-sm ${
+            className={`px-4 py-1 rounded text-white text-xs ${
               isDisable || addIsLoading
-                ? "bg-gray-400 cursor-not-allowed"
+                ? "bg-gray-400"
                 : "bg-green-600 hover:bg-green-700"
             }`}
           >
@@ -231,40 +294,15 @@ function LayoutMaster() {
         </div>
       </div>
 
-      {/* Textarea & Search */}
-      <div className="w-full my-3">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <textarea
-            value={textDetail}
-            readOnly
-            placeholder="Detail View"
-            className="w-full border border-blue-400 rounded p-2 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none min-w-[180px]"
-            rows={2}
-          />
-          <div className="flex-grow min-w-[180px]">
-            <div className="flex items-center border border-blue-400 rounded-md px-2 py-1 focus-within:ring-1 focus-within:ring-blue-300">
-              <i className="bi bi-search text-gray-400 mr-2"></i>
-              <input
-                value={searchData}
-                type="search"
-                placeholder="Search here..."
-                onChange={(e) => setSearchData(e.target.value)}
-                className="w-full border-0 outline-none bg-transparent text-xs md:text-sm"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Data Table */}
-      <div className="w-full">
+      {/* Table Section */}
+      <div className="w-full mt-4">
         <LayoutTable
           Col={fields}
           setIsDisable={setIsDisable}
           search={searchData}
           setTextDetail={setTextDetail}
-          type={mastertype}      // master short type like 'im'
-          layout={layout}        // layout string like 'layout1' etc — important!
+          type={mastertype}
+          layout={layout}
           layoutData={layoutData}
         />
       </div>
