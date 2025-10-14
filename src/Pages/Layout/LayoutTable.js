@@ -24,7 +24,8 @@ function LayoutTable({
   search,
   setTextDetail,
   type, // mastertype (like 'im', 'um', etc.)
-  layout, // layout string (like 'layout1', 'layout8', etc.)
+  layout,
+  currentMaster,// layout string (like 'layout1', 'layout8', etc.)
   layoutData: items = [],
 }) {
   const editInputRef = useRef(null);
@@ -157,7 +158,7 @@ function LayoutTable({
   // ✅ Update success
   useEffect(() => {
     if (updateIsSuccess) {
-      toast.success(`${type} updated successfully`);
+      toast.success(`${currentMaster.name} updated successfully`);
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({});
       setIsDisable(false);
@@ -173,7 +174,7 @@ function LayoutTable({
   // ✅ Delete success
   useEffect(() => {
     if (deleteIsSuccess) {
-      toast.success(`${type} deleted successfully`);
+      toast.success(`${currentMaster.name} deleted successfully`);
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({});
       setIsDisable(false);

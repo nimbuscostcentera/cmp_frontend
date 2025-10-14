@@ -25,15 +25,15 @@ function LayoutMaster() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [mastertype, setMasterType] = useState("im");
+  const [mastertype, setMasterType] = useState("cm");
   const [foreignData, setForeignData] = useState({});
 
-  // Active master config
+  /// Active master details
   const currentMaster = masters.find((m) => m.type === mastertype);
   const fields = currentMaster?.fields || [];
   const layout = currentMaster?.layout || "layout1";
 
-  // ✅ Centralized layout hooks
+  /// ✅ Centralized layout hooks
   const layoutHooks = {
     layout1: useLayout1Master(),
     layout2: useLayout2Master(),
@@ -50,7 +50,7 @@ function LayoutMaster() {
     layout13: useLayout13Master(),
   };
 
-  // ✅ Active hook and states
+  /// ✅ Active hook and states
   const activeHook = layoutHooks[layout] || {};
   const {
     addError,
@@ -93,15 +93,13 @@ function LayoutMaster() {
       await fetchFn();
     }
 
-    // 🔹 Fetch foreign key layouts
+    /// 🔹 Fetch foreign key layouts
     const foreignLayouts = fields
       .filter((f) => f.foreignKey && f.foreignKeyType)
       .map((f) => ({
         layoutKey: f.foreignKey,
         type: f.foreignKeyType,
         field: f.name,
-        labelField: f.optionLabelField,
-        valueField: f.optionValueField,
       }));
 
     for (const fk of foreignLayouts) {
@@ -109,14 +107,11 @@ function LayoutMaster() {
       if (!fkHook) continue;
 
       const cap = fk.layoutKey.charAt(0).toUpperCase() + fk.layoutKey.slice(1);
-      const fkFetchFn =
-        fkHook[`fetch${cap}`] || fkHook[`fetch${cap}Master`];
+      const fkFetchFn = fkHook[`fetch${cap}`] || fkHook[`fetch${cap}Master`];
 
       if (fkFetchFn) {
         try {
           await fkFetchFn(fk.type);
-          const data = fkHook[fk.layoutKey] || [];
-          setForeignData((prev) => ({ ...prev, [fk.field]: data }));
         } catch (err) {
           console.error(`Foreign fetch failed for ${fk.layoutKey}`, err);
         }
@@ -124,19 +119,35 @@ function LayoutMaster() {
     }
   }, [fetchFn, fields, layoutHooks, mastertype]);
 
-  // 🔁 Fetch on master change
+  ///🔁 Fetch on master change
   useEffect(() => {
     fetchAllRequiredData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mastertype]);
 
-  // 🔁 Refresh after CRUD actions
+  /// 🔁 Refresh after CRUD actions
   useEffect(() => {
     if (addIsSuccess || updateIsSuccess || deleteIsSuccess) {
       fetchAllRequiredData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addIsSuccess, updateIsSuccess, deleteIsSuccess]);
+
+  // ✅ Reactive sync for foreign key data (fix for missing options)
+  useEffect(() => {
+    const updatedForeignData = {};
+
+    fields.forEach((f) => {
+      if (f.foreignKey && f.foreignKeyType) {
+        const fkHook = layoutHooks[f.foreignKey];
+        if (fkHook) {
+          updatedForeignData[f.name] = fkHook[f.foreignKey] || [];
+        }
+      }
+    });
+
+    setForeignData(updatedForeignData);
+  }, [fields, layoutHooks]);
 
   // 🧾 Input change
   const OnChangeHandler = (e) => {
@@ -171,7 +182,7 @@ function LayoutMaster() {
   // ✅ Success/error toasts
   useEffect(() => {
     if (addIsSuccess) {
-      toast.success(`${mastertype} added successfully`);
+      toast.success(`${currentMaster.name} added successfully`);
       setItemData(fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {}));
     }
     if (addError) toast.error(addError);
@@ -242,10 +253,7 @@ function LayoutMaster() {
                           Array.isArray(foreignData[f.name]) &&
                           foreignData[f.name].length > 0
                             ? foreignData[f.name].map((d, i) => (
-                                <option
-                                  key={i}
-                                  value={d[f.optionValueField]}
-                                >
+                                <option key={i} value={d[f.optionValueField]}>
                                   {d[f.optionLabelField]}
                                 </option>
                               ))
@@ -304,6 +312,7 @@ function LayoutMaster() {
           type={mastertype}
           layout={layout}
           layoutData={layoutData}
+          currentMaster={currentMaster}
         />
       </div>
     </div>

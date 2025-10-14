@@ -47,7 +47,13 @@ export const masters = [
     type: "im",
     layout: "layout1",
     fields: [
-      { name: "Code", label: "Item Code", maxLength: 6, width: "w-[100px]",disable:true },
+      {
+        name: "Code",
+        label: "Item Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        disable: true,
+      },
       {
         name: "Description",
         label: "Description",
@@ -90,7 +96,7 @@ export const masters = [
     type: "itmtype",
     layout: "layout1",
     fields: [
-      { name: "Item_ID", label: "Item Code", maxLength: 6, width: "w-[100px]" },
+      { name: "Item_ID", label: "Item Code", maxLength: 6, width: "w-[100px]" }, ///item code
       {
         name: "Item_Name",
         label: "Item Name",
@@ -156,72 +162,72 @@ export const masters = [
   },
 
   // ================= layout3 =================
-  {
-    name: "Vendor Group Master",
-    type: "vg",
-    layout: "layout3", // replace with actual layout name used
-    fields: [
-      {
-        name: "VendorGrp_ID",
-        label: "Vendor Group ID",
-        type: "number",
-        readOnly: true,
-        hidden: true,
-      },
-      {
-        name: "VendorGrp_Name",
-        label: "Vendor Group Name",
-        type: "text",
-        maxLength: 100,
-        required: true,
-      },
-      {
-        name: "Address1",
-        label: "Address Line 1",
-        type: "text",
-        maxLength: 255,
-        required: false,
-      },
-      {
-        name: "Address2",
-        label: "Address Line 2",
-        type: "text",
-        maxLength: 255,
-        required: false,
-      },
-      {
-        name: "Address3",
-        label: "Address Line 3",
-        type: "text",
-        maxLength: 255,
-        required: false,
-      },
-      {
-        name: "Contact",
-        label: "Contact Number",
-        type: "text",
-        maxLength: 30,
-        required: false,
-      },
-      {
-        name: "ID_Type",
-        label: "ID Type",
-        type: "select",
-        required: true,
-        options: [
-          { value: "A", label: "Artisan" },
-          { value: "D", label: "Dealer" },
-          { value: "S", label: "Staff" },
-        ],
-      },
-      {
-        name: "Has_Process",
-        label: "Has Process",
-        type: "checkbox",
-        required: false,
-      },
-    ],
-  },
+  // {
+  //   name: "Vendor Group Master",
+  //   type: "vg",
+  //   layout: "layout3", // replace with actual layout name used
+  //   fields: [
+  //     {
+  //       name: "VendorGrp_ID",
+  //       label: "Vendor Group ID",
+  //       type: "number",
+  //       readOnly: true,
+  //       hidden: true,
+  //     },
+  //     {
+  //       name: "VendorGrp_Name",
+  //       label: "Vendor Group Name",
+  //       type: "text",
+  //       maxLength: 100,
+  //       required: true,
+  //     },
+  //     {
+  //       name: "Address1",
+  //       label: "Address Line 1",
+  //       type: "text",
+  //       maxLength: 255,
+  //       required: false,
+  //     },
+  //     {
+  //       name: "Address2",
+  //       label: "Address Line 2",
+  //       type: "text",
+  //       maxLength: 255,
+  //       required: false,
+  //     },
+  //     {
+  //       name: "Address3",
+  //       label: "Address Line 3",
+  //       type: "text",
+  //       maxLength: 255,
+  //       required: false,
+  //     },
+  //     {
+  //       name: "Contact",
+  //       label: "Contact Number",
+  //       type: "text",
+  //       maxLength: 30,
+  //       required: false,
+  //     },
+  //     {
+  //       name: "ID_Type",
+  //       label: "ID Type",
+  //       type: "select",
+  //       required: true,
+  //       options: [
+  //         { value: "A", label: "Artisan" },
+  //         { value: "D", label: "Dealer" },
+  //         { value: "S", label: "Staff" },
+  //       ],
+  //     },
+  //     {
+  //       name: "Has_Process",
+  //       label: "Has Process",
+  //       type: "checkbox",
+  //       required: false,
+  //     },
+  //   ],
+  // },
 
   {
     name: "Vendor Master",
@@ -254,7 +260,7 @@ export const masters = [
     layout: "layout4",
     fields: [
       {
-        name: "Customer_ID",
+        name: "Customer_ID", ///customer code
         label: "Customer Code",
         maxLength: 6,
         width: "w-[100px]",
@@ -303,7 +309,7 @@ export const masters = [
     type: "rmm",
     layout: "layout5",
     fields: [
-      { name: "Raw_Code", label: "Raw Code", maxLength: 6, width: "w-[100px]" },
+      { name: "Raw_Code", label: "Raw Code", maxLength: 6, width: "w-[100px]" },   ///code
       {
         name: "Raw_Description",
         label: "Description",
@@ -330,7 +336,7 @@ export const masters = [
     layout: "layout8",
     fields: [
       {
-        name: "Sub_Code",
+        name: "Sub_Code",   ///code 
         label: "Sub Code",
         maxLength: 6,
         width: "w-[100px]",
@@ -477,7 +483,7 @@ export const masters = [
     layout: "layout11",
     fields: [
       {
-        name: "Unit_Code",
+        name: "Unit_Code",   ///code
         label: "Unit Code",
         maxLength: 6,
         width: "w-[100px]",
@@ -527,7 +533,7 @@ export const masters = [
     layout: "layout13",
     fields: [
       {
-        name: "Company_Code",
+        name: "Company_Code",   ///code 
         label: "Company Code",
         maxLength: 15,
         width: "w-[150px]",
