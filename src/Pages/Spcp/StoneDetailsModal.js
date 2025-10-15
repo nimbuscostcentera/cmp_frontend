@@ -69,14 +69,35 @@ function StoneDetailsModal({
   };
 
   // ✅ Save only when Save button is clicked
-  const saveItem = () => {
-    if (localRows.length === 0) {
-      setRows([]);
-    } else {
-      setRows(localRows);
-    }
-    handleClose();
-  };
+const saveItem = () => {
+  if (localRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
+
+  // console.log(localRows)
+
+  // ✅ Validation: ensure both fields are filled for every row
+  const hasEmptyField = localRows.some(
+    (row) =>
+      !row.ID_MiscCharge || // null or empty
+      row.Amount === "" ||
+      row.Amount === 0 ||
+      isNaN(row.Amount)
+  );
+
+  if (hasEmptyField) {
+    toast.error(
+      "Please fill all required fields!"
+    );
+    return;
+  }
+
+  // ✅ Passed validation — save the data
+  setRows(localRows);
+  handleClose();
+};
+
 
   // ❌ Close modal without saving
   const handleModalClose = () => {
@@ -96,7 +117,7 @@ function StoneDetailsModal({
   // 🧩 Table columns
   const detailColumns = [
     {
-      label: "Misc Charge",
+      label: "Misc Charge*",
       key: "ID_MiscCharge",
       AutoSearch: true,
       SearchLabel: "label",
@@ -106,7 +127,7 @@ function StoneDetailsModal({
       width: "200px",
     },
     {
-      label: "Amount",
+      label: "Amount*",
       key: "Amount",
       type: "number",
       width: "150px",

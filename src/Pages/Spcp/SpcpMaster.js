@@ -32,6 +32,8 @@ function StoneRateMaster() {
     CP: "",
     SP: "",
     totalcharge: "",
+    Tolerance_Upper: "",
+    Tolerance_Lower: "",
     Details: [],
   });
 
@@ -98,6 +100,16 @@ function StoneRateMaster() {
   // Handle input changes
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
+    if(name === "CP"){
+         const regex = /^\d{0,7}(\.\d{0,2})?$/;
+         if (value !== "" && !regex.test(value)) return;
+     
+    }
+
+     if (name === "Tolerance_Lower" || name === "Tolerance_Upper") {
+       const regex = /^[0-9]{0,6}$/;
+       if (value !== "" && !regex.test(value)) return;
+     }
     setStoneRateHeaders((prev) => ({
       ...prev,
       [name]: value,
@@ -123,13 +135,17 @@ function StoneRateMaster() {
   const SaveData = () => {
     const { ID_StoneM, Srl_Col, ID_StoneS, ID_Color } = stoneRateHeaders;
     console.log(stoneRateHeaders, "stoneRateHeaders");
-    if (!ID_StoneM || !Srl_Col || !ID_StoneS || !ID_Color) {
-      toast.error("Stone Master, Srl Col, Stone Sub, and Color are mandatory");
+    if (!ID_StoneM || !Srl_Col || !ID_StoneS || !ID_Color || stoneRateHeaders.Tolerance_Lower === "" || stoneRateHeaders.Tolerance_Upper === "") {
+      toast.error("Missing required fields!");
       return;
     }
 
-    // console.log(stoneRateHeaders, "🚀 Final Payload (header + details)");
-    addSpcp("header", stoneRateHeaders);
+    if (stoneRateHeaders.Details?.length === 0) {
+      toast.error("Please add at least one Misc. Charge in details.");
+      return;
+    }
+      // console.log(stoneRateHeaders, "🚀 Final Payload (header + details)");
+      addSpcp("header", stoneRateHeaders);
   };
 
   // Handle success & error
@@ -147,6 +163,8 @@ function StoneRateMaster() {
         CP: "",
         SP: "",
         totalcharge: "",
+        Tolerance_Upper: "",
+        Tolerance_Lower: "",
         Details: [],
       });
     }
@@ -170,7 +188,7 @@ function StoneRateMaster() {
       <Row className="w-100">
         <Col xs={12}>
           <h5 className="mb-0 text-sm md:text-base">Stone Rate Setting</h5>
-          <hr className="my-1" />
+          {/* <hr className="my-1" /> */}
         </Col>
 
         {/* ✅ Header Table */}
@@ -188,11 +206,13 @@ function StoneRateMaster() {
                   <th>Stone Master*</th>
                   <th>Stone Sub*</th>
                   <th>Color*</th>
-                  <th>Pcs</th>
-                  <th>Weight</th>
-                  <th>CP</th>
-                  <th style={{ width: "180px" }}>Mis. Charge</th>
-                  <th>SP (Auto)</th>
+                  <th>Pcs*</th>
+                  <th>Weight*</th>
+                  <th>CP*</th>
+                  <th>Tol Lower*</th>
+                  <th>Tol Upper*</th>
+                  <th style={{ width: "400px" }}>Mis. C.*</th>
+                  <th>SP* (Auto)</th>
                 </tr>
               </thead>
               <tbody className="tab-body">
@@ -289,7 +309,27 @@ function StoneRateMaster() {
                     />
                   </td>
                   <td>
-                    <div className="d-flex align-items-center">
+                    <input
+                      name="Tolerance_Lower"
+                      type="number"
+                      value={stoneRateHeaders.Tolerance_Lower}
+                      onChange={OnChangeHandler}
+                      placeholder="Tol Lower"
+                      className="input-cell text-xs md:text-sm py-1"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      name="Tolerance_Upper"
+                      type="number"
+                      value={stoneRateHeaders.Tolerance_Upper}
+                      onChange={OnChangeHandler}
+                      placeholder="Tol Upper"
+                      className="input-cell text-xs md:text-sm py-1"
+                    />
+                  </td>
+                  <td>
+                    <div className="d-flex align-items-center fl">
                       <input
                         placeholder="Principal Amount"
                         className="input-cell"
@@ -297,7 +337,7 @@ function StoneRateMaster() {
                         value={stoneRateHeaders.totalcharge}
                         type="number"
                         step="0.01"
-                        style={{ width: "100%" }}
+                        // style={{ width: "100%" }}
                         readOnly
                       />
 

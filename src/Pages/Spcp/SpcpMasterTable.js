@@ -60,8 +60,19 @@ function SpcpMasterTable({
   };
 
   const SaveChange = () => {
-    const { ID, ID_StoneM, Srl_Col, ID_StoneS, ID_Color, Pcs, Weight, CP, SP } =
-      editedData;
+    const {
+      ID,
+      ID_StoneM,
+      Srl_Col,
+      ID_StoneS,
+      ID_Color,
+      Pcs,
+      Weight,
+      CP,
+      SP,
+      Tolerance_Upper,
+      Tolerance_Lower,
+    } = editedData;
 
     if (!ID_StoneM || !ID_StoneS || !ID_Color) {
       toast.error("Stone Master, Sub Master and Color are required");
@@ -72,10 +83,15 @@ function SpcpMasterTable({
       toast.error("Pcs must be a number");
       return;
     }
-    if (!Weight || isNaN(Weight)) {
-      toast.error("Weight must be a valid number");
+
+    if (!CP || !SP || !Tolerance_Upper || !Tolerance_Lower) {
+      toast.error("Missing required fields!");
       return;
     }
+      if (!Weight || isNaN(Weight)) {
+        toast.error("Weight must be a valid number");
+        return;
+      }
 
     updateSpcp(type, ID, editedData);
   };
@@ -157,9 +173,8 @@ function SpcpMasterTable({
       width: "200px",
       isSelection: true,
       options: dropdownListStoneM,
-      
     },
-  
+
     {
       headername: "Stone Sub Master",
       fieldname: "StoneS_Name",
@@ -188,6 +203,18 @@ function SpcpMasterTable({
     },
     { headername: "CP", fieldname: "CP", type: "number", width: "120px" },
     {
+      headername: "Tolerance Lower",
+      fieldname: "Tolerance_Lower",
+      type: "number",
+      width: "120px",
+    },
+    {
+      headername: "Tolerance Upper",
+      fieldname: "Tolerance_Upper",
+      type: "number",
+      width: "120px",
+    },
+    {
       headername: "SP",
       fieldname: "SP",
       type: "number",
@@ -207,6 +234,10 @@ function SpcpMasterTable({
           const colKey = e.target.name;
           const newValue = e.target.value;
           let weightchange;
+          if (colKey === "Tolerance_Lower" || colKey === "Tolerance_Upper") {
+            const regex = /^[0-9]{0,6}$/;
+            if (newValue !== "" && !regex.test(newValue)) return;
+          }
 
           setEditedData((prev) => {
             let updated = { ...prev, [colKey]: newValue };
@@ -218,6 +249,10 @@ function SpcpMasterTable({
                 )?.Standard_Weight || 0;
               updated.Weight = weightchange;
             }
+             if (colKey === "CP") {
+               const regex = /^\d{0,7}(\.\d{0,2})?$/;
+               if (newValue !== "" && !regex.test(newValue)) return;
+             }
 
             if (colKey === "CP") {
               const prevCP = parseFloat(prev.CP || 0);

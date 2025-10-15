@@ -84,7 +84,7 @@ function DesignMasterTable({
       toast.error("Weight must be a valid number");
       return;
     }
-    console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
+    // console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
     if (
       editedData?.Tolerance_Lower !== "" &&
       editedData?.Tolerance_Upper !== "" &&
@@ -288,11 +288,11 @@ function DesignMasterTable({
           }
 
           if (colKey === "Tolerance_Lower" || colKey === "Tolerance_Upper") {
-            const regex = /^\d{0,7}(\.\d{0,3})?$/;
+           const regex = /^[0-9]{0,6}$/;
             if (newValue !== "" && !regex.test(newValue)) return;
           }
           if (colKey === "Gross_Weight") {
-            const regex = /^\d{0,6}(\.\d{0,3})?$/;
+            const regex = /^[0-9]{0,6}(\.[0-9]{0,3})?$/;
             if (newValue !== "" && !regex.test(newValue)) return;
           }
 

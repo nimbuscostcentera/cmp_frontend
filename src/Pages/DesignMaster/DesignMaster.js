@@ -40,7 +40,6 @@ function DesignMaster() {
     Design_Group: "",
     ID_master: "",
     Picture: "",
-    Gross_Weight: "",
     Tolerance_Lower: "",
     Tolerance_Upper: "",
     Details: [],
@@ -103,8 +102,10 @@ function DesignMaster() {
   // Handle input change
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if (name === "Gross_Weight") {
-      const regex = /^\d{0,6}(\.\d{0,3})?$/;
+
+
+    if( name === "Tolerance_Lower" || name === "Tolerance_Upper"){
+     const regex = /^[0-9]{0,6}$/;
       if (value !== "" && !regex.test(value)) return;
     }
     setDesignHeader((prev) => ({ ...prev, [name]: value }));
@@ -166,7 +167,6 @@ function DesignMaster() {
     formData.append("Design_Description", designHeader.Design_Description);
     formData.append("Design_Group", designHeader.Design_Group);
     formData.append("ID_master", designHeader.ID_master);
-    formData.append("Gross_Weight", designHeader.Gross_Weight);
     formData.append("Tolerance_Lower", designHeader.Tolerance_Lower || "");
     formData.append("Tolerance_Upper", designHeader.Tolerance_Upper || "");
 
@@ -209,7 +209,6 @@ function DesignMaster() {
         Design_Group: "",
         ID_master: "",
         Picture: "",
-        Gross_Weight: "",
         Tolerance_Lower: "",
         Tolerance_Upper: "",
         Details: [],
@@ -238,7 +237,7 @@ function DesignMaster() {
       <Row className="w-100">
         <Col xs={12}>
           <h5 className="mb-0 text-sm md:text-base">Design Master</h5>
-          <hr className="my-1" />
+          {/* <hr className="my-1" /> */}
         </Col>
 
         <Col xs={12}>
@@ -255,7 +254,6 @@ function DesignMaster() {
                   <th>Design Group*</th>
                   <th>Item*</th>
                   <th>Picture</th>
-                  <th>Gross Wt*</th>
                   <th>Tol Lower</th>
                   <th>Tol Upper</th>
                   <th style={{ width: "180px" }}>Stone Details</th>
@@ -323,17 +321,6 @@ function DesignMaster() {
                       ref={fileInputRef} // 👈 add ref here
                       onChange={handleImageUpload}
                       className="input-cell text-xs md:text-sm"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="Gross_Weight"
-                      type="number"
-                      step="0.001"
-                      value={designHeader.Gross_Weight}
-                      onChange={OnChangeHandler}
-                      placeholder="Gross Wt"
-                      className="input-cell text-xs md:text-sm py-1"
                     />
                   </td>
                   <td>

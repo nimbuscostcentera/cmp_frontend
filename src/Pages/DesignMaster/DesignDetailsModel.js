@@ -92,15 +92,53 @@ function DesignDetailsModel({
   };
 
   // ✅ Save rows back to parent only when user clicks Save
-  const saveItem = () => {
-    // If user added but deleted everything, no need to save
-    if (localRows.length === 0) {
-      setRows([]);
-    } else {
-      setRows(localRows);
-    }
-    handleClose();
-  };
+const saveItem = () => {
+  if (localRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
+
+  // Filter out completely empty rows before validation
+  const filteredRows = localRows.filter((row) => {
+    return (
+      row.ID_StoneM ||
+      row.ID_StoneS ||
+      (row.Pcs && row.Pcs !== 0) ||
+      (row.Weight && row.Weight !== 0)
+    );
+  });
+
+  if (filteredRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
+
+  // Validate each filled row
+  const invalidRow = filteredRows.find((row) => {
+    return (
+      !row.ID_StoneM || // missing Stone Master
+      !row.ID_StoneS || // missing Stone Sub
+      row.Pcs === null ||
+      row.Pcs === "" ||
+      isNaN(row.Pcs)
+    );
+  });
+
+  if (invalidRow) {
+    toast.error(
+      "Please fill all required fields (Stone Master, Stone Sub, and Pcs) in each filled row before saving"
+    );
+    return;
+  }
+
+  console.log(filteredRows);
+
+  // ✅ Save only non-empty, valid rows
+  setRows(filteredRows);
+  handleClose();
+};
+
+
 
   // ❌ When modal closed without saving → discard all local changes
   const handleModalClose = () => {

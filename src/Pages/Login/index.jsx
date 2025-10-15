@@ -25,6 +25,16 @@ function Login() {
 
   const InputHandler = (e) => {
     const { name, value } = e.target;
+     if (name === "contact") {
+       // Allow only digits
+       if (!/^\d*$/.test(value)) return;
+
+       // Limit to 10 digits
+       if (value.length > 10) return;
+
+       // If at least 1 digit is entered, ensure it starts with 6-9
+       if (value.length === 1 && !/[6-9]/.test(value[0])) return;
+     }
     setData((prev) => ({ ...prev, [name]: value.trimStart() }));
   };
 
