@@ -152,7 +152,7 @@ function Layout13Table({ setIsDisable, search, setTextDetail, type }) {
         isAction={params.IsAction}
         ActionFunc={ActionFunc}
         ActionId={params.ActionID}
-        OnChangeHandler={(e) => {
+        OnChangeHandler={(index,e) => {
           const { name, value, type, checked } = e.target;
           if (name === "Contact") {
             if (value.length > 10 || !PhnoValidation(value)) {

@@ -98,7 +98,7 @@ const saveItem = () => {
     return;
   }
 
-  // Filter out completely empty rows before validation
+  // Filter out completely empty rows
   const filteredRows = localRows.filter((row) => {
     return (
       row.ID_StoneM ||
@@ -113,30 +113,57 @@ const saveItem = () => {
     return;
   }
 
-  // Validate each filled row
+  // Validate required fields if both Stone Master and Stone Sub are filled
   const invalidRow = filteredRows.find((row) => {
-    return (
-      !row.ID_StoneM || // missing Stone Master
-      !row.ID_StoneS || // missing Stone Sub
-      row.Pcs === null ||
-      row.Pcs === "" ||
-      isNaN(row.Pcs)
-    );
+    if (row.ID_StoneM && row.ID_StoneS) {
+      // All fields except ID_Size must be filled
+      return (
+        row.Pcs === null ||
+        row.Pcs === "" ||
+        row.Pcs === 0 ||
+        isNaN(row.Pcs) ||
+        row.Weight === null ||
+        row.Weight === "" ||
+        row.Weight === 0 ||
+        isNaN(row.Weight)
+        // Add any other mandatory field checks here if needed
+      );
+    }
+    return false; // row is partially filled or empty → ok
   });
 
   if (invalidRow) {
     toast.error(
-      "Please fill all required fields (Stone Master, Stone Sub, and Pcs) in each filled row before saving"
+      "All fields (except Size) are mandatory for rows where Stone Master and Stone Sub are filled."
     );
     return;
   }
 
-  console.log(filteredRows);
+  // Check for duplicates based on Size + Stone Master + Stone Sub
+  const duplicates = filteredRows.filter((row, index, self) => {
+    return (
+      self.findIndex(
+        (r) =>
+          r.ID_StoneM === row.ID_StoneM &&
+          r.ID_StoneS === row.ID_StoneS &&
+          r.ID_Size === row.ID_Size
+      ) !== index
+    );
+  });
 
-  // ✅ Save only non-empty, valid rows
+  if (duplicates.length > 0) {
+    toast.error(
+      "Duplicate entries are not allowed for the combination of Size + Stone Master + Stone Sub Master"
+    );
+    return;
+  }
+
+  // Save only non-empty, valid, unique rows
   setRows(filteredRows);
   handleClose();
 };
+
+
 
 
 

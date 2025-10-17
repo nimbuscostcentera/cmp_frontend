@@ -26,7 +26,7 @@ function Tab4Color({
           {
             rowid: 1,
             Srl_Col: 1,
-            ID_Color: null,
+            Color: null,
           },
         ]);
       }
@@ -41,7 +41,7 @@ function Tab4Color({
       {
         rowid: newRowId,
         Srl_Col: newRowId,
-        ID_Color: null,
+        Color: null,
       },
     ]);
   };
@@ -67,7 +67,7 @@ function Tab4Color({
     }
 
     // Filter valid rows
-    const filteredRows = localRows.filter((r) => r.ID_Color);
+    const filteredRows = localRows.filter((r) => r.Color);
 
     if (filteredRows.length === 0) {
       toast.error("Please select at least one color");
@@ -75,7 +75,7 @@ function Tab4Color({
     }
 
     // Prevent duplicate colors
-    const colorIds = filteredRows.map((r) => r.ID_Color);
+    const colorIds = filteredRows.map((r) => r.Color);
     const hasDuplicates = new Set(colorIds).size !== colorIds.length;
     if (hasDuplicates) {
       toast.error("Duplicate colors are not allowed");
@@ -85,13 +85,13 @@ function Tab4Color({
     // ✅ Create comma-separated color names for display
     const colorNames = filteredRows
       .map((r) => {
-        const colorObj = colorOptions?.find((c) => c.value === r.ID_Color);
+        const colorObj = colorOptions?.find((c) => c.value === r.Color);
         return colorObj?.label || "";
       })
       .filter((name) => name.trim() !== "")
       .join(", ");
     const Color_Id = filteredRows
-      .map((r) => r.ID_Color)
+      .map((r) => r.Color)
       .filter((id) => id !== null)
     .join(",");
 
@@ -110,7 +110,7 @@ function Tab4Color({
   const colorColumns = [
     {
       label: "Color",
-      key: "ID_Color",
+      key: "Color",
       AutoSearch: true,
       SearchLabel: "label",
       SearchValue: "value",

@@ -36,6 +36,7 @@ const useLayout2Master = create((set, get) => ({
     try {
       const res = await axios.get(`${AddLayout2MasterAPI}?type=${type}`);
       set({ layout2: res.data, fetchIsLoading: false, fetchIsSuccess: true });
+      return res.data;
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch data",

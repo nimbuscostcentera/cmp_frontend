@@ -99,4 +99,6 @@ export const UpdateDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMaster
 export const DeleteDesignMasterAPI = `${BASE_URL}${MASTER_BASE_URL}/DesignMasterList`;
 
 
-
+//layout15 master
+export const AddMappingTcAPI = `${BASE_URL}${MASTER_BASE_URL}/mappingtc/`;
+export const UpdateMappingTcAPI = `${BASE_URL}${MASTER_BASE_URL}/mappingtc/`;

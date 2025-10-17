@@ -14,16 +14,25 @@ import Tab4Color from "./Tab4Color";
 import useDesignMaster from "../../../Store/MasterStore/useDesignMaster";
 import axios from "axios";
 import useDesignItemType from "../../../Store/MasterStore/useDesignItemType";
+import Tab4Stone from "./Tab4Stone";
+import useLayout10Master from "../../../Store/MasterStore/useLayout10Master";
+import Tab4MasterTable from "./Tab4MasterTable";
 
 // import Tab4DetailsModel from "./Tab4DetailsModel";
 // import Tab4ItemTypeModel from "./Tab4ItemTypeModel";
 
 function Tab4Master() {
   const inputRef = useRef();
+    const [isDisable, setIsDisable] = useState(false);
   const [searchData, setSearchData] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
   const [layoutItem, setLayoutItem] = useState([]);
-  const [layoutItemtype, setLayoutItemtype] = useState([]);
+  const [layoutSize, setLayoutSize] = useState([]);
+  const [layoutStoneM, setLayoutStoneM] = useState([]);
+  const [layoutStoneS, setLayoutStoneS] = useState([]);
+  const [layoutDepartment, setLayoutDepartment] = useState([]);
+
   const [layoutColor, setLayoutColor] = useState([]);
 
   // ✅ Zustand store states
@@ -39,7 +48,8 @@ function Tab4Master() {
 
   // Combo dropdowns from layout masters
   const { layout1, fetchLayout1 } = useLayout1Master(); // Item Master
-  const { layout2, fetchLayout2 } = useLayout2Master(); // Department Master
+  const { layout2, fetchLayout2 } = useLayout2Master(); // Department Master & stone master
+  const { layout10, fetchLayout10 } = useLayout10Master(); // stone sub master
   const { Design: designData, fetchDesign } = useDesignMaster();
   const { DesignItemType, fetchDesignItemType } = useDesignItemType();
 
@@ -55,6 +65,7 @@ function Tab4Master() {
     Color_Id: "",
     Weight: "",
     colors: [],
+    stones: [],
   });
 
   // 🧠 Dropdown data mapping
@@ -83,25 +94,55 @@ function Tab4Master() {
     [DesignItemType]
   );
 
-  const colorOptions = useMemo(
-    () => layoutColor.map((i) => ({ label: i.Code, value: i.ID })),
-    [layoutColor]
-  );
+const sizeOptions = useMemo(
+  () => layoutSize.map((i) => ({ label: i.Code, value: i.ID })),
+  [layoutSize]
+);
+
+const stoneMainOptions = useMemo(
+  () => layoutStoneM.map((i) => ({ label: i.Code, value: i.ID })),
+  [layoutStoneM]
+);
+
+const stoneSubOptions = useMemo(
+  () =>
+    layoutStoneS.map((item) => ({
+      label: `${item.Sub_Code}`,
+      value: item.Sub_ID,
+      Weight: item.Weight,
+    })),
+  [layoutStoneS]
+);
+
+const colorOptions = useMemo(
+  () => layoutColor.map((i) => ({ label: i.Code, value: i.ID })),
+  [layoutColor]
+);
+
 
   useEffect(() => {
-    // inputRef.current?.focus();
-    fetchDesign("header"); // Fetch Item Master
-    fetchLayout2("dm"); // Fetch Department Master
+    fetchDesign("header");
+  async function fetchLayoutData() {
+    const resSize = await fetchLayout1("szm");
+    setLayoutSize(resSize);
+    const resitem = await fetchLayout1("im");
+    setLayoutItem(resitem);
 
-    async function fetchLayout() {
-      const res = await fetchLayout1("im");
-      setLayoutItem(res);
+    const resStoneM = await fetchLayout2("sm");
+    setLayoutStoneM(resStoneM);
 
-      const res2 = await fetchLayout1("cm");
-      setLayoutColor(res2);
-    }
-    fetchLayout();
-  }, [tab4Data.Design]);
+    const resStoneS = await fetchLayout10("ssm");
+    setLayoutStoneS(resStoneS);
+
+    const resColor = await fetchLayout1("cm");
+    setLayoutColor(resColor);
+
+    const resDept = await fetchLayout2("dm");
+    setLayoutDepartment(resDept);
+  }
+
+  fetchLayoutData();
+}, []);
 
   useEffect(() => {
     if (tab4Header.Design) {
@@ -109,6 +150,28 @@ function Tab4Master() {
     }
   }, [tab4Header.Design]);
 
+  // 🧠 Calculate GWeight whenever Pcs or Weight changes
+  useEffect(() => {
+    const calculateGWeight = () => {
+      const weightPerPiece = parseFloat(tab4Header.Weight) || 0;
+      const pieces = parseInt(tab4Header.Pcs) || 0;
+
+      if (weightPerPiece > 0 && pieces > 0) {
+        const gWeight = weightPerPiece * pieces;
+        setTab4Header((prev) => ({
+          ...prev,
+          GWeight: gWeight.toFixed(3).toString(),
+        }));
+      } else {
+        setTab4Header((prev) => ({
+          ...prev,
+          GWeight: "",
+        }));
+      }
+    };
+
+    calculateGWeight();
+  }, [tab4Header.Weight, tab4Header.Pcs]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "Pcs") {
@@ -120,9 +183,9 @@ function Tab4Master() {
 
   // ✅ Save handler (no FormData)
   const handleSave = async () => {
-    const { Department, Design, ItemType, Item, Color, Pcs } = tab4Header;
-
-    if (!Department || !Design || !ItemType || !Item || !Color || !Pcs) {
+    const { Department, Design, ItemType, Item, colors, stones, GWeight, Pcs } = tab4Header;
+// console.log(Department,Design, ItemType, Item, colors, stones, GWeight, Pcs);
+    if (!Department || !Design || !ItemType || !Item || !colors.length || !stones.length || !GWeight || !Pcs) {
       toast.error("All fields are mandatory");
       return;
     }
@@ -139,8 +202,7 @@ function Tab4Master() {
     }));
   };
 
-
-  console.log(tab4Header, "tab4data");
+  // console.log(tab4Header, "tab4data");
   // ✅ Success/Error feedback
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
@@ -154,6 +216,9 @@ function Tab4Master() {
         Weight: "",
         GWeight: "",
         Color_Display: "",
+        Color_Id: "",
+        stones: [],
+        colors: [], 
       });
     }
     if (addError) toast.error(addError);
@@ -187,6 +252,7 @@ function Tab4Master() {
                   <th>Weight*</th>
                   <th>GWeight*</th>
                   <th>Color Display*</th>
+                  <th>Stone D.*</th>
                 </tr>
               </thead>
               <tbody className="tab-body">
@@ -211,12 +277,19 @@ function Tab4Master() {
                   <td>
                     <SearchableDropDown
                       options={designOptions}
-                      handleChange={(e) =>
+                      handleChange={(e) => {
+                        const selectedDesign = designData.find(
+                          (item) => item.DesignID === e.target.value
+                        );
+                        console.log(selectedDesign, "selectedDesign");
                         setTab4Header((prev) => ({
                           ...prev,
                           Design: e.target.value,
-                        }))
-                      }
+                          Item: selectedDesign
+                            ? selectedDesign.ID_master
+                            : null,
+                        }));
+                      }}
                       selectedVal={tab4Header.Design || -1}
                       placeholder={"--Select Design--"}
                       width={"100%"}
@@ -252,6 +325,7 @@ function Tab4Master() {
                       selectedVal={tab4Header.Item || -1}
                       placeholder={"--Select Item--"}
                       width={"100%"}
+                      disabled={"true"}
                     />
                   </td>
                   <td>
@@ -309,6 +383,28 @@ function Tab4Master() {
                       </Button>
                     </div>
                   </td>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <input
+                        name="StoneD."
+                        value={tab4Header.stones.length || ""}
+                        onChange={handleChange}
+                        placeholder="Stone D."
+                        className="input-cell text-xs md:text-sm py-1"
+                        readOnly
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setShowModal1(true)}
+                      >
+                        <i
+                          className="bi bi-pencil-square"
+                          style={{ fontSize: "12px" }}
+                        ></i>
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -338,8 +434,19 @@ function Tab4Master() {
         </Col>
 
         <Col xs={12}>
-          {/* Reusable table */}
-          {/* <Tab4MasterTable search={searchData} /> */}
+          <Tab4MasterTable
+            search={searchData}
+            // setTextDetail={setTextDetail}
+            sizeOptions={sizeOptions}
+            stoneMainOptions={stoneMainOptions}
+            stoneSubOptions={stoneSubOptions}
+            colorOptions={colorOptions}
+            departmentOptions={departmentOptions}
+            designOptions={designOptions}
+            itemOptions={itemOptions}
+            itemtypeOptions={itemtypeOptions}
+            setIsDisable={setIsDisable}
+          />
         </Col>
       </Row>
       {showModal && (
@@ -350,6 +457,20 @@ function Tab4Master() {
           setRows={handleSaveDetails}
           colorOptions={colorOptions}
           // Color_Display={tab4Header.Color_Display}
+        />
+      )}
+      {showModal1 && (
+        <Tab4Stone
+          show={showModal1}
+          handleClose={() => setShowModal1(false)}
+          rows={tab4Header.stones}
+          setRows={(rows) =>
+            setTab4Header((prev) => ({ ...prev, stones: rows }))
+          }
+          sizeOptions={sizeOptions}
+          stoneMainOptions={stoneMainOptions}
+          stoneSubOptions={stoneSubOptions}
+          colorOptions={colorOptions}
         />
       )}
 

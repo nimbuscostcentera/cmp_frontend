@@ -13,6 +13,7 @@ const SearchableDropDown = ({
   defaultval,
   width = "w-full",
   directSearch = false,
+  disabled = false, // New disabled prop
 }) => {
   const [show, setShow] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,7 +24,11 @@ const SearchableDropDown = ({
   const selectRef = useRef(null);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleShow = () => {
+    if (!disabled) {
+      setShow(true);
+    }
+  };
 
   const findSelectedValue = () => {
     if (Array.isArray(options) && options.length !== 0) {
@@ -34,6 +39,8 @@ const SearchableDropDown = ({
   };
 
   const handleInputChange = (e) => {
+    if (disabled) return;
+
     const value = e.target.value;
     setSearchTerm(value);
 
@@ -52,6 +59,8 @@ const SearchableDropDown = ({
   };
 
   const handleOptionSelect = (option) => {
+    if (disabled) return;
+
     const obj = { target: { value: option.value, name: label } };
     handleChange(obj);
     setSearchTerm(option.label);
@@ -59,6 +68,8 @@ const SearchableDropDown = ({
   };
 
   const handleKeyDown = (e) => {
+    if (disabled) return;
+
     if (e.key === "Tab") {
       e.preventDefault();
       setShowDropdown(false);
@@ -99,7 +110,7 @@ const SearchableDropDown = ({
   }, [show]);
 
   return (
-    <div className={`relative  ${width}`}>
+    <div className={`relative ${width}`}>
       {/* Input */}
       <div className="flex w-full">
         <input
@@ -109,36 +120,60 @@ const SearchableDropDown = ({
           onChange={directSearch ? handleInputChange : () => {}}
           onKeyUp={handleKeyDown}
           onClick={directSearch ? () => {} : handleShow}
-          className="flex-grow rounded-l-md border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
+          disabled={disabled}
+          className={`
+            flex-grow rounded-l-md border px-2 py-1 text-sm focus:outline-none focus:ring-1 transition-colors
+            ${
+              disabled
+                ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
+                : "border-gray-300 text-gray-700 focus:ring-blue-300 focus:border-blue-300"
+            }
+          `}
         />
         <button
           onClick={handleShow}
-          className="bg-gray-200 border border-l-0 border-gray-300 rounded-r-md px-2 py-1 text-gray-700 hover:bg-gray-300 transition"
+          disabled={disabled}
+          className={`
+            border border-l-0 rounded-r-md px-2 py-1 transition
+            ${
+              disabled
+                ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300"
+            }
+          `}
         >
           <i className="bi bi-search"></i>
         </button>
       </div>
 
       {/* Dropdown suggestions for directSearch */}
-      {directSearch && showDropdown && filteredOptions.length > 0 && (
-        <ul
-          ref={dropdownRef}
-          className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg z-20"
-        >
-          {filteredOptions.map((option) => (
-            <li
-              key={option.value}
-              onClick={() => handleOptionSelect(option)}
-              className="cursor-pointer px-2 py-1 hover:bg-blue-100"
-            >
-              {option.label}
-            </li>
-          ))}
-        </ul>
-      )}
+      {directSearch &&
+        showDropdown &&
+        filteredOptions.length > 0 &&
+        !disabled && (
+          <ul
+            ref={dropdownRef}
+            className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg z-20"
+          >
+            {filteredOptions.map((option) => (
+              <li
+                key={option.value}
+                onClick={() => handleOptionSelect(option)}
+                className="cursor-pointer px-2 py-1 hover:bg-blue-100"
+              >
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        )}
 
       {/* Modal for traditional search */}
-      <Modal show={show} onHide={handleClose} size="lg" backdrop="static">
+      <Modal
+        show={show && !disabled}
+        onHide={handleClose}
+        size="lg"
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>{placeholder}</Modal.Title>
         </Modal.Header>
@@ -178,6 +213,14 @@ const SearchableDropDown = ({
           />
         </Modal.Body>
       </Modal>
+
+      {/* Disabled overlay tooltip */}
+      {disabled && (
+        <div
+          className="absolute inset-0 rounded-md bg-gray-50 bg-opacity-50 cursor-not-allowed"
+          title="This field is disabled"
+        ></div>
+      )}
     </div>
   );
 };

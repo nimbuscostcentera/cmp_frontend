@@ -95,8 +95,50 @@ function DesignDetailTable({
 
   // 🎯 Save edited record
   const SaveChange = async () => {
+    if (!editedData) {
+      toast.error("No data to save");
+      return;
+    }
+
+    // 1️⃣ Check if both Stone Master and Stone Sub are filled
+    if (editedData.ID_StoneM && editedData.ID_StoneS) {
+      // Mandatory fields except ID_Size
+      if (
+        editedData.Pcs === null ||
+        editedData.Pcs === "" ||
+        editedData.Pcs === 0 ||
+        isNaN(editedData.Pcs) ||
+        editedData.Weight === null ||
+        editedData.Weight === "" ||
+        editedData.Weight === 0 ||
+        isNaN(editedData.Weight)
+      ) {
+        toast.error(
+          "All fields (except Size) are mandatory for rows where Stone Master and Stone Sub are filled."
+        );
+        return;
+      }
+    }
+
+    // 2️⃣ (Optional) If you want, you can check duplicates here too,
+    // if you have access to all rows in the parent table
+    // Example:
+    // const duplicates = allRows.filter((row, index, self) => {
+    //   return self.findIndex(r => r.ID_StoneM === row.ID_StoneM && r.ID_StoneS === row.ID_StoneS && r.ID_Size === row.ID_Size) !== index;
+    // });
+    // if (duplicates.length > 0) {
+    //   toast.error("Duplicate entries are not allowed for the combination of Size + Stone Master + Stone Sub Master");
+    //   return;
+    // }
+
+    // 3️⃣ Prepare payload and call API
     const payload = { ...editedData, ID_Header: selectedDesignId };
-    await updateDesignDetail(type, editedData.ID, payload);
+    try {
+      await updateDesignDetail(type, editedData.ID, payload);
+      toast.success("Design detail updated successfully");
+    } catch (err) {
+      toast.error("Failed to update design detail");
+    }
   };
 
   // 🎯 Delete record
@@ -169,19 +211,14 @@ function DesignDetailTable({
 
     return true;
   };
-const isFormValid1 = () => {
-  for (const row of rows) {
-    if (
-      !row.ID_Size ||
-      !row.ID_StoneM ||
-      !row.ID_StoneS ||
-      !row.Weight
-    ) {
-      return false; // ❌ Return false if any required field is missing
+  const isFormValid1 = () => {
+    for (const row of rows) {
+      if (!row.ID_Size || !row.ID_StoneM || !row.ID_StoneS || !row.Weight) {
+        return false; // ❌ Return false if any required field is missing
+      }
     }
-  }
-  return true; // ✅ All fields are filled
-};
+    return true; // ✅ All fields are filled
+  };
 
   const saveNewRows = async () => {
     if (!isFormValid()) {
@@ -313,8 +350,20 @@ const isFormValid1 = () => {
       width: "180px",
       PlaceHolder: "Select Stone S",
     },
-    { label: "Pcs", key: "Pcs", type: "number", width: "100px", PlaceHolder: "Enter Pcs" },
-    { label: "Weight", key: "Weight", type: "number", width: "120px", PlaceHolder: "Enter Weight" },
+    {
+      label: "Pcs",
+      key: "Pcs",
+      type: "number",
+      width: "100px",
+      PlaceHolder: "Enter Pcs",
+    },
+    {
+      label: "Weight",
+      key: "Weight",
+      type: "number",
+      width: "120px",
+      PlaceHolder: "Enter Weight",
+    },
   ];
 
   return (

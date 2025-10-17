@@ -1,11 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import defaultimage from "../../Asset/default.png";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import SearchableDropDown from "../SearchableDropDown";
 import MultipleSelection from "../MultipleSelection";
 import BASE_URL from "../../Apis/ApiBaseUrl";
-// ActionButton (slightly larger icons)
+
+// ActionButton
 const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   <button
     className="p-0 m-0 flex items-center justify-center h-10 w-10 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -36,6 +37,7 @@ const RenderCellContent = ({
   useInputRef,
   isUseInputRef,
   PictureHandler,
+  isAllEditable,
 }) => {
   const handleDateCheck = useCallback(
     (event) => {
@@ -69,35 +71,39 @@ const RenderCellContent = ({
       : field.iconError(item);
   }
 
-  if (ActionId === index && !field?.isNotEditable) {
+  // ✅ GLOBAL EDIT FEATURE
+  if ((ActionId === index || isAllEditable) && !field?.isNotEditable) {
     if (field?.isSelection) {
-     return field?.isMultiSelection ? (
-       <MultipleSelection
-         options={field.options}
-         handleChange={HandleMultiSelection}
-         selectedVal={
-           EditedData[field.selectionname] || item[field.selectionname]
-         }
-         label={field.labelname}
-         placeholder={field.placeholder}
-         defaultval={EditedData[field.labelname]}
-       />
-     ) : (
-       <div className="transition-all duration-200 ease-in-out transform scale-95">
-         <SearchableDropDown
-           options={field.options}
-           handleChange={(e) => OnChangeHandler(index, e)}
-           selectedVal={
-             EditedData[field.selectionname] || item[field.selectionname]
-           }
-           label={field.selectionname}
-           placeholder={field.headername}
-           defaultval={item[field.fieldname]}
-           width={field.width || "100%"}
-           className="small-dropdown"
-         />
-       </div>
-     );
+      return field?.isMultiSelection ? (
+        <MultipleSelection
+          options={field.options}
+          handleChange={(selectedOptions) => {
+            // Pass the selected options, index, and field name
+            HandleMultiSelection(selectedOptions, index, field.fieldname);
+          }}
+          selectedVal={
+            EditedData[field.selectionname] || item[field.selectionname]
+          }
+          label={field.labelname}
+          placeholder={field.placeholder}
+          defaultval={EditedData[field.labelname]}
+        />
+      ) : (
+        <div className="transition-all duration-200 ease-in-out transform scale-95">
+          <SearchableDropDown
+            options={field.options}
+            handleChange={(e) => OnChangeHandler(index, e)}
+            selectedVal={
+              EditedData[field.selectionname] || item[field.selectionname]
+            }
+            label={field.selectionname}
+            placeholder={field.headername}
+            defaultval={item[field.fieldname]}
+            width={field.width || "100%"}
+            className="small-dropdown"
+          />
+        </div>
+      );
     }
     if (field?.isBongDate) {
       return (
@@ -124,18 +130,37 @@ const RenderCellContent = ({
       );
     }
     return (
-      <div className="flex items-center w-full  mx-3" style={{ maxWidth:  "75%" }}>
+      <div
+        className="flex items-center w-full mx-3"
+        style={{ maxWidth: "75%" }}
+      >
         <input
           name={field.fieldname}
           maxLength={field.max}
           placeholder={field.headername}
-          value={EditedData[field.fieldname] || ""}
+          value={EditedData[field.fieldname] || item[field.fieldname] || ""}
           ref={field?.isUseInputRef ? useInputRef : null}
           type={field.type || "text"}
           onChange={(e) => OnChangeHandler(index, e)}
           className="input-cell form-input w-100"
           readOnly={field?.isReadOnly || false}
         />
+      </div>
+    );
+  }
+
+  // 🆕 FIXED: Handle multi-selection display in view mode
+  if (field?.isMultiSelection && !(ActionId === index || isAllEditable)) {
+    // Use the pre-formatted string from the fieldname (which is "enumvalue" in your Col config)
+    const displayValue = item[field.fieldname];
+
+    if (!displayValue || displayValue === "" || displayValue === "null") {
+      return "-";
+    }
+
+    return (
+      <div className="truncate" title={displayValue}>
+        {displayValue}
       </div>
     );
   }
@@ -165,22 +190,48 @@ const RenderCellContent = ({
     );
   }
 
-  if (field?.type === "Img" && ActionId === index) {
-   return (
-     <input
-       type="file"
-       name="Img"
-       accept="image/*"
-       ref={field?.isUseInputRef ? useInputRef : null}
-       onChange={(e) => PictureHandler(index, e)}
-       className="w-32 h-7 text-[10px] file:text-[10px] file:py-1 file:px-2 file:rounded file:border file:border-gray-300"
-       readOnly={field?.isReadOnly || false}
-     />
-   );
-
+  if (field?.type === "Img" && (ActionId === index || isAllEditable)) {
+    return (
+      <input
+        type="file"
+        name="Img"
+        accept="image/*"
+        ref={field?.isUseInputRef ? useInputRef : null}
+        onChange={(e) => PictureHandler(index, e)}
+        className="w-32 h-7 text-[10px] file:text-[10px] file:py-1 file:px-2 file:rounded file:border file:border-gray-300"
+        readOnly={field?.isReadOnly || false}
+      />
+    );
   }
 
-  return item[field.fieldname] == 0 ? "-" : item[field.fieldname];
+  // 🆕 FIXED: Default return with proper object handling
+  const cellValue = item[field.fieldname];
+
+  // Handle null/undefined/empty
+  if (cellValue == null || cellValue === "" || cellValue === "null") {
+    return "-";
+  }
+
+  // Handle objects - stringify them to avoid React errors
+  if (typeof cellValue === "object" && !React.isValidElement(cellValue)) {
+    return (
+      <div className="truncate" title={JSON.stringify(cellValue)}>
+        {Array.isArray(cellValue)
+          ? cellValue
+              .map((item) => item?.label || item?.value || item)
+              .join(", ")
+          : JSON.stringify(cellValue)}
+      </div>
+    );
+  }
+
+  // Handle zero values
+  if (cellValue == "0") {
+    return "-";
+  }
+
+  // Handle normal values
+  return cellValue;
 };
 
 const Table = ({
@@ -224,6 +275,7 @@ const Table = ({
   isUseInputRef,
   actions = [],
   PictureHandler,
+  isAllEditable,
 }) => {
   const scrollRef = useRef(null);
   const [sortField, setSortField] = useState("");
@@ -242,16 +294,14 @@ const Table = ({
   const handleSort = (fieldName, type) => {
     setSortField(fieldName);
     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    if (onSorting) {
-      onSorting(fieldName, type);
-    }
+    if (onSorting) onSorting(fieldName, type);
   };
 
-  const renderActionButtons = (item, index) => {
-    return actions.map((action, i) => {
+  const renderActionButtons = (item, index) =>
+    actions.map((action, i) => {
       if (action.type === "checkbox") {
         return (
-          <td key={i} className=" text-center">
+          <td key={i} className="text-center">
             <input
               type="checkbox"
               checked={action.checkedItems?.some(
@@ -265,7 +315,7 @@ const Table = ({
       }
 
       return (
-        <td key={i} className=" text-center">
+        <td key={i} className="text-center">
           <div className="flex justify-center">
             <ActionButton
               icon={action.icon}
@@ -280,13 +330,11 @@ const Table = ({
         </td>
       );
     });
-  };
 
-  const renderRowNumber = (index) => {
-    return PageNumber && rowsperpage
+  const renderRowNumber = (index) =>
+    PageNumber && rowsperpage
       ? (PageNumber - 1) * rowsperpage + index + 1
       : index + 1;
-  };
 
   const renderLoadingSkeleton = () =>
     [...Array(12)].map((_, index) => (
@@ -321,15 +369,11 @@ const Table = ({
 
     return (
       <tr>
-        <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10">
-          {/* {renderRowNumber(0)} */}
-        </td>
+        <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10"></td>
         <td
           colSpan={colspan}
           className="text-center text-gray-500 bg-gray-100 py-3 text-xs"
-          style={{
-            height: "35vh",
-          }}
+          style={{ height: "35vh" }}
         >
           <i className="bi bi-exclamation-circle mr-1" />
           No Data Found
@@ -376,6 +420,7 @@ const Table = ({
                 useInputRef={useInputRef}
                 isUseInputRef={isUseInputRef}
                 PictureHandler={PictureHandler}
+                isAllEditable={isAllEditable}
               />
             </div>
           </td>
@@ -385,21 +430,33 @@ const Table = ({
           <>
             <td className="px-1 py-1 text-center w-12">
               <div className="flex justify-center">
-                <ActionButton
-                  icon="pencil-square"
-                  color="#ac4bec"
-                  onClick={() => ActionFunc(index)}
-                  title="Edit"
-                />
+                {!isAllEditable && (
+                  <ActionButton
+                    icon="pencil-square"
+                    color="#ac4bec"
+                    onClick={() => ActionFunc(index)}
+                    title="Edit"
+                  />
+                )}
               </div>
             </td>
             <td className="px-1 py-1 text-center w-12">
               <div className="flex justify-center">
                 <ActionButton
                   icon="floppy"
-                  color={index === ActionId ? "green" : "lightgrey"}
-                  onClick={() => OnSaveHandler(index)}
-                  disabled={ActionId == null || ActionId === -1}
+                  color={
+                    isAllEditable
+                      ? "green"
+                      : index === ActionId
+                      ? "green"
+                      : "lightgrey"
+                  }
+                  onClick={() =>
+                    isAllEditable ? OnSaveHandler() : OnSaveHandler(index)
+                  }
+                  disabled={
+                    !isAllEditable && (ActionId == null || ActionId === -1)
+                  }
                   title="Save"
                 />
               </div>
@@ -521,12 +578,12 @@ const Table = ({
                 </>
               )}
               {isView && (
-                <th className="px-1 py-1 text-center w-40 font-normal ">
+                <th className="px-3 py-1 text-center w-70 font-normal ">
                   {viewPref} V.
                 </th>
               )}
               {isView1 && (
-                <th className="px-1 py-1 text-center w-40 font-normal">
+                <th className="px-3 py-1 text-center w-70 font-normal">
                   {viewPref1} V.
                 </th>
               )}
@@ -579,6 +636,7 @@ const Table = ({
           </tbody>
         </table>
       </div>
+
       {showScrollButtons && (
         <div
           className="absolute right-2 flex flex-col space-y-2 z-40"
