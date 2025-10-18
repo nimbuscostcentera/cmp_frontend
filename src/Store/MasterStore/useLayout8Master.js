@@ -36,6 +36,7 @@ const useLayout8Master = create((set, get) => ({
     try {
       const res = await axios.get(`${AddLayout8MasterAPI}?type=${type}`); // type passed to API
       set({ layout8: res.data, fetchIsLoading: false, fetchIsSuccess: true });
+      return res.data;
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch items",

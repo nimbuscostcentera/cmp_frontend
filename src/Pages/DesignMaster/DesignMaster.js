@@ -5,12 +5,13 @@ import "../../Components/Table/table.css";
 import useDesignMaster from "../../Store/MasterStore/useDesignMaster";
 import Layout13Table from "../Layout13/Layout13Table";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
-import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
+// import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
 import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 import SearchableDropDown from "../../Components/SearchableDropDown";
 import DesignDetailsModel from "./DesignDetailsModel";
 import DesignItemTypeModel from "./DesignItemTypeModel";
 import DesignMasterTable from "./DesignMasterTable";
+import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
 
 function DesignMaster() {
   const inputRef = useRef();
@@ -31,7 +32,7 @@ function DesignMaster() {
   const fileInputRef = useRef(null); // 👈 add this line
   // Masters for dropdowns
   const { layout2, fetchLayout2 } = useLayout2Master(); // Stone Master
-  const { layout10, fetchLayout10 } = useLayout10Master(); // Stone Sub Master
+  const { layout8, fetchLayout8 } = useLayout8Master(); // Stone Sub Master
   const { layout1, fetchLayout1 } = useLayout1Master(); // Size Master
 
   const [designHeader, setDesignHeader] = useState({
@@ -40,7 +41,6 @@ function DesignMaster() {
     Design_Group: "",
     ID_master: "",
     Picture: "",
-    Gross_Weight: "",
     Tolerance_Lower: "",
     Tolerance_Upper: "",
     Details: [],
@@ -49,43 +49,43 @@ function DesignMaster() {
 
   // Dropdown Data
   const dropdownListStoneM = useMemo(
-    () => layout2.map((item) => ({ label: item.Code, value: item.ID })),
+    () => layout2?.map((item) => ({ label: item.Code, value: item.ID })),
     [layout2]
   );
 
   const dropdownListStoneS = useMemo(
     () =>
-      layout10.map((item) => ({
+      layout8?.map((item) => ({
         label: item.Sub_Code,
         value: item.Sub_ID,
         Weight: item.Weight,
       })),
-    [layout10]
+    [layout8]
   );
 
   const dropdownListSize = useMemo(
-    () => layoutsize.map((item) => ({ label: item.Code, value: item.ID })),
+    () => layoutsize?.map((item) => ({ label: item.Code, value: item.ID })),
     [layoutsize]
   );
 
   const dropdownitem = useMemo(
-    () => layoutItem.map((item) => ({ label: item.Code, value: item.ID })),
+    () => layoutItem?.map((item) => ({ label: item.Code, value: item.ID })),
     [layoutItem]
   );
 
   const dropdowndgm = useMemo(
-    () => layoutdgm.map((item) => ({ label: item.Code, value: item.ID })),
+    () => layoutdgm?.map((item) => ({ label: item.Code, value: item.ID })),
     [layoutdgm]
   );
   const dropdownitm = useMemo(
-    () => layoutitm.map((item) => ({ label: item.Code, value: item.ID })),
+    () => layoutitm?.map((item) => ({ label: item.Code, value: item.ID })),
     [layoutitm]
   );
 
   useEffect(() => {
     inputRef.current?.focus();
     fetchLayout2("sm");
-    fetchLayout10("ssm");
+    fetchLayout8("ssm");
 
     async function fetchLayout() {
       const res = await fetchLayout1("im");
@@ -94,7 +94,7 @@ function DesignMaster() {
       setLayoutdgm(res1);
       const res2 = await fetchLayout1("szm");
       setLayoutsize(res2);
-      const res3 = await fetchLayout1("itm");
+      const res3 = await fetchLayout1("itmtype");
       setLayoutitm(res3);
     }
     fetchLayout();
@@ -103,8 +103,10 @@ function DesignMaster() {
   // Handle input change
   const OnChangeHandler = (e) => {
     const { name, value } = e.target;
-    if (name === "Gross_Weight") {
-      const regex = /^\d{0,6}(\.\d{0,3})?$/;
+
+
+    if( name === "Tolerance_Lower" || name === "Tolerance_Upper"){
+     const regex = /^[0-9]{0,6}$/;
       if (value !== "" && !regex.test(value)) return;
     }
     setDesignHeader((prev) => ({ ...prev, [name]: value }));
@@ -140,17 +142,32 @@ function DesignMaster() {
       toast.error("All mandatory fields must be filled");
       return;
     }
-    if (designHeader?.Tolerance_Lower >= designHeader?.Tolerance_Upper) {
-      toast.error("Tolerance Lower cannot be greater than or equal to Tolerance Upper");
-      return;
-    }
+    if (
+      designHeader?.Tolerance_Lower !== "" &&
+      designHeader?.Tolerance_Upper !== ""
+    ) {
+      if (designHeader?.Tolerance_Lower >= designHeader?.Tolerance_Upper) {
+        toast.error(
+          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+        );
+        return;
+      }
+      if (
+        designHeader?.Tolerance_Lower < 0 ||
+        designHeader?.Tolerance_Upper < 0
+      ) {
+        toast.error("Tolerance values cannot be negative");
+        return;
+      }
+    } 
+  
+
 
     const formData = new FormData();
     formData.append("Design_Code", designHeader.Design_Code);
     formData.append("Design_Description", designHeader.Design_Description);
     formData.append("Design_Group", designHeader.Design_Group);
     formData.append("ID_master", designHeader.ID_master);
-    formData.append("Gross_Weight", designHeader.Gross_Weight);
     formData.append("Tolerance_Lower", designHeader.Tolerance_Lower || "");
     formData.append("Tolerance_Upper", designHeader.Tolerance_Upper || "");
 
@@ -193,7 +210,6 @@ function DesignMaster() {
         Design_Group: "",
         ID_master: "",
         Picture: "",
-        Gross_Weight: "",
         Tolerance_Lower: "",
         Tolerance_Upper: "",
         Details: [],
@@ -222,7 +238,7 @@ function DesignMaster() {
       <Row className="w-100">
         <Col xs={12}>
           <h5 className="mb-0 text-sm md:text-base">Design Master</h5>
-          <hr className="my-1" />
+          {/* <hr className="my-1" /> */}
         </Col>
 
         <Col xs={12}>
@@ -239,7 +255,6 @@ function DesignMaster() {
                   <th>Design Group*</th>
                   <th>Item*</th>
                   <th>Picture</th>
-                  <th>Gross Wt*</th>
                   <th>Tol Lower</th>
                   <th>Tol Upper</th>
                   <th style={{ width: "180px" }}>Stone Details</th>
@@ -307,17 +322,6 @@ function DesignMaster() {
                       ref={fileInputRef} // 👈 add ref here
                       onChange={handleImageUpload}
                       className="input-cell text-xs md:text-sm"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      name="Gross_Weight"
-                      type="number"
-                      step="0.001"
-                      value={designHeader.Gross_Weight}
-                      onChange={OnChangeHandler}
-                      placeholder="Gross Wt"
-                      className="input-cell text-xs md:text-sm py-1"
                     />
                   </td>
                   <td>

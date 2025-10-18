@@ -84,13 +84,28 @@ function DesignMasterTable({
       toast.error("Weight must be a valid number");
       return;
     }
-
-    if (editedData?.Tolerance_Lower >= editedData?.Tolerance_Upper) {
-      toast.error(
-        "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
-      );
-      return;
+    // console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
+    if (
+      editedData?.Tolerance_Lower !== "" &&
+      editedData?.Tolerance_Upper !== "" &&
+      editedData?.Tolerance_Lower !== null &&
+      editedData?.Tolerance_Upper !== null
+    ) {
+      if (editedData?.Tolerance_Lower >= editedData?.Tolerance_Upper) {
+        toast.error(
+          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+        );
+        return;
+      }
+      if (editedData?.Tolerance_Lower < 0 || editedData?.Tolerance_Upper < 0) {
+        toast.error("Tolerance values cannot be negative");
+        return;
+      }
+    } else {
+      editedData.Tolerance_Lower = "";
+      editedData.Tolerance_Upper = "";
     }
+
     const formData = new FormData();
 
     for (const key in editedData) {
@@ -105,7 +120,7 @@ function DesignMasterTable({
     }
     updateDesign(type, DesignID, formData); // ✅ use DesignID
   };
-  console.log(editedData, "editedData");
+  // console.log(editedData, "editedData");
   const PictureHandler = (index, e) => {
     let value = e.target.files[0];
     setEditedData((prev) => ({ ...prev, Picture: value }));
@@ -197,6 +212,7 @@ function DesignMasterTable({
       fieldname: "Design_Code",
       type: "text",
       width: "150px",
+      isUseInputRef: true,
     },
     {
       headername: "Description",
@@ -272,11 +288,11 @@ function DesignMasterTable({
           }
 
           if (colKey === "Tolerance_Lower" || colKey === "Tolerance_Upper") {
-            const regex = /^\d{0,7}(\.\d{0,3})?$/;
+           const regex = /^[0-9]{0,6}$/;
             if (newValue !== "" && !regex.test(newValue)) return;
           }
           if (colKey === "Gross_Weight") {
-            const regex = /^\d{0,6}(\.\d{0,3})?$/;
+            const regex = /^[0-9]{0,6}(\.[0-9]{0,3})?$/;
             if (newValue !== "" && !regex.test(newValue)) return;
           }
 
@@ -297,8 +313,8 @@ function DesignMasterTable({
         handleViewClick={handleViewClick}
         handleViewClick1={handleViewClick1}
         PictureHandler={PictureHandler}
-        viewPref={"D"}
-        viewPref1={"IT"}
+        viewPref={"St."}
+        viewPref1={"It."}
       />
 
       {/* Placeholder for modal, uncomment if needed */}

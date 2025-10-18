@@ -1,7 +1,13 @@
-// pages/LayoutMaster/LayoutMaster.js
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { toast, ToastContainer } from "react-toastify";
 
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // <-- added for redirection
 import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
 import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
 import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
@@ -15,48 +21,85 @@ import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
 import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
 import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
 import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
-
-import { masters } from "../Home/MasterInitialData";
+import useLayout14Master from "../../Store/MasterStore/useLayout14Master";
+import { masters } from "./MasterInitialData";
 import LayoutTable from "./LayoutTable";
-import masterMapping from "../../Utils/mastermapping";
+
+
 
 function LayoutMaster() {
   const inputRef = useRef();
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [mastertype, setMasterType] = useState("cm");
+  const [mastertype, setMasterType] = useState("im");
   const [foreignData, setForeignData] = useState({});
 
-  /// Active master details
+  const navigate = useNavigate(); // <-- initialize navigation
+
+  // Active master details
   const currentMaster = masters.find((m) => m.type === mastertype);
   const fields = currentMaster?.fields || [];
   const layout = currentMaster?.layout || "layout1";
 
-  /// ✅ Centralized layout hooks
-  const layoutHooks = {
-    layout1: useLayout1Master(),
-    layout2: useLayout2Master(),
-    layout3: useLayout3Master(),
-    layout4: useLayout4Master(),
-    layout5: useLayout5Master(),
-    layout6: useLayout6Master(),
-    layout7: useLayout7Master(),
-    layout8: useLayout8Master(),
-    layout9: useLayout9Master(),
-    layout10: useLayout10Master(),
-    layout11: useLayout11Master(),
-    layout12: useLayout12Master(),
-    layout13: useLayout13Master(),
-  };
+  // Centralized layout hooks
+  const layout1Master = useLayout1Master();
+  const layout2Master = useLayout2Master();
+  const layout3Master = useLayout3Master();
+  const layout4Master = useLayout4Master();
+  const layout5Master = useLayout5Master();
+  const layout6Master = useLayout6Master();
+  const layout7Master = useLayout7Master();
+  const layout8Master = useLayout8Master();
+  const layout9Master = useLayout9Master();
+  const layout10Master = useLayout10Master();
+  const layout11Master = useLayout11Master();
+  const layout12Master = useLayout12Master();
+  const layout13Master = useLayout13Master();
+  const layout14Master = useLayout14Master();
 
-  /// ✅ Active hook and states
+  const layoutHooks = useMemo(
+    () => ({
+      layout1: layout1Master,
+      layout2: layout2Master,
+      layout3: layout3Master,
+      layout4: layout4Master,
+      layout5: layout5Master,
+      layout6: layout6Master,
+      layout7: layout7Master,
+      layout8: layout8Master,
+      layout9: layout9Master,
+      layout10: layout10Master,
+      layout11: layout11Master,
+      layout12: layout12Master,
+      layout13: layout13Master,
+      layout14: layout14Master,
+    }),
+    [
+      layout1Master,
+      layout2Master,
+      layout3Master,
+      layout4Master,
+      layout5Master,
+      layout6Master,
+      layout7Master,
+      layout8Master,
+      layout9Master,
+      layout10Master,
+      layout11Master,
+      layout12Master,
+      layout13Master,
+      layout14Master,
+    ]
+  );
+
   const activeHook = layoutHooks[layout] || {};
   const {
     addError,
     addIsLoading,
     addIsSuccess,
     fetchIsLoading,
+    fetchIsSuccess,
     updateIsSuccess,
     deleteIsSuccess,
     clearAddState,
@@ -72,18 +115,32 @@ function LayoutMaster() {
     activeHook[`add${capitalizedLayout}`] ||
     activeHook[`add${capitalizedLayout}Master`];
 
-  // ✅ Controlled form data
+  // Initialize form data
   const [itemData, setItemData] = useState(
-    fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {})
+    fields.reduce(
+      (acc, f) => ({
+        ...acc,
+        [f.name]: f.type === "checkbox" ? false : "",
+      }),
+      {}
+    )
   );
 
   // Reset when master changes
   useEffect(() => {
-    setItemData(fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {}));
+    setItemData(
+      fields.reduce(
+        (acc, f) => ({
+          ...acc,
+          [f.name]: f.type === "checkbox" ? false : "",
+        }),
+        {}
+      )
+    );
     inputRef.current?.focus();
   }, [mastertype, fields]);
 
-  // 🧠 Smart unified data fetcher (main + foreign)
+  // Fetch data
   const fetchAllRequiredData = useCallback(async () => {
     if (!fetchFn) return;
 
@@ -93,7 +150,6 @@ function LayoutMaster() {
       await fetchFn();
     }
 
-    /// 🔹 Fetch foreign key layouts
     const foreignLayouts = fields
       .filter((f) => f.foreignKey && f.foreignKeyType)
       .map((f) => ({
@@ -119,24 +175,18 @@ function LayoutMaster() {
     }
   }, [fetchFn, fields, layoutHooks, mastertype]);
 
-  ///🔁 Fetch on master change
   useEffect(() => {
     fetchAllRequiredData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mastertype]);
 
-  /// 🔁 Refresh after CRUD actions
   useEffect(() => {
     if (addIsSuccess || updateIsSuccess || deleteIsSuccess) {
       fetchAllRequiredData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
-  // ✅ Reactive sync for foreign key data (fix for missing options)
   useEffect(() => {
     const updatedForeignData = {};
-
     fields.forEach((f) => {
       if (f.foreignKey && f.foreignKeyType) {
         const fkHook = layoutHooks[f.foreignKey];
@@ -145,24 +195,17 @@ function LayoutMaster() {
         }
       }
     });
-
     setForeignData(updatedForeignData);
   }, [fields, layoutHooks]);
 
-  // 🧾 Input change
-  const OnChangeHandler = (e) => {
-    const { name, value, type, checked } = e.target;
-    setItemData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  // 💾 Save handler
+  // Save handler
   const SaveData = () => {
     for (const f of fields) {
+      // Skip checkbox
       if (f.type === "checkbox") continue;
-      if (!itemData[f.name]) {
+
+      // Only check required fields
+      if (f.required && !itemData[f.name]) {
         toast.error(`${f.label} is mandatory`);
         return;
       }
@@ -179,17 +222,54 @@ function LayoutMaster() {
     }
   };
 
-  // ✅ Success/error toasts
+  // Success/error toasts
   useEffect(() => {
     if (addIsSuccess) {
-      toast.success(`${currentMaster.name} added successfully`);
-      setItemData(fields.reduce((acc, f) => ({ ...acc, [f.name]: "" }), {}));
+      toast.success(`${currentMaster?.name} added successfully`);
+      setItemData(
+        fields.reduce(
+          (acc, f) => ({
+            ...acc,
+            [f.name]: f.type === "checkbox" ? false : "",
+          }),
+          {}
+        )
+      );
     }
     if (addError) toast.error(addError);
     clearAddState && clearAddState();
   }, [addIsSuccess, addError]);
 
-  // 🖼️ Render UI
+  // Enter toggles checkbox
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && e.target.type === "checkbox") {
+      e.preventDefault();
+      e.target.click();
+    }
+  };
+
+  // 🧠 Handle input change with validations
+  const handleInputChange = (e, f) => {
+    let value = e.target.value;
+
+    // ✅ 1. If field has decimal(5.2) validation
+    if (f.validate === "decimal52") {
+      const regex = /^\d{0,5}(\.\d{0,2})?$/;
+      if (!regex.test(value) && value !== "") {
+        return;
+      }
+    }
+
+    // ✅ 2. Enforce maxLength
+    if (f.maxLength && value.length > f.maxLength) {
+      value = value.slice(0, f.maxLength);
+    }
+
+    // ✅ 3. Update state
+    setItemData((prev) => ({ ...prev, [f.name]: value }));
+  };
+
+  // Render
   return (
     <div className="w-[98%] p-2">
       <ToastContainer />
@@ -199,9 +279,19 @@ function LayoutMaster() {
         <label className="mr-2 text-sm font-semibold">Select Master:</label>
         <select
           value={masters.find((m) => m.type === mastertype)?.name}
-          onChange={(e) =>
-            setMasterType(masters.find((m) => m.name === e.target.value)?.type)
-          }
+          onChange={(e) => {
+            const selectedMaster = masters.find((m) => m.name === e.target.value);
+            if (!selectedMaster) return;
+
+            // <-- NEW: if static master, redirect to its route
+            if (selectedMaster?.isStatic && selectedMaster?.redirectTo) {
+              navigate(selectedMaster.redirectTo);
+              return;
+            }
+
+            // otherwise behave as before
+            setMasterType(selectedMaster.type);
+          }}
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
           {masters.map((m) => (
@@ -213,9 +303,7 @@ function LayoutMaster() {
       </div>
 
       <div className="w-full">
-        <h1 className="mb-0 text-sm font-semibold">
-          {masterMapping[mastertype] || mastertype}
-        </h1>
+        <h1 className="mb-0 text-sm font-semibold">{currentMaster?.name}</h1>
         <hr className="my-1" />
       </div>
 
@@ -226,7 +314,7 @@ function LayoutMaster() {
             <table className="text-sm min-w-[300px] border border-gray-300">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-2 py-1">#</th>
+                  <th className="px-2 py-1"></th>
                   {fields.map((f) => (
                     <th key={f.name} className="px-2 py-1">
                       {f.label}*
@@ -236,19 +324,22 @@ function LayoutMaster() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-2 py-1">→</td>
+                  <td className="px-2 py-1"></td>
                   {fields.map((f, idx) => (
                     <td key={f.name} className="px-2 py-1">
                       {f.type === "select" ? (
                         <select
                           name={f.name}
                           value={itemData[f.name] ?? ""}
-                          onChange={OnChangeHandler}
+                          onChange={(e) =>
+                            setItemData((prev) => ({
+                              ...prev,
+                              [f.name]: e.target.value,
+                            }))
+                          }
                           className="border border-gray-300 rounded px-2 py-1 text-xs"
                         >
                           <option value="">Select {f.label}</option>
-
-                          {/* Dynamic options */}
                           {f.foreignKey &&
                           Array.isArray(foreignData[f.name]) &&
                           foreignData[f.name].length > 0
@@ -267,8 +358,14 @@ function LayoutMaster() {
                         <input
                           type="checkbox"
                           name={f.name}
-                          checked={!!itemData[f.name]}
-                          onChange={OnChangeHandler}
+                          checked={Boolean(itemData[f.name])}
+                          onChange={(e) =>
+                            setItemData((prev) => ({
+                              ...prev,
+                              [f.name]: e.target.checked,
+                            }))
+                          }
+                          onKeyDown={handleKeyDown}
                           ref={idx === 0 ? inputRef : null}
                         />
                       ) : (
@@ -276,8 +373,9 @@ function LayoutMaster() {
                           type={f.type || "text"}
                           name={f.name}
                           value={itemData[f.name] ?? ""}
-                          onChange={OnChangeHandler}
+                          onChange={(e) => handleInputChange(e, f)}
                           ref={idx === 0 ? inputRef : null}
+                          maxLength={f.maxLength || undefined}
                           className="border border-gray-300 rounded px-2 py-1 text-xs"
                         />
                       )}

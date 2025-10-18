@@ -11,7 +11,7 @@ import Layout2Master from "./Pages/Layout2/Layout2Master";
 import Layout3Master from "./Pages/Layout3/Layout3Master";
 import Layout4Master from "./Pages/Layout4/Layout4Master";
 import Layout5Master from "./Pages/Layout5/Layout5Master";
-import ProcessMaster from "./Pages/ProcessMaster/ProcessMaster";
+// import ProcessMaster from "./Pages/ProcessMaster/ProcessMaster";
 import PlatingPolishMaster from "./Pages/PlatingPolishMaster/PlatingPolishMaster";
 import UnitMaster from "./Pages/UnitMaster/UnitMaster";
 import Layout1Master from "./Pages/Layout1/Layout1Master";
@@ -22,7 +22,9 @@ import Layout6Master from "./Pages/Layout6/Layout6Master";
 import Layout8Master from "./Pages/Layout8/Layout8Mater";
 import SpcpMaster from "./Pages/Spcp/SpcpMaster";
 import Layout10Master from "./Pages/Layout10/Layout10Master";
-import LayoutMaster from "./Pages/Layout/LayoutMaster";
+import LayoutMaster from "./Pages/MasterLayouts/LayoutMaster";  
+import LayoutPrac from "./Pages/MasterLayout2/LayoutPrac";
+import DesignMaster from "./Pages/DesignMaster/DesignMaster";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -100,12 +102,16 @@ const router = createBrowserRouter([
         element: withSuspense(Layout7Master),
       },
       {
+        path: "layoutPrac",
+        element: withSuspense(LayoutPrac),
+      },
+      {
         path: "spcp",
         element: withSuspense(SpcpMaster),
       },
       {
         path: "design",
-        // element: withSuspense(DesignMaster),
+        element: withSuspense(DesignMaster),
       },
       {
         path: "layout8",

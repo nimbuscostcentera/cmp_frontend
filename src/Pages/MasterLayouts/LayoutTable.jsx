@@ -17,15 +17,16 @@ import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
 import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
 import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
 import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
+import useLayout14Master from "../../Store/MasterStore/useLayout14Master";
 
 function LayoutTable({
   Col,
   setIsDisable,
   search,
   setTextDetail,
-  type, // mastertype (like 'im', 'um', etc.)
+  type,
   layout,
-  currentMaster,// layout string (like 'layout1', 'layout8', etc.)
+  currentMaster,
   layoutData: items = [],
 }) {
   const editInputRef = useRef(null);
@@ -33,7 +34,7 @@ function LayoutTable({
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [editedData, setEditedData] = useState({});
 
-  // ✅ All layout hooks map
+  // All layout hooks map
   const hooks = {
     layout1: useLayout1Master(),
     layout2: useLayout2Master(),
@@ -48,18 +49,17 @@ function LayoutTable({
     layout11: useLayout11Master(),
     layout12: useLayout12Master(),
     layout13: useLayout13Master(),
+    layout14: useLayout14Master(),
   };
 
   const layoutKey = layout || "layout1";
   const activeHook = hooks[layoutKey] || {};
 
-  // ✅ Safe dynamic function detection
-  const fnName = layoutKey.charAt(0).toUpperCase() + layoutKey.slice(1); // Layout1, Layout2...
+  const fnName = layoutKey.charAt(0).toUpperCase() + layoutKey.slice(1);
   const updateFn = activeHook[`update${fnName}`];
   const deleteFn = activeHook[`delete${fnName}`];
   const fetchFn = activeHook[`fetch${fnName}`];
 
-  // ✅ Extract states
   const {
     updateIsLoading,
     updateError,
@@ -72,7 +72,6 @@ function LayoutTable({
     fetchIsLoading,
   } = activeHook;
 
-  // ✅ Smart ID detector (works for any layout)
   const getIdField = (obj) => {
     if (!obj) return null;
     const key = Object.keys(obj).find(
@@ -81,16 +80,33 @@ function LayoutTable({
     return key ? obj[key] : null;
   };
 
-  // ✅ Normalize columns
+  // Normalize columns with foreignKey support
   const normalizedCols = Col?.map((col) => ({
     fieldname: col.name,
     label: col.label,
     width: col.width?.replace("w-[", "").replace("]", "") || "120px",
     max: col.maxLength,
-    type: "text",
+    type: col.type || "text",
+    required: col.required || false,
+    foreignKey: col.foreignKey || null,
+    foreignKeyCode: col.foreignKeyCode || null,
+    optionValueField: col.optionValueField,
+    optionLabelField: col.optionLabelField,
+    foreignOptions:
+      col.foreignKey && hooks[col.foreignKey]
+        ? hooks[col.foreignKey].data || []
+        : [],
+    render:
+      col.type === "checkbox"
+        ? (value) => (
+            <span className="text-green-600 font-bold text-center">
+              {value ? "✔️" : ""}
+            </span>
+          )
+        : undefined,
   }));
 
-  // ✏️ Edit
+  // Edit row
   const ActionFunc = (tabIndex) => {
     const selected = filteredData[tabIndex];
     if (!selected) return;
@@ -100,16 +116,17 @@ function LayoutTable({
     setTimeout(() => editInputRef.current?.focus?.(), 50);
   };
 
-  // 💾 Save
+  // Save changes
   const SaveChange = () => {
     const missingField = Col.find(
       (f) =>
-        editedData?.[f.name] === undefined ||
-        editedData?.[f.name] === null ||
-        editedData?.[f.name] === ""
+        f.required &&
+        (editedData?.[f.name] === undefined ||
+          editedData?.[f.name] === null ||
+          editedData?.[f.name] === "")
     );
     if (missingField) {
-      toast.error(`${missingField.label} is required`);
+      toast.error(`${missingField.label} cannot be empty`);
       return;
     }
 
@@ -126,8 +143,13 @@ function LayoutTable({
     }
   };
 
-  // 🗑️ Delete
+  // Delete row
   const handleDelete = (tabIndex) => {
+    if (params.IsAction && params.ActionID === tabIndex) {
+      toast.warn("Please save the changes before deleting this row");
+      return;
+    }
+
     const obj = filteredData[tabIndex];
     const idField = getIdField(obj);
     if (!idField) {
@@ -144,26 +166,29 @@ function LayoutTable({
     }
   };
 
-  // 🔍 Search
+  // Filter by search
   useEffect(() => {
     const val = (search || "").toLowerCase();
-    const filtered = (items || []).filter(
-      (item) =>
-        (item.Code || "").toString().toLowerCase().includes(val) ||
-        (item.Description || "").toString().toLowerCase().includes(val)
+    const filtered = (items || []).filter((item) =>
+      Object.values(item).some(
+        (v) =>
+          v !== null &&
+          v !== undefined &&
+          v.toString().toLowerCase().includes(val)
+      )
     );
     setFilteredData(filtered);
   }, [search, items]);
 
-  // ✅ Update success
+  // Update success effect
   useEffect(() => {
     if (updateIsSuccess) {
-      toast.success(`${currentMaster.name} updated successfully`);
+      toast.success(`${currentMaster?.name} updated successfully`);
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({});
       setIsDisable(false);
       clearUpdateState && clearUpdateState();
-      fetchFn && fetchFn(type); // refresh
+      fetchFn && fetchFn(type);
     }
     if (updateError) {
       toast.error(updateError);
@@ -171,15 +196,15 @@ function LayoutTable({
     }
   }, [updateIsSuccess, updateError]);
 
-  // ✅ Delete success
+  // Delete success effect
   useEffect(() => {
     if (deleteIsSuccess) {
-      toast.success(`${currentMaster.name} deleted successfully`);
+      toast.success(`${currentMaster?.name} deleted successfully`);
       setParams({ IsAction: false, ActionID: -1 });
       setEditedData({});
       setIsDisable(false);
       clearDeleteState && clearDeleteState();
-      fetchFn && fetchFn(type); // refresh after delete
+      fetchFn && fetchFn(type);
     }
     if (deleteError) {
       toast.error(deleteError);
@@ -197,12 +222,18 @@ function LayoutTable({
         ActionFunc={ActionFunc}
         OnSaveHandler={SaveChange}
         handleDelete={handleDelete}
-        OnChangeHandler={(i, e) =>
+        OnChangeHandler={(i, e) => {
+          const { name, value, type, checked } = e.target;
+          const colDef = Col.find((c) => c.name === name);
+          if (colDef?.required && type !== "checkbox" && value === "") {
+            toast.warn(`${colDef.label} cannot be empty`);
+            return;
+          }
           setEditedData((prev) => ({
             ...prev,
-            [e.target.name]: e.target.value,
-          }))
-        }
+            [name]: type === "checkbox" ? checked : value,
+          }));
+        }}
         getFocusText={(val) => setTextDetail(val)}
         isEdit={true}
         isDelete={true}

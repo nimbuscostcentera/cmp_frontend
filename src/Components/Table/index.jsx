@@ -1,12 +1,9 @@
-// Components/Table.jsx
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef } from "react";
 import defaultimage from "../../Asset/default.png";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import SearchableDropDown from "../SearchableDropDown";
-import MultipleSelection from "../MultipleSelection";
 
-// Action button component
+// Action button
 const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   <button
     className="p-0 m-0 flex items-center justify-center h-7 w-7 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -20,7 +17,7 @@ const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   </button>
 );
 
-// Cell content renderer
+// ✅ Cell renderer with foreign key label support
 const RenderCellContent = ({
   item,
   field,
@@ -30,13 +27,28 @@ const RenderCellContent = ({
   OnChangeHandler,
   useInputRef,
 }) => {
-  if (ActionId === index && !field?.isNotEditable) {
+  const isEditing = ActionId === index && !field?.isNotEditable;
+
+  if (isEditing && field.type === "checkbox") {
+    return (
+      <input
+        type="checkbox"
+        name={field.fieldname}
+        checked={!!EditedData[field.fieldname]}
+        ref={field?.isUseInputRef ? useInputRef : null}
+        onChange={(e) => OnChangeHandler(index, e)}
+        className="cursor-pointer"
+      />
+    );
+  }
+
+  if (isEditing) {
     return (
       <input
         name={field.fieldname}
         maxLength={field.max}
         placeholder={field.label}
-        value={EditedData[field.fieldname] || item[field.fieldname]}
+        value={EditedData[field.fieldname] || ""}
         ref={field?.isUseInputRef ? useInputRef : null}
         type={field.type || "text"}
         onChange={(e) => OnChangeHandler(index, e)}
@@ -46,7 +58,7 @@ const RenderCellContent = ({
     );
   }
 
-  if (field.type === "Img" && ActionId !== index) {
+  if (field.type === "Img") {
     const imageUrl = item[field.fieldname] || defaultimage;
     return (
       <img
@@ -61,10 +73,30 @@ const RenderCellContent = ({
     );
   }
 
+  if (field.type === "checkbox") {
+    return (
+      <span className="text-green-600 font-bold text-center">
+        {item[field.fieldname] ? "✅" : "❌"}
+      </span>
+    );
+  }
+
+  // 🔹 Foreign key display
+  if (field.foreignKey) {
+    const label =
+      item[field.foreignKeyCode] ||
+      item[`${field.fieldname}_Code`] ||
+      item[`${field.fieldname}Code`] ||
+      item[`${field.fieldname}_Label`] ||
+      item[field.optionLabelField] ||
+      item[field.fieldname];
+    return label || "-";
+  }
+
   return item[field.fieldname] || "-";
 };
 
-// Main Table component
+// ✅ Main Table component
 const Table = ({
   tab = [],
   Col = [],
@@ -116,7 +148,10 @@ const Table = ({
     return (
       <tr>
         <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10" />
-        <td colSpan={colspan} className="text-center text-gray-500 py-3 text-xs bg-gray-100">
+        <td
+          colSpan={colspan}
+          className="text-center text-gray-500 py-3 text-xs bg-gray-100"
+        >
           <i className="bi bi-exclamation-circle mr-1" />
           No Data Found
         </td>
@@ -126,7 +161,10 @@ const Table = ({
 
   const renderDataRows = () =>
     tab.map((item, index) => (
-      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50 text-sm">
+      <tr
+        key={index}
+        className="border-b border-gray-200 hover:bg-gray-50 text-sm"
+      >
         <td className="sticky left-0 bg-indigo-900 text-white px-1 py-1 text-center z-10">
           {renderRowNumber(index)}
         </td>
@@ -152,7 +190,11 @@ const Table = ({
         {isEdit && (
           <>
             <td className="px-1 py-1 text-center w-12">
-              <ActionButton icon="pencil-square" onClick={() => ActionFunc(index)} title="Edit" />
+              <ActionButton
+                icon="pencil-square"
+                onClick={() => ActionFunc(index)}
+                title="Edit"
+              />
             </td>
             <td className="px-1 py-1 text-center w-12">
               <ActionButton
@@ -168,7 +210,12 @@ const Table = ({
 
         {isDelete && (
           <td className="px-1 py-1 text-center w-12">
-            <ActionButton icon="trash" color="#ff0000" onClick={() => handleDelete(index)} title="Delete" />
+            <ActionButton
+              icon="trash"
+              color="#ff0000"
+              onClick={() => handleDelete(index)}
+              title="Delete"
+            />
           </td>
         )}
       </tr>
@@ -184,9 +231,15 @@ const Table = ({
         <table className="w-full border-collapse text-sm">
           <thead className="bg-indigo-900 text-white sticky top-0 z-20">
             <tr>
-              <th className="sticky left-0 px-1 py-1 text-center z-30 w-8 font-normal">Row</th>
+              <th className="sticky left-0 px-1 py-1 text-center z-30 w-8 font-normal">
+                Row
+              </th>
               {Col.map((col, idx) => (
-                <th key={idx} className="px-1 py-1 text-center font-normal">
+                <th
+                  key={idx}
+                  className="px-1 py-1 text-center font-normal"
+                  style={{ minWidth: col.width || "120px" }}
+                >
                   {col.label}
                 </th>
               ))}
@@ -196,11 +249,17 @@ const Table = ({
                   <th className="px-1 py-1 text-center w-12 font-normal">Save</th>
                 </>
               )}
-              {isDelete && <th className="px-1 py-1 text-center w-12 font-normal">Delete</th>}
+              {isDelete && (
+                <th className="px-1 py-1 text-center w-12 font-normal">Delete</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white">
-            {isLoading ? renderLoadingSkeleton() : tab.length === 0 ? renderNoDataRow() : renderDataRows()}
+            {isLoading
+              ? renderLoadingSkeleton()
+              : tab.length === 0
+              ? renderNoDataRow()
+              : renderDataRows()}
           </tbody>
         </table>
       </div>
