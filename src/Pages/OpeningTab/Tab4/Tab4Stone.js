@@ -8,7 +8,6 @@ function Tab4Stone({
   handleClose,
   rows,
   setRows,
-  sizeOptions,
   stoneMainOptions,
   stoneSubOptions,
   colorOptions,
@@ -26,10 +25,9 @@ function Tab4Stone({
           {
             rowid: 1,
             Srl: 1,
-            Size: null,
-            StoneMain: null,
-            StoneSub: null,
-            Color: null,
+            ID_StoneM: null,
+            ID_StoneS: null,
+            ID_Color: null,
             Pcs: "",
             Weight: "",
             PhysicalPcs: "",
@@ -47,10 +45,9 @@ function Tab4Stone({
       {
         rowid: newRowId,
         Srl: newRowId,
-        Size: null,
-        StoneMain: null,
-        StoneSub: null,
-        Color: null,
+        ID_StoneM: null,
+        ID_StoneS: null,
+        ID_Color: null,
         Pcs: "",
         Weight: "",
         PhysicalPcs: "",
@@ -69,10 +66,10 @@ function Tab4Stone({
     const updatedRows = [...localRows];
     const row = { ...updatedRows[rowIndex], [key]: value };
 
-    // Get the selected StoneSub object (contains Weight)
-    const stoneSubObj = stoneSubOptions?.find((s) => s.value === row.StoneSub);
+    // Get selected StoneSub object (contains Weight info)
+    const stoneSubObj = stoneSubOptions?.find((s) => s.value === row.ID_StoneS);
 
-    // Auto calculate Weight = StoneSub.Weight × Pcs
+    // Auto-calculate Weight = StoneSub.Weight × Pcs
     if (stoneSubObj && row.Pcs) {
       row.Weight = (Number(stoneSubObj.Weight) * Number(row.Pcs)).toFixed(3);
     } else {
@@ -90,9 +87,9 @@ function Tab4Stone({
       return;
     }
 
-    // Mandatory: StoneMain, StoneSub, Color, Pcs
+    // 🧾 Mandatory fields validation (StoneMain, StoneSub, Color, Pcs)
     const filteredRows = localRows.filter(
-      (r) => r.StoneMain && r.StoneSub && r.Color && r.Pcs
+      (r) => r.ID_StoneM && r.ID_StoneS && r.ID_Color && r.Pcs
     );
 
     if (filteredRows.length === 0) {
@@ -100,15 +97,13 @@ function Tab4Stone({
       return;
     }
 
-    // ❌ Prevent duplicates (Size + StoneMain + StoneSub + Color)
+    // ❌ Prevent duplicate (StoneMain + StoneSub + Color)
     const comboKeys = filteredRows.map(
-      (r) => `${r.Size || "NULL"}-${r.StoneMain}-${r.StoneSub}-${r.Color}`
+      (r) => `${r.ID_StoneM}-${r.ID_StoneS}-${r.ID_Color}`
     );
     const hasDuplicates = new Set(comboKeys).size !== comboKeys.length;
     if (hasDuplicates) {
-      toast.error(
-        "Duplicate Size + Stone Main + Stone Sub + Color not allowed"
-      );
+      toast.error("Duplicate Stone Main + Stone Sub + Color not allowed");
       return;
     }
 
@@ -121,7 +116,7 @@ function Tab4Stone({
       return;
     }
 
-    // ✅ Pass data back to parent
+    // ✅ Pass cleaned data back to parent
     setRows(filteredRows);
     handleClose();
   };
@@ -129,18 +124,8 @@ function Tab4Stone({
   // 🔹 Define table columns
   const stoneColumns = [
     {
-      label: "Size",
-      key: "Size",
-      AutoSearch: true,
-      SearchLabel: "label",
-      SearchValue: "value",
-      PlaceHolder: "Select Size",
-      data: sizeOptions || [],
-      width: "150px",
-    },
-    {
       label: "Stone Main *",
-      key: "StoneMain",
+      key: "ID_StoneM",
       AutoSearch: true,
       SearchLabel: "label",
       SearchValue: "value",
@@ -150,7 +135,7 @@ function Tab4Stone({
     },
     {
       label: "Stone Sub *",
-      key: "StoneSub",
+      key: "ID_StoneS",
       AutoSearch: true,
       SearchLabel: "label",
       SearchValue: "value",
@@ -160,7 +145,7 @@ function Tab4Stone({
     },
     {
       label: "Color *",
-      key: "Color",
+      key: "ID_Color",
       AutoSearch: true,
       SearchLabel: "label",
       SearchValue: "value",

@@ -80,10 +80,7 @@ function DesignMasterTable({
       toast.error("Design Description is required");
       return;
     }
-    if (!Gross_Weight || isNaN(Gross_Weight)) {
-      toast.error("Weight must be a valid number");
-      return;
-    }
+   
     // console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
     if (
       editedData?.Tolerance_Lower !== "" &&
@@ -243,12 +240,6 @@ function DesignMasterTable({
       max: 100,
       isShortingOff: true,
       isNotEditable: true,
-    },
-    {
-      headername: "Gross Weight",
-      fieldname: "Gross_Weight",
-      type: "number",
-      width: "120px",
     },
     {
       headername: "Tolerance Lower",

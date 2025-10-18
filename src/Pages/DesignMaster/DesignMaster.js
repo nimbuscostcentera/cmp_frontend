@@ -128,15 +128,13 @@ function DesignMaster() {
       Design_Description,
       Design_Group,
       ID_master,
-      Gross_Weight,
     } = designHeader;
 
     if (
       !Design_Code ||
       !Design_Description ||
       !Design_Group ||
-      !ID_master ||
-      !Gross_Weight
+      !ID_master 
     ) {
       toast.error("All mandatory fields must be filled");
       return;

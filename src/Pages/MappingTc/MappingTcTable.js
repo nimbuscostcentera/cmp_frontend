@@ -45,8 +45,8 @@ function MappingTcTable() {
 
       return {
         ...row,
-        data: ids, // internal numeric array
-        selectedValue: selectedOptions, // dropdown selected objects
+        data: ids,
+        selectedValue: selectedOptions,
         enumvalue: selectedOptions.map((item) => item.label).join(", ") || "",
       };
     });
@@ -142,7 +142,7 @@ function MappingTcTable() {
   const handleCancelEdit = () => {
     setIsAllEditable(false);
     setEditedRows({});
-    setFilteredData(transformData(mappingTc)); // Restore table to original
+    setFilteredData(transformData(mappingTc));
     toast.info("Edit mode cancelled.");
   };
 
@@ -164,20 +164,15 @@ function MappingTcTable() {
     if (invalidRow) {
       if (invalidRow.Prefix_Voucher?.length > invalidRow.maxlength) {
         toast.error(
-          `Row with Tc ${invalidRow.Tc} exceeds Visible length of ${invalidRow.maxlength}. ` +
-            `Current length is ${invalidRow.Prefix_Voucher.length}.`
+          `Row with Tc ${invalidRow.Tc} exceeds Visible length of ${invalidRow.maxlength}.`
         );
       } else if (!invalidRow.Max_Serial || invalidRow.Max_Serial.length < 4) {
         toast.error(
-          `Row with Tc ${invalidRow.Tc}: Serial number part must have at least 4 zeros. ` +
-            `Current serial zeros: ${invalidRow.Max_Serial?.length || 0}`
+          `Row with Tc ${invalidRow.Tc}: Serial number part must have at least 4 zeros.`
         );
       } else {
         toast.error(
-          `Row with Tc ${invalidRow.Tc}: Prefix length (${invalidRow.Prefix_Voucher.length}) is too long. ` +
-            `Must leave at least 4 characters for serial zeros. Max prefix allowed: ${
-              invalidRow.maxlength - 4
-            }`
+          `Row with Tc ${invalidRow.Tc}: Prefix too long. Leave at least 4 characters for serial zeros.`
         );
       }
       return;
@@ -201,33 +196,24 @@ function MappingTcTable() {
     {
       headername: "Trancode",
       fieldname: "Trancode",
-      type: "String",
       width: "120px",
       isReadOnly: true,
     },
     {
       headername: "Interface",
       fieldname: "Interface",
-      type: "String",
       width: "200px",
       isReadOnly: true,
     },
-    {
-      headername: "Visible L.",
-      fieldname: "maxlength",
-      type: "String",
-      width: "150px",
-    },
+    { headername: "Visible L.", fieldname: "maxlength", width: "150px" },
     {
       headername: "Prefix Voucher",
       fieldname: "Prefix_Voucher",
-      type: "String",
       width: "150px",
     },
     {
       headername: "Filled By",
       fieldname: "Max_Serial",
-      type: "String",
       width: "150px",
       isReadOnly: true,
     },
@@ -244,68 +230,72 @@ function MappingTcTable() {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 md:p-6">
       <ToastContainer />
-      <div className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-        <div>
-          <h2 className="text-xl font-bold text-gray-800">
+
+      {/* ✅ Responsive Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="text-center md:text-left">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800">
             Mapping TC Configuration
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mt-1">
             {isAllEditable
               ? "Edit mode active - modify Prefix Voucher values"
               : "View mode - click 'Edit All' to make changes"}
           </p>
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex flex-col sm:flex-row justify-center md:justify-end gap-2">
           {!isAllEditable ? (
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition duration-200"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition duration-200 w-full sm:w-auto"
               onClick={handleEnableEdit}
               disabled={fetchIsLoading}
             >
-              <i className="bi bi-pencil-square"></i> Edit All
+              <i className="bi bi-pencil-square"></i>
+              <span>Edit All</span>
             </button>
           ) : (
             <>
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2 transition duration-200"
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center gap-2 transition duration-200 w-full sm:w-auto"
                 onClick={handleCancelEdit}
               >
-                <i className="bi bi-x-circle"></i> Cancel
+                <i className="bi bi-x-circle"></i>
+                <span>Cancel</span>
               </button>
               <button
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition duration-200 disabled:opacity-50"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition duration-200 disabled:opacity-50 w-full sm:w-auto"
                 onClick={handleSaveAll}
                 disabled={
                   Object.keys(editedRows).length === 0 || fetchIsLoading
                 }
               >
-                <i className="bi bi-check-all"></i> Save All (
-                {Object.keys(editedRows).length})
+                <i className="bi bi-check-all"></i>
+                <span>Save All ({Object.keys(editedRows).length})</span>
               </button>
             </>
           )}
         </div>
       </div>
 
+      {/* ✅ Banner */}
       {isAllEditable && (
-        <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg text-yellow-700 flex justify-between items-center shadow-sm">
+        <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg text-yellow-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 shadow-sm">
           <span>
             <i className="bi bi-exclamation-triangle mr-2"></i>
-            Editing mode active - {Object.keys(editedRows).length} row(s)
+            Editing mode active — {Object.keys(editedRows).length} row(s)
             modified
           </span>
-          <span className="text-yellow-600">
+          <span className="text-sm text-yellow-600">
             Click any Prefix Voucher field to edit
           </span>
         </div>
       )}
 
-      <div
-        className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto"
-        style={{ maxHeight: "50vh" }}
-      >
+      {/* ✅ Table Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto max-h-[60vh]">
         <Table
           tab={filteredData}
           OnChangeHandler={handleInputChange}
@@ -313,7 +303,7 @@ function MappingTcTable() {
           isEdit={false}
           EditedData={editedRows}
           isLoading={fetchIsLoading}
-          height="45vh"
+          height="50vh"
           isAllEditable={isAllEditable}
           HandleMultiSelection={handleMultiSelectionChange}
         />
