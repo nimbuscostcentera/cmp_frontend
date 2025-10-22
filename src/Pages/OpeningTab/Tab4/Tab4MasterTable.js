@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Table from "../../../Components/Table";
 import ReusableModal from "../../../Components/ReusableModal";
-import Tab4Stone from "./Tab4Stone";
-import Tab4Color from "./Tab4Color";
-// ✅ Zustand store
+import Tab4StoneTable from "./Tab4StoneTable";
+import Tab4ColorTable from "./Tab4ColorTable";
 import useTab4Master from "../../../Store/OpeningStore/useTab4Master";
+import useDesignItemType from "../../../Store/MasterStore/useDesignItemType";
 
 function Tab4MasterTable({
   setIsDisable,
@@ -18,10 +18,8 @@ function Tab4MasterTable({
   departmentOptions,
   designOptions,
   itemOptions,
-  itemtypeOptions,
 }) {
   const editinputref = useRef(null);
-
   const [filteredData, setFilteredData] = useState([]);
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [showStoneModal, setShowStoneModal] = useState(false);
@@ -30,13 +28,21 @@ function Tab4MasterTable({
 
   const [editedData, setEditedData] = useState({
     ID: null,
-    Code: "",
-    Description: "",
-    Department: "",
-    Design: "",
-    Item: "",
-    ItemType: "",
-    GrossWeight: 0,
+    ID_Department: null,
+    ID_Department_Code: "",
+    ID_Design: null,
+    ID_Design_Code: "",
+    ID_ItemType: null,
+    ID_ItemType_Code: "",
+    ID_Item: null,
+    ID_Item_Code: "",
+    ID_Size: null,
+    ID_Size_Code: "",
+    Trancode: "OPE",
+    Srl: 0,
+    Pcs: 0,
+    GWeight: 0,
+    ColorS: "",
   });
 
   const {
@@ -53,7 +59,6 @@ function Tab4MasterTable({
     clearDeleteState,
   } = useTab4Master();
 
-  // ✅ Edit
   const ActionFunc = (tabIndex) => {
     setParams({ IsAction: true, ActionID: tabIndex });
     setIsDisable(true);
@@ -61,29 +66,71 @@ function Tab4MasterTable({
     if (selected) setEditedData({ ...selected });
   };
 
-  // ✅ Save Change
-  const SaveChange = () => {
-    const { Code, Description, GrossWeight } = editedData;
 
-    if (!Code) return toast.error("Code is required");
-    if (!Description) return toast.error("Description is required");
-    if (isNaN(GrossWeight)) return toast.error("Weight must be a number");
+    const { DesignItemType, fetchDesignItemType } = useDesignItemType();
 
-    const formData = new FormData();
-    Object.keys(editedData).forEach((key) =>
-      formData.append(key, editedData[key])
+  // Fetch item types whenever design changes
+  useEffect(() => {
+    if (editedData.ID_Design) {
+      fetchDesignItemType("itemtype", editedData.ID_Design);
+    }
+  }, [editedData.ID_Design]);
+
+  const itemtypeOptions = DesignItemType.map((i) => ({
+    label: `${i.ItemType_Name}:${i.Approx_Gross_Weight}`,
+    value: i.ID,
+    Approx_Gross_Weight: i.Approx_Gross_Weight,
+  }));
+
+
+  // Auto-calculate GWeight when ItemType or Pcs changes
+  useEffect(() => {
+    const selectedItemType = itemtypeOptions.find(
+      (item) => item.value === editedData.ID_ItemType
     );
 
-    updateTab4(editedData.ID, formData);
+    const weightPerPiece =
+      parseFloat(selectedItemType?.Approx_Gross_Weight) || 0;
+    const pcs = parseFloat(editedData.Pcs) || 0;
+
+    const gWeight = weightPerPiece * pcs;
+
+    setEditedData((prev) => ({
+      ...prev,
+      GWeight: gWeight > 0 ? gWeight.toFixed(3).toString() : "",
+    }));
+  }, [editedData.ID_ItemType, editedData.Pcs, itemtypeOptions]);
+
+
+  const SaveChange = () => {
+    const {
+      ID_Department,
+      ID_Design,
+      ID_ItemType,
+      ID_Item,
+      ID_Size,
+      Pcs,
+      GWeight,
+      ColorS,
+    } = editedData;
+
+    if (!ID_Department) return toast.error("Department is required");
+    if (!ID_Design) return toast.error("Design is required");
+    if (!ID_ItemType) return toast.error("Item Type is required");
+    if (!ID_Item) return toast.error("Item is required");
+    if (!ID_Size) return toast.error("Size is required");
+    if (isNaN(GWeight)) return toast.error("Gross Weight must be a number");
+
+  
+
+    updateTab4("design_header", editedData.ID, editedData);
   };
 
-  // ✅ Delete
   const handleDelete = (index) => {
     const row = filteredData[index];
     if (row) deleteTab4(row.ID);
   };
 
-  // ✅ Open modals
   const handleStoneClick = (index) => {
     const row = filteredData[index];
     if (row) {
@@ -91,6 +138,7 @@ function Tab4MasterTable({
       setShowStoneModal(true);
     }
   };
+
   const handleColorClick = (index) => {
     const row = filteredData[index];
     if (row) {
@@ -109,83 +157,131 @@ function Tab4MasterTable({
     setSelectedTab4Id(null);
   };
 
-  // ✅ Search filter
   useEffect(() => {
     const val = search?.toLowerCase();
     const filtered = tab4Data.filter(
       (r) =>
-        r.Code?.toLowerCase().includes(val) ||
-        r.Description?.toLowerCase().includes(val) ||
-        r.Department?.toLowerCase().includes(val)
+        r.ID_Department_Code?.toLowerCase().includes(val) ||
+        r.ID_Design_Code?.toLowerCase().includes(val) ||
+        r.ID_Item_Code?.toLowerCase().includes(val) ||
+        r.ID_ItemType_Code?.toLowerCase().includes(val) ||
+        r.ID_Size_Code?.toLowerCase().includes(val)
     );
     setFilteredData(filtered);
   }, [search, tab4Data]);
 
-  // ✅ Fetch data
   useEffect(() => {
-    fetchTab4();
+    fetchTab4("design_header");
   }, [addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
-  // ✅ Handle update success/error
-  useEffect(() => {
-    if (updateIsSuccess) toast.success("Updated successfully");
-    if (updateError) toast.error(updateError);
-    clearUpdateState();
-  }, [updateIsSuccess, updateError]);
+useEffect(() => {
+  if (updateIsSuccess) {
+    toast.success("Updated successfully");
 
-  // ✅ Handle delete success/error
+    // ✅ Reset edited data after successful update
+    setEditedData({
+      ID: null,
+      ID_Department: null,
+      ID_Department_Code: "",
+      ID_Design: null,
+      ID_Design_Code: "",
+      ID_ItemType: null,
+      ID_ItemType_Code: "",
+      ID_Item: null,
+      ID_Item_Code: "",
+      ID_Size: null,
+      ID_Size_Code: "",
+      Trancode: "OPE",
+      Srl: 0,
+      Pcs: 0,
+      GWeight: 0,
+      ColorS: "",
+    });
+
+    // ✅ Reset action params and disable edit mode
+    setParams({ IsAction: false, ActionID: -1 });
+    setIsDisable(false);
+  }
+
+  if (updateError) toast.error(updateError);
+
+  // ✅ Always clear state in the end
+  clearUpdateState();
+}, [updateIsSuccess, updateError]);
+
+
   useEffect(() => {
     if (deleteIsSuccess) toast.success("Deleted successfully");
     if (deleteError) toast.error(deleteError);
     clearDeleteState();
   }, [deleteIsSuccess, deleteError]);
 
-  // ✅ Table Columns
   const Col = [
-    { headername: "Code", fieldname: "Code", type: "text", width: "150px" },
-    {
-      headername: "Description",
-      fieldname: "Description",
-      type: "text",
-      width: "150px",
-    },
     {
       headername: "Department",
-      fieldname: "department_name",
-      selectionname: "Department",
+      fieldname: "ID_Department_Code",
+      selectionname: "ID_Department",
+      type: "String",
       isSelection: true,
       options: departmentOptions,
-      width: "150px",
+      width: "200px",
     },
     {
       headername: "Design",
-      fieldname: "design_name",
-      selectionname: "Design",
+      fieldname: "ID_Design_Code",
+      selectionname: "ID_Design",
+      type: "String",
       isSelection: true,
       options: designOptions,
-      width: "150px",
-    },
-    {
-      headername: "Item",
-      fieldname: "item_name",
-      selectionname: "Item",
-      isSelection: true,
-      options: itemOptions,
-      width: "150px",
+      width: "200px",
     },
     {
       headername: "Item Type",
-      fieldname: "itemtype_name",
-      selectionname: "ItemType",
+      fieldname: "ID_ItemType_Code",
+      selectionname: "ID_ItemType",
+      type: "String",
       isSelection: true,
       options: itemtypeOptions,
-      width: "150px",
+      width: "200px",
+    },
+    {
+      headername: "Item",
+      fieldname: "ID_Item_Code",
+      selectionname: "ID_Item",
+      type: "String",
+      isSelection: true,
+      options: itemOptions,
+      width: "200px",
+    },
+    {
+      headername: "Size",
+      fieldname: "ID_Size_Code",
+      selectionname: "ID_Size",
+      type: "String",
+      isSelection: true,
+      options: sizeOptions,
+      width: "200px",
+    },
+    {
+      headername: "Pcs",
+      fieldname: "Pcs",
+      type: "number",
+      width: "120px",
     },
     {
       headername: "Gross Weight",
-      fieldname: "GrossWeight",
+      fieldname: "GWeight",
       type: "number",
       width: "120px",
+      isReadOnly: true,
+    },
+
+    {
+      headername: "ColorS",
+      fieldname: "ColorS",
+      type: "text",
+      width: "100px",
+      isReadOnly: true,
     },
   ];
 
@@ -199,11 +295,11 @@ function Tab4MasterTable({
         OnChangeHandler={(i, e) => {
           const name = e.target.name;
           let val = e.target.value;
-          if (name === "GrossWeight") val = parseFloat(val) || 0;
+          if (name === "GWeight") val = parseFloat(val) || 0;
           setEditedData((prev) => ({ ...prev, [name]: val }));
         }}
         OnSaveHandler={SaveChange}
-        getFocusText={(val) => setTextDetail(val)}
+        // getFocusText={(val) => setTextDetail(val)}
         Col={Col}
         isEdit={true}
         EditedData={editedData}
@@ -218,21 +314,19 @@ function Tab4MasterTable({
         viewPref1={"Col."}
       />
 
-      {/* Stone Modal */}
       <ReusableModal
         show={showStoneModal}
         handleClose={handleCloseStone}
         Title={`Stones for ID #${selectedTab4Id || ""}`}
         body={
-          <Tab4Stone
+          <Tab4StoneTable
             show={showStoneModal}
             handleClose={handleCloseStone}
-            rows={[]}
-            setRows={() => {}}
             sizeOptions={sizeOptions}
             stoneMainOptions={stoneMainOptions}
             stoneSubOptions={stoneSubOptions}
             colorOptions={colorOptions}
+            selectedDesignId={selectedTab4Id}
           />
         }
         PrimaryButtonName="Close"
@@ -240,19 +334,16 @@ function Tab4MasterTable({
         handlePrimary={handleCloseStone}
       />
 
-      {/* Color Modal */}
       <ReusableModal
         show={showColorModal}
         handleClose={handleCloseColor}
         Title={`Colors for ID #${selectedTab4Id || ""}`}
         body={
-          <Tab4Color
+          <Tab4ColorTable
             show={showColorModal}
             handleClose={handleCloseColor}
-            rows={[]}
-            setRows={() => {}}
             colorOptions={colorOptions}
-            Color_Display={true}
+            selectedDesignId={selectedTab4Id}
           />
         }
         PrimaryButtonName="Close"
@@ -264,4 +355,3 @@ function Tab4MasterTable({
 }
 
 export default Tab4MasterTable;
- 
