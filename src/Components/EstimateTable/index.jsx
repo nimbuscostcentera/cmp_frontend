@@ -232,23 +232,35 @@ function EstimateTable({
 
   return (
     <div
-      style={{ overflow: "auto", width: "auto" }}
-      className="table-responsive slider border m-0"
+      className="table-container"
+      style={{
+        overflowX: "auto", // ✅ horizontal scroll
+        overflowY: "hidden",
+        width: "100%",
+        maxWidth: "100%",
+      }}
     >
       <table
         className="table align-middle m-0 p-0"
-        style={{ width: tableWidth || "auto",height:"auto" }}
+        style={{
+          minWidth: "950px", // ✅ enough base width to show all fields nicely
+          width: tableWidth || "auto",
+          borderCollapse: "collapse",
+        }}
       >
         <thead className="thead-decor tab-head">
           <tr>
-            <th className="th-decor" style={{ width: "50px" }}>
+            <th className="th-decor sticky-col" style={{ width: "50px" }}>
               Row
             </th>
             {columns.map((col) => (
               <th
                 key={col.key}
                 className="th-decor"
-                style={{ width: col?.width || "auto" }}
+                style={{
+                  width: col?.width || "auto",
+                  whiteSpace: "nowrap",
+                }}
               >
                 {col.label}
               </th>
@@ -256,15 +268,23 @@ function EstimateTable({
             {isDelete && <th className="th-decor">Actions</th>}
           </tr>
         </thead>
+
         <tbody className="table-body-decor tab-body">
           {rows.map((row, indexrow) => (
             <tr key={indexrow}>
-              <td className="th-decor" style={{width:"50px"}}>{indexrow + 1}</td>
+              <td className="th-decor" style={{ width: "50px" }}>
+                {indexrow + 1}
+              </td>
+
               {columns.map((col) => (
                 <td
                   key={`${indexrow}-${col.key}`}
                   className="td-cell"
-                  style={{ width: col?.width }}
+                  style={{
+                    width: col?.width,
+                    minWidth: col?.width || "120px",
+                    whiteSpace: "nowrap",
+                  }}
                 >
                   <CellRenderer
                     col={col}
@@ -280,12 +300,13 @@ function EstimateTable({
                     bongView={bongView}
                     setBongView={setBongView}
                     CloseBongCal={toggleBongView}
-                    priorityref={priorityref} // Pass the ref to CellRenderer
+                    priorityref={priorityref}
                   />
                 </td>
               ))}
+
               {isDelete && (
-                <td className="td-cell" style={{ width: "50px" }}>
+                <td className="td-cell" style={{ width: "60px" }}>
                   <button
                     className={
                       row?.[id] == 1
@@ -306,5 +327,6 @@ function EstimateTable({
     </div>
   );
 }
+
 
 export default memo(EstimateTable);

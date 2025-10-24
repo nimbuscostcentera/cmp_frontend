@@ -76,7 +76,7 @@ function Tab4Master() {
     () =>
       DesignItemType.map((i) => ({
         label: `${i.ItemType_Name}:${i.Approx_Gross_Weight}`,
-        value: i.ID,
+        value: i.ID_ItemType,
         Approx_Gross_Weight: i.Approx_Gross_Weight,
       })),
     [DesignItemType]
@@ -223,7 +223,7 @@ function Tab4Master() {
   // Success/Error feedback
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
-      toast.success("Tab4 Record Added Successfully!");
+      toast.success("Opening Design Stock Record Added Successfully!");
       setTab4Header({
         ID_Department: "",
         ID_Design: "",
@@ -435,8 +435,25 @@ function Tab4Master() {
           </div>
         </Col>
 
-        {/* Submit Button */}
-        <Col xs={12} className="d-flex justify-content-end mb-2">
+        <Col
+          xs={12}
+          className="d-flex justify-content-between align-items-center mb-2 mt-2"
+        >
+          {/* Search Field */}
+          <div className="flex-grow" style={{ maxWidth: "250px" }}>
+            <div className="d-flex align-items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm">
+              <i className="bi bi-search text-gray-400 mx-1"></i>
+              <input
+                value={searchData}
+                type="search"
+                placeholder="Search here..."
+                onChange={(e) => setSearchData(e.target.value)}
+                className="w-100 border-0 outline-none bg-transparent px-1"
+              />
+            </div>
+          </div>
+
+          {/* Save Button */}
           <Button variant="success" onClick={handleSave} size="sm">
             {addIsLoading ? "Please wait..." : "Submit"}
           </Button>

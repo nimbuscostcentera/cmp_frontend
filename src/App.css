@@ -31,3 +31,9 @@
   border: 1px solid #25a353 !important;
   outline: 3px solid #25a35367;
 }
+
+
+.bg-indigo-900 {
+  --tw-bg-opacity: 1;
+  background-color: #2f2d66 !important;
+}

@@ -139,6 +139,9 @@ function DesignMaster() {
       toast.error("All mandatory fields must be filled");
       return;
     }
+
+
+    console.log(designHeader, "designHeader");
     if (
       designHeader?.Tolerance_Lower !== "" &&
       designHeader?.Tolerance_Upper !== ""

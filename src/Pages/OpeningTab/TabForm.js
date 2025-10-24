@@ -7,7 +7,7 @@ const TabForm = () => {
     { id: "settings", label: "Tab 2", content: <SettingsForm /> },
     { id: "security", label: "Tab 3", content: <SecurityForm /> },
     { id: "tab3a", label: "Tab 3A", content: <SecurityForm /> },
-    { id: "tab4", label: "Tab 4", content: <Tab4Master /> },
+    { id: "tab4", label: "Opening Design Stock", content: <Tab4Master /> },
   ];
 
   const [activeTab, setActiveTab] = useState(tabs[0].id);

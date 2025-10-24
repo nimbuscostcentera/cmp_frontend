@@ -54,10 +54,10 @@ const useTab4ColorTable = create((set, get) => ({
   },
 
   // ✅ Add new Tab4Color rows
-  addTab4Color: async (ID_Header, newItems) => {
+  addTab4Color: async (type, Header, newItems) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddTab4MasterAPI, { ID_Header, data: newItems });
+      await axios.post(AddTab4MasterAPI, { Header, data: newItems, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -70,12 +70,16 @@ const useTab4ColorTable = create((set, get) => ({
   // =====================================================
   // UPDATE Tab4Color row
   // =====================================================
-  updateTab4Color: async (id, payload) => {
+  updateTab4Color: async (type, id, payload) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateTab4MasterAPI}/${id}/`, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+      await axios.put(
+        `${UpdateTab4MasterAPI}/${id}/`,
+        { ...payload, type },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -88,10 +92,11 @@ const useTab4ColorTable = create((set, get) => ({
   // =====================================================
   // DELETE Tab4Color row
   // =====================================================
-  deleteTab4Color: async (id) => {
+  deleteTab4Color: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteTab4MasterAPI}/${id}/`);
+      // await axios.delete(`${DeleteTab4MasterAPI}/${id}/`);
+      await axios.delete(`${DeleteTab4MasterAPI}/${id}/?type=${type}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({

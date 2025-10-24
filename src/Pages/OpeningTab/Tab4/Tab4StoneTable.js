@@ -19,7 +19,6 @@ function Tab4StoneTable({
   const [params, setParams] = useState({ IsAction: false, ActionID: -1 });
   const [editedData, setEditedData] = useState({
     ID: null,
-    ID_Size: "",
     ID_StoneM: "",
     ID_StoneS: "",
     ID_Color: "",
@@ -32,7 +31,6 @@ function Tab4StoneTable({
   const [rows, setRows] = useState([
     {
       rowid: 1,
-      ID_Size: "",
       ID_StoneM: "",
       ID_StoneS: "",
       ID_Color: "",
@@ -72,7 +70,6 @@ function Tab4StoneTable({
     if (selected) {
       setEditedData({
         ID: selected.ID,
-        ID_Size: selected.ID_Size || "",
         ID_StoneM: selected.ID_StoneM,
         ID_StoneS: selected.ID_StoneS,
         ID_Color: selected.ID_Color,
@@ -135,7 +132,7 @@ const SaveChange = async () => {
   // 🔹 Delete record
   const handleDelete = async (index) => {
     const obj = tab4StoneData[index];
-    if (obj) await deleteTab4Stone(obj.ID);
+    if (obj) await deleteTab4Stone("design_stone", obj.ID);
   };
 
   // 🔹 Handle new rows in add form
@@ -174,7 +171,6 @@ const SaveChange = async () => {
       ...rows,
       {
         rowid: rows.length + 1,
-        ID_Size: "",
         ID_StoneM: "",
         ID_StoneS: "",
         ID_Color: "",
@@ -209,12 +205,11 @@ const SaveChange = async () => {
       ...row,
       ID_Header: selectedDesignId,
     }));
-    await addTab4Stone(payload);
+    await addTab4Stone("design_stone",selectedDesignId, payload);
     setShowAddForm(false);
     setRows([
       {
         rowid: 1,
-        ID_Size: "",
         ID_StoneM: "",
         ID_StoneS: "",
         ID_Color: "",
@@ -231,7 +226,7 @@ const SaveChange = async () => {
     if (addIsSuccess) {
       toast.success("Record added successfully");
       clearAddState();
-      fetchTab4Stone(selectedDesignId);
+      fetchTab4Stone("design_stone", selectedDesignId);
     } else if (addError) {
       toast.error(addError);
       clearAddState();
@@ -240,7 +235,7 @@ const SaveChange = async () => {
     if (updateIsSuccess) {
       toast.success("Record updated successfully");
       clearUpdateState();
-      fetchTab4Stone(selectedDesignId);
+       fetchTab4Stone("design_stone", selectedDesignId);
       setParams({ IsAction: false, ActionID: -1 });
     } else if (updateError) {
       toast.error(updateError);
@@ -250,7 +245,7 @@ const SaveChange = async () => {
     if (deleteIsSuccess) {
       toast.success("Record deleted successfully");
       clearDeleteState();
-      fetchTab4Stone(selectedDesignId);
+        fetchTab4Stone("design_stone", selectedDesignId);
     } else if (deleteError) {
       toast.error(deleteError);
       clearDeleteState();
@@ -307,14 +302,6 @@ const SaveChange = async () => {
 
   const detailColumns = [
     {
-      label: "Size",
-      key: "ID_Size",
-      AutoSearch: true,
-      data: sizeOptions,
-      width: "150px",
-      PlaceHolder: "Select Size",
-    },
-    {
       label: "Stone M",
       key: "ID_StoneM",
       AutoSearch: true,
@@ -342,7 +329,7 @@ const SaveChange = async () => {
       label: "Pcs",
       key: "Pcs",
       type: "number",
-      width: "80px",
+      width: "100px",
       PlaceHolder: "Enter Pcs",
     },
     {
@@ -382,7 +369,7 @@ const SaveChange = async () => {
       />
 
       {/* Add new rows section */}
-      <div className="d-flex justify-content-end mb-3">
+      <div className="d-flex justify-content-end mb-3 mt-2">
         <button
           className="btn btn-primary"
           onClick={() => setShowAddForm(!showAddForm)}
@@ -405,15 +392,18 @@ const SaveChange = async () => {
             </div>
           </div>
 
-          <EstimateTable
-            columns={detailColumns}
-            rows={rows}
-            handleChange={handleDetailChange}
-            deleteRow={deleteRow}
-            isDelete={true}
-            id="rowid"
-            priorityref={srlPrnInputRef}
-          />
+          {/* ✅ Make table horizontally scrollable */}
+          <div style={{ overflowX: "auto", whiteSpace: "nowrap" }}>
+            <EstimateTable
+              columns={detailColumns}
+              rows={rows}
+              handleChange={handleDetailChange}
+              deleteRow={deleteRow}
+              isDelete={true}
+              id="rowid"
+              priorityref={srlPrnInputRef}
+            />
+          </div>
         </div>
       )}
     </div>

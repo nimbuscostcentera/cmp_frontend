@@ -13,6 +13,7 @@ function Setup() {
     NegativeStoneStock: true,
     NegativeRawMaterial: true,
     OrderStoneValid: true,
+    AutoVoucher: false, // ✅ new field
   });
 
   const {
@@ -42,6 +43,7 @@ function Setup() {
         NegativeStoneStock: !!setupData.NegativeStoneStock,
         NegativeRawMaterial: !!setupData.NegativeRawMaterial,
         OrderStoneValid: !!setupData.OrderStoneValid,
+        AutoVoucher: !!setupData.AutoVoucher, // ✅ new field
       });
     }
   }, [setupData]);
@@ -61,7 +63,6 @@ function Setup() {
         toast.success("Setup updated successfully!");
       } else {
         await addSetup(formData);
-        toast.success("Setup added successfully!");
       }
     } catch {
       toast.error("Failed to save setup!");
@@ -128,15 +129,21 @@ function Setup() {
       icon: "bi-shield-check",
       color: "#6f42c1",
     },
+    {
+      name: "AutoVoucher",
+      label: "Auto + Manual Voucher",
+      description:
+        "If OFF → Auto mode only; If ON → user can override voucher number",
+      icon: "bi-receipt",
+      color: "#198754",
+    },
   ];
 
   return (
-    <Container fluid className="p-4  min-vh-100">
+    <Container fluid className="p-4 min-vh-100">
       <ToastContainer position="top-right" autoClose={2000} />
-
       <Row className="justify-content-center">
         <Col xl={10} lg={12}>
-          {/* Header Section */}
           <div className="text-center mb-5">
             <div className="mb-3">
               <i
@@ -150,7 +157,6 @@ function Setup() {
             </p>
           </div>
 
-          {/* Configuration Cards */}
           <Row className="g-4 mb-5">
             {setupOptions.map((option) => (
               <Col key={option.name} md={6} lg={4}>
@@ -190,8 +196,6 @@ function Setup() {
                       >
                         {formData[option.name] ? "Enabled" : "Disabled"}
                       </span>
-
-                      {/* Toggle Switch */}
                       <label className="switch m-0">
                         <input
                           type="checkbox"
@@ -208,7 +212,6 @@ function Setup() {
             ))}
           </Row>
 
-          {/* Action Buttons */}
           <Card className="shadow-sm border-0 rounded-3">
             <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
               <div>
@@ -257,33 +260,28 @@ function Setup() {
         </Col>
       </Row>
 
-      {/* Custom Switch + Card Styles */}
       <style jsx>{`
         .beautiful-card {
           background: linear-gradient(135deg, #ffffff, #f9fafc);
           transition: all 0.3s ease;
           border: 1px solid rgba(0, 0, 0, 0.05);
         }
-
         .beautiful-card:hover {
           transform: translateY(-3px);
           box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
           background: linear-gradient(135deg, #fefefe, #f3f6fa);
         }
-
         .switch {
           position: relative;
           display: inline-block;
           width: 46px;
           height: 24px;
         }
-
         .switch input {
           opacity: 0;
           width: 0;
           height: 0;
         }
-
         .slider {
           position: absolute;
           cursor: pointer;
@@ -295,7 +293,6 @@ function Setup() {
           transition: 0.4s;
           border-radius: 24px;
         }
-
         .slider:before {
           position: absolute;
           content: "";
@@ -307,11 +304,9 @@ function Setup() {
           transition: 0.4s;
           border-radius: 50%;
         }
-
         input:checked + .slider {
           background-color: #007bff;
         }
-
         input:checked + .slider:before {
           transform: translateX(22px);
         }

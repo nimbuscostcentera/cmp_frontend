@@ -51,7 +51,7 @@ function Tab4MasterTable({
     updateTab4,
     deleteTab4,
     addIsSuccess,
-    updateIsSuccess,
+    updateIsSuccess, 
     deleteIsSuccess,
     updateError,
     deleteError,
@@ -78,7 +78,7 @@ function Tab4MasterTable({
 
   const itemtypeOptions = DesignItemType.map((i) => ({
     label: `${i.ItemType_Name}:${i.Approx_Gross_Weight}`,
-    value: i.ID,
+    value: i.ID_ItemType,
     Approx_Gross_Weight: i.Approx_Gross_Weight,
   }));
 
@@ -99,7 +99,7 @@ function Tab4MasterTable({
       ...prev,
       GWeight: gWeight > 0 ? gWeight.toFixed(3).toString() : "",
     }));
-  }, [editedData.ID_ItemType, editedData.Pcs, itemtypeOptions]);
+  }, [editedData.ID_ItemType, editedData.Pcs]);
 
 
   const SaveChange = () => {
@@ -128,7 +128,7 @@ function Tab4MasterTable({
 
   const handleDelete = (index) => {
     const row = filteredData[index];
-    if (row) deleteTab4(row.ID);
+    if (row) deleteTab4("design_header",row.ID);
   };
 
   const handleStoneClick = (index) => {
@@ -157,18 +157,44 @@ function Tab4MasterTable({
     setSelectedTab4Id(null);
   };
 
-  useEffect(() => {
-    const val = search?.toLowerCase();
-    const filtered = tab4Data.filter(
-      (r) =>
-        r.ID_Department_Code?.toLowerCase().includes(val) ||
-        r.ID_Design_Code?.toLowerCase().includes(val) ||
-        r.ID_Item_Code?.toLowerCase().includes(val) ||
-        r.ID_ItemType_Code?.toLowerCase().includes(val) ||
-        r.ID_Size_Code?.toLowerCase().includes(val)
-    );
-    setFilteredData(filtered);
-  }, [search, tab4Data]);
+useEffect(() => {
+  const val = search?.toLowerCase();
+
+  // Step 1: Filter as before
+  const filtered = tab4Data.filter(
+    (r) =>
+      r.ID_Department_Code?.toLowerCase().includes(val) ||
+      r.ID_Design_Code?.toLowerCase().includes(val) ||
+      r.ID_Item_Code?.toLowerCase().includes(val) ||
+      r.ID_ItemType_Code?.toLowerCase().includes(val) ||
+      r.ID_Size_Code?.toLowerCase().includes(val)
+  );
+
+  // Step 2: Create a display label for ColorS
+  const updatedFiltered = filtered.map((row) => {
+    let colorLabel = "";
+
+    if (row.ColorS) {
+      const colorIds = row.ColorS.split(",").map((id) => id.trim());
+      const colorLabels = colorIds
+        .map((id) => {
+          const match = colorOptions.find(
+            (c) => String(c.value) === String(id)
+          );
+          return match ? match.label : id;
+        })
+        .join(", ");
+      colorLabel = colorLabels;
+    }
+
+    // Add a new field only for display
+    return { ...row, ColorS_Label: colorLabel };
+  });
+
+  setFilteredData(updatedFiltered);
+}, [search, tab4Data, colorOptions]);
+
+
 
   useEffect(() => {
     fetchTab4("design_header");
@@ -275,12 +301,11 @@ useEffect(() => {
       width: "120px",
       isReadOnly: true,
     },
-
     {
       headername: "ColorS",
-      fieldname: "ColorS",
+      fieldname: "ColorS_Label", // 👈 shows the label version
       type: "text",
-      width: "100px",
+      width: "150px",
       isReadOnly: true,
     },
   ];

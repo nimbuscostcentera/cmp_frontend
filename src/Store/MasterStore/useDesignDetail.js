@@ -93,7 +93,7 @@ const useDesignDetail = create((set, get) => ({
   // =====================================================
   // DELETE DesignDetail
   // =====================================================
-  deleteDesignDetail: async (type = "prm", id) => {
+  deleteDesignDetail: async (type , id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
       await axios.delete(`${DeleteDesignMasterAPI}/${id}/?type=${type}`);

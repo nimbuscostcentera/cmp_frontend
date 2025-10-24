@@ -138,7 +138,7 @@ const RenderCellContent = ({
           name={field.fieldname}
           maxLength={field.max}
           placeholder={field.headername}
-          value={EditedData[field.fieldname] ||  ""}
+          value={EditedData[field.fieldname] || item[field.fieldname]}
           ref={field?.isUseInputRef ? useInputRef : null}
           type={field.type || "text"}
           onChange={(e) => OnChangeHandler(index, e)}

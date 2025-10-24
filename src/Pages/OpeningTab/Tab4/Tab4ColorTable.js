@@ -3,6 +3,7 @@ import Table from "../../../Components/Table";
 import EstimateTable from "../../../Components/EstimateTable";
 import { toast } from "react-toastify";
 import useTab4ColorTable from "../../../Store/OpeningStore/useTab4ColorTable";
+import useTab4Master from "../../../Store/OpeningStore/useTab4Master";
 
 function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
   const editInputRef = useRef(null);
@@ -11,12 +12,14 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
   const [params, setParams] = useState({ IsAction: false, ActionID: -1 });
   const [editedData, setEditedData] = useState({
     ID: null,
-    ID_Color: "",
+    Color: "",
   });
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [rows, setRows] = useState([{ rowid: 1, ID_Color: "" }]);
-
+  const [rows, setRows] = useState([{ rowid: 1, Color: "" }]);
+  const {
+    fetchTab4,
+  } = useTab4Master();
   const {
     tab4ColorData,
     fetchTab4Color,
@@ -47,7 +50,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
     if (selected) {
       setEditedData({
         ID: selected.ID,
-        ID_Color: selected.ID_Color,
+        Color: selected.Color,
       });
     }
   };
@@ -59,22 +62,56 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
   };
 
   // Save edited record
-  const SaveChange = async () => {
-    if (!editedData.ID_Color) {
-      toast.error("Color is required");
-      return;
-    }
-    try {
-      await updateTab4Color(editedData.ID, editedData);
-    } catch {
-      toast.error("Failed to update");
-    }
-  };
+  // Save edited record
+const SaveChange = async () => {
+  if (!editedData.Color) {
+    toast.error("Color is required");
+    return;
+  }
+
+  try {
+    // 1️⃣ Get all current colors from tab4ColorData
+    const allColors = tab4ColorData.map((row) => ({ ...row }));
+
+    // 2️⃣ Replace the color of the edited row
+    const updatedColors = allColors.map(
+      (row) =>
+        row.ID === editedData.ID
+          ? { ...row, Color: editedData.Color } // updated row
+          : row // keep not edited rows as-is
+    );
+
+    // 3️⃣ Generate ColorS string from all updated Color values
+    const colorString = updatedColors
+      .map((row) => row.Color) // just the values
+      .filter(Boolean) // remove empty/nulls
+      .join(","); // combine into comma-separated string
+
+    // 4️⃣ Add ColorS to payload
+    const payload = {
+      ...editedData,
+      ColorS: colorString,
+    };
+
+    console.log(payload, "payload"); // for debugging
+
+
+
+    // 5️⃣ Call update API
+    await updateTab4Color("design_color", editedData.ID, payload);
+
+    // toast.success("Color updated successfully with ColorS synced!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update color");
+  }
+};
+
 
   // Delete record
   const handleDelete = async (index) => {
     const obj = tab4ColorData[index];
-    if (obj) await deleteTab4Color(obj.ID);
+    if (obj) await deleteTab4Color("design_color",obj.ID);
   };
 
   // Handle new rows in add form
@@ -87,7 +124,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
   };
 
   const addRow = () => {
-    setRows([...rows, { rowid: rows.length + 1, ID_Color: "" }]);
+    setRows([...rows, { rowid: rows.length + 1, Color: "" }]);
   };
 
   const deleteRow = (rowid) => {
@@ -98,7 +135,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
 
   const isFormValid = () => {
     for (const row of rows) {
-      if (!row.ID_Color) {
+      if (!row.Color) {
         toast.error("Color is required in all rows.");
         return false;
       }
@@ -108,10 +145,10 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
 
   const saveNewRows = async () => {
     if (!isFormValid()) return;
-    await addTab4Color(selectedDesignId, rows);
+    await addTab4Color("design_color",selectedDesignId, rows);
     setShowAddForm(false);
-    setRows([{ rowid: 1, ID_Color: "" }]);
-    fetchTab4Color("color", selectedDesignId);
+    setRows([{ rowid: 1, Color: "" }]); 
+    fetchTab4Color("design_color", selectedDesignId);
   };
 
   // Toast notifications
@@ -119,7 +156,8 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
     if (addIsSuccess) {
       toast.success("Record added successfully");
       clearAddState();
-      fetchTab4Color("color", selectedDesignId);
+      fetchTab4Color("design_color", selectedDesignId);
+       fetchTab4("design_header");
     } else if (addError) {
       toast.error(addError);
       clearAddState();
@@ -128,7 +166,8 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
     if (updateIsSuccess) {
       toast.success("Record updated successfully");
       clearUpdateState();
-      fetchTab4Color("color", selectedDesignId);
+      fetchTab4Color("design_color", selectedDesignId);
+       fetchTab4("design_header");
       setParams({ IsAction: false, ActionID: -1 });
     } else if (updateError) {
       toast.error(updateError);
@@ -138,7 +177,8 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
     if (deleteIsSuccess) {
       toast.success("Record deleted successfully");
       clearDeleteState();
-      fetchTab4Color("color", selectedDesignId);
+      fetchTab4Color("design_color", selectedDesignId);
+       fetchTab4("design_header");
     } else if (deleteError) {
       toast.error(deleteError);
       clearDeleteState();
@@ -156,7 +196,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
     {
       headername: "Color",
       fieldname: "Color_name",
-      selectionname: "ID_Color",
+      selectionname: "Color",
       isSelection: true,
       options: colorOptions,
       width: "150px",
@@ -166,7 +206,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
   const detailColumns = [
     {
       label: "Color",
-      key: "ID_Color",
+      key: "Color",
       AutoSearch: true,
       data: colorOptions,
       width: "150px",
@@ -194,7 +234,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
       />
 
       {/* Add new rows section */}
-      <div className="d-flex justify-content-end mb-3">
+      <div className="d-flex justify-content-end mb-3 mt-2">
         <button
           className="btn btn-primary"
           onClick={() => setShowAddForm(!showAddForm)}
@@ -204,7 +244,7 @@ function Tab4ColorTable({ show, handleClose, colorOptions, selectedDesignId }) {
       </div>
 
       {showAddForm && (
-        <div className="border p-3 mb-3">
+        <div className="border  p-3 mb-3">
           <div className="d-flex justify-content-between mb-3">
             <h5>Add New Color Details</h5>
             <div>

@@ -54,10 +54,10 @@ const useTab4StoneTable = create((set, get) => ({
   },
 
   // ✅ Add new Tab4Stone rows
-  addTab4Stone: async (ID_Header, newItems) => {
+  addTab4Stone: async (type, Header, newItems) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(AddTab4MasterAPI, { ID_Header, data: newItems });
+      await axios.post(AddTab4MasterAPI, { type, Header, data: newItems });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
       set({
@@ -73,9 +73,13 @@ const useTab4StoneTable = create((set, get) => ({
   updateTab4Stone: async (type, id, payload) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateTab4MasterAPI}/${id}/`, {...payload, type}, {
-        headers: { "Content-Type": "application/json" },
-      });
+      await axios.put(
+        `${UpdateTab4MasterAPI}/${id}/`,
+        { ...payload, type },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -88,10 +92,11 @@ const useTab4StoneTable = create((set, get) => ({
   // =====================================================
   // DELETE Tab4Stone row
   // =====================================================
-  deleteTab4Stone: async (id) => {
+  deleteTab4Stone: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteTab4MasterAPI}/${id}/`);
+      // await axios.delete(`${DeleteTab4MasterAPI}/${id}/`);
+      await axios.delete(`${DeleteTab4MasterAPI}/${id}/?type=${type}`);
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({
