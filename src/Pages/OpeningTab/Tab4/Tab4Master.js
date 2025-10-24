@@ -76,7 +76,7 @@ function Tab4Master() {
     () =>
       DesignItemType.map((i) => ({
         label: `${i.ItemType_Name}:${i.Approx_Gross_Weight}`,
-        value: i.ID,
+        value: i.ID_ItemType,
         Approx_Gross_Weight: i.Approx_Gross_Weight,
       })),
     [DesignItemType]
@@ -215,8 +215,8 @@ function Tab4Master() {
     setTab4Header((prev) => ({
       ...prev,
       colors: rows,
-      ColorS: colorNames,
-      ID_Color: Color_Id,
+      ID_Color: colorNames,
+      ColorS: Color_Id,
     }));
   };
 
@@ -354,7 +354,6 @@ function Tab4Master() {
                       selectedVal={tab4Header.ID_Size || -1}
                       placeholder="--Select Size--"
                       width="100%"
-                      disabled
                     />
                   </td>
                   <td>
@@ -391,8 +390,8 @@ function Tab4Master() {
                   <td>
                     <div className="d-flex align-items-center">
                       <input
-                        name="ColorS"
-                        value={tab4Header.ColorS}
+                        name="ID_Color"
+                        value={tab4Header.ID_Color}
                         onChange={handleChange}
                         readOnly
                         placeholder="Color Display"

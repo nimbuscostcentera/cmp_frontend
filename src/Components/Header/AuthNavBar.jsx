@@ -275,7 +275,6 @@
 
 // export default AuthNavBar;
 
-
 // ///
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -353,7 +352,7 @@ function AuthNavBar() {
   return (
     <>
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-gray-900 text-white shadow-md z-50">
+      <nav className="fixed top-0 left-0 w-full bg-indigo-950 text-white shadow-md z-50 rounded-lg">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Left side: Logo + Desktop menu */}
           <div className="flex items-center">
@@ -362,12 +361,13 @@ function AuthNavBar() {
             </Link>
 
             {/* Desktop navigation */}
-            <div className="hidden lg:flex space-x-6">
+            <div className="hidden lg:flex space-x-6 ml-10">
               <Link
                 to="/auth/home"
-                className="flex items-center hover:text-blue-400 transition-colors duration-200"
+                className="flex items-center hover:text-blue-400 transition-colors duration-200 text-white no-underline"
               >
-                <i className="bi bi-house mr-1"></i> Home
+                <i className="bi bi-house mr-1"></i>{" "}
+                Home
               </Link>
 
               {/* File dropdown */}
@@ -456,14 +456,14 @@ function AuthNavBar() {
             </div>
 
             {/* Profile / Settings / Logout */}
-            <div className="hidden lg:flex items-center space-x-3">
-              <span className="text-sm">
+            <div className="hidden lg:flex items-center space-x-6">
+              <span className="text-md">
                 <i className="bi bi-person mr-1"></i>{" "}
                 {user?.User_Name || "User"}
               </span>
               <Link
                 to="/auth/setup"
-                className="hover:text-blue-400 transition-colors"
+                className="hover:text-blue-400 transition-colors text-white no-underline"
               >
                 <i className="bi bi-gear-fill"></i>
               </Link>
@@ -496,7 +496,10 @@ function AuthNavBar() {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-gray-800 text-white px-4 py-4 space-y-3 shadow-md">
-          <Link to="/auth/home" className="block hover:text-blue-400">
+          <Link
+            to="/auth/home"
+            className="flex items-center text-white no-underline hover:!text-blue-400 transition-colors duration-200"
+          >
             <i className="bi bi-house mr-2"></i> Home
           </Link>
           {menuInitial.map((menu, i) => (
@@ -563,6 +566,3 @@ function AuthNavBar() {
 }
 
 export default AuthNavBar;
-
-
-
