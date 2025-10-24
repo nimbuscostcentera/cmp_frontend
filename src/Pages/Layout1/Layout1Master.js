@@ -12,8 +12,8 @@ function Layout1Master() {
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [type, setType] = useState("im"); // Color, MiscCharge, DesignGroup, Item, Size, Plating
- 
+  const [type, setType] = useState("dgm"); // Color, MiscCharge, DesignGroup, Item, Size, Plating
+
   const [itemData, setItemData] = useState({
     Code: "",
     Description: "",

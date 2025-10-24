@@ -279,10 +279,9 @@
 // ///
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "bootstrap-icons/font/bootstrap-icons.min.css"; // icons
+import "bootstrap-icons/font/bootstrap-icons.min.css"; // For icons only
 import Image from "../../Asset/Nimbus_Logo_Transparent_white.png"; // logo
 
-// Only top-level menus (no submenus)
 export const menuInitial = [
   { title: "Master", link: "/auth/layout" },
   { title: "Transaction", link: "/auth/home/transaction" },
@@ -293,27 +292,26 @@ function AuthNavBar() {
   const navigate = useNavigate();
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showMenu, setShowMenu] = useState(false);
-
-  // File dropdown state + timer
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
-  const fileMenuTimer = useRef(null);
-
-  const handleFileEnter = () => {
-    if (fileMenuTimer.current) clearTimeout(fileMenuTimer.current);
-    setFileMenuOpen(true);
-  };
-
-  const handleFileLeave = () => {
-    fileMenuTimer.current = setTimeout(() => {
-      setFileMenuOpen(false);
-    }, 300);
-  };
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
+  const fileMenuTimer = useRef(null);
 
-  // Close search when clicking outside
+  // Load user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Invalid user data in localStorage", error);
+      }
+    }
+  }, []);
+
+  // Handle outside click for search
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -328,8 +326,10 @@ function AuthNavBar() {
   }, [searchExpanded]);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth-token");
-    navigate("/");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
   };
 
   const handleSearch = (e) => {
@@ -341,27 +341,36 @@ function AuthNavBar() {
     }
   };
 
+  const handleFileEnter = () => {
+    if (fileMenuTimer.current) clearTimeout(fileMenuTimer.current);
+    setFileMenuOpen(true);
+  };
+
+  const handleFileLeave = () => {
+    fileMenuTimer.current = setTimeout(() => setFileMenuOpen(false), 300);
+  };
+
   return (
     <>
-      {/* Top Navbar */}
+      {/* Navbar */}
       <nav className="fixed top-0 left-0 w-full bg-gray-900 text-white shadow-md z-50">
-        <div className="flex items-center justify-between px-4 py-2">
-          {/* Left: Logo + Desktop Nav */}
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Left side: Logo + Desktop menu */}
           <div className="flex items-center">
             <Link to="/auth" className="flex items-center mr-4">
               <img src={Image} alt="Nimbus Logo" className="h-8" />
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop navigation */}
             <div className="hidden lg:flex space-x-6">
               <Link
                 to="/auth/home"
-                className="flex items-center text-white no-underline hover:!text-blue-400 transition-colors duration-200"
+                className="flex items-center hover:text-blue-400 transition-colors duration-200"
               >
                 <i className="bi bi-house mr-1"></i> Home
               </Link>
 
-              {/* File dropdown (hover with timer) */}
+              {/* File dropdown */}
               <div
                 className="relative"
                 onMouseEnter={handleFileEnter}
@@ -382,18 +391,14 @@ function AuthNavBar() {
                   File
                 </button>
 
-                {/* Dropdown menu */}
                 {fileMenuOpen && (
-                  <div className="absolute left-0 top-9 bg-black rounded-md shadow-lg min-w-[160px]">
+                  <div className="absolute left-0 top-9 bg-gray-800 rounded-md shadow-lg min-w-[160px]">
                     <ul className="list-none p-0 m-0">
                       {menuInitial.map((menu, i) => (
-                        <li
-                          key={i}
-                          className="px-4 py-2 text-left cursor-pointer hover:bg-gray-700 transition-colors duration-200 rounded-md"
-                        >
+                        <li key={i}>
                           <Link
                             to={menu.link}
-                            className="text-white no-underline hover:text-blue-400 block"
+                            className="block px-4 py-2 hover:bg-gray-700 hover:text-blue-400 rounded-md"
                           >
                             {menu.title}
                           </Link>
@@ -406,7 +411,7 @@ function AuthNavBar() {
             </div>
           </div>
 
-          {/* Right: Search + Profile/Icons */}
+          {/* Right side: Search + Profile */}
           <div className="flex items-center space-x-4">
             {/* Desktop Search */}
             <div
@@ -430,7 +435,6 @@ function AuthNavBar() {
                   />
                   <button
                     type="button"
-                    className="ml-2"
                     onClick={() => {
                       setSearchExpanded(false);
                       setSearchQuery("");
@@ -451,20 +455,27 @@ function AuthNavBar() {
               )}
             </div>
 
-            {/* Desktop Profile/Settings/Logout */}
-            <div className="hidden lg:flex items-center space-x-6">
-              <Link to="/auth/profile" className="hover:text-blue-400">
-                <i className="bi bi-person-circle"></i>
-              </Link>
-              <Link to="/auth/setup" className="hover:text-blue-400">
+            {/* Profile / Settings / Logout */}
+            <div className="hidden lg:flex items-center space-x-3">
+              <span className="text-sm">
+                <i className="bi bi-person mr-1"></i>{" "}
+                {user?.User_Name || "User"}
+              </span>
+              <Link
+                to="/auth/setup"
+                className="hover:text-blue-400 transition-colors"
+              >
                 <i className="bi bi-gear-fill"></i>
               </Link>
-              <button onClick={handleLogout} className="hover:text-red-400">
+              <button
+                onClick={handleLogout}
+                className="hover:text-red-400 transition-colors"
+              >
                 <i className="bi bi-box-arrow-right"></i>
               </button>
             </div>
 
-            {/* Mobile Buttons */}
+            {/* Mobile menu icons */}
             <div className="lg:hidden flex items-center space-x-3">
               <button
                 onClick={() => {
@@ -474,7 +485,7 @@ function AuthNavBar() {
               >
                 <i className="bi bi-search"></i>
               </button>
-              <button onClick={() => setShowMenu(!showMenu)}>
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 <i className="bi bi-list text-2xl"></i>
               </button>
             </div>
@@ -482,8 +493,8 @@ function AuthNavBar() {
         </div>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
-      {showMenu && (
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
         <div className="lg:hidden bg-gray-800 text-white px-4 py-4 space-y-3 shadow-md">
           <Link to="/auth/home" className="block hover:text-blue-400">
             <i className="bi bi-house mr-2"></i> Home
@@ -513,7 +524,7 @@ function AuthNavBar() {
         </div>
       )}
 
-      {/* Mobile Search Overlay */}
+      {/* Mobile search overlay */}
       {searchExpanded && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-start justify-center pt-20 z-50 lg:hidden">
           <div className="bg-gray-900 w-11/12 p-3 rounded-lg flex items-center">
@@ -545,12 +556,13 @@ function AuthNavBar() {
         </div>
       )}
 
-      {/* Padding to prevent content overlap with fixed navbar */}
-      <div className="pt-16"></div>
+      {/* Spacer for fixed nav */}
+      <div className="pt-[76px]"></div>
     </>
   );
 }
 
 export default AuthNavBar;
+
 
 

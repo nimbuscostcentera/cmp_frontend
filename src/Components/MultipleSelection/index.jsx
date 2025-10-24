@@ -9,7 +9,6 @@ const MultipleSelection = ({
   placeholder,
   defaultval,
   style = { width: "250px" },
-  onRemove, // New prop for removal handling
 }) => {
   const [show, setShow] = useState(false);
 
@@ -21,10 +20,8 @@ const MultipleSelection = ({
   };
 
   const handleSelectionChange = (selected, actionMeta) => {
-    if (actionMeta.action === "remove-value") {
-      // Call removal handler when a value is removed
-      onRemove(actionMeta.removedValue);
-    }
+    // We don't need to handle remove separately because the parent component
+    // can handle the entire selected array from the change.
     handleChange(selected);
   };
 
@@ -54,11 +51,7 @@ const MultipleSelection = ({
           <i className="bi bi-search"></i>
         </InputGroup.Text>
       </InputGroup>
-      <Modal
-        show={show}
-        onHide={handleClose}
-        size="lg"
-      >
+      <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>{placeholder}</Modal.Title>
         </Modal.Header>
@@ -68,7 +61,7 @@ const MultipleSelection = ({
             isMulti
             value={selectedVal}
             options={options}
-            onChange={handleSelectionChange} // Use the modified handler
+            onChange={handleSelectionChange}
             placeholder={`--${placeholder}--`}
             isSearchable
             closeMenuOnSelect={false}

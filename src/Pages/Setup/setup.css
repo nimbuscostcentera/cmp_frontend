@@ -1,0 +1,266 @@
+/* Setup.css */
+.setup-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.setup-header {
+    color: white;
+}
+
+.setup-icon {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.9);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.setup-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.setup-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
+}
+
+/* Option Cards */
+.setup-option-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.setup-option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.option-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.option-title {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.option-description {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.status-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #718096;
+}
+
+/* Custom Toggle Switch */
+.setup-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.setup-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e2e8f0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked+.toggle-slider {
+    background-color: #10b981;
+}
+
+input:checked+.toggle-slider:before {
+    transform: translateX(24px);
+}
+
+input:focus+.toggle-slider {
+    box-shadow: 0 0 1px #10b981;
+}
+
+/* Summary Card */
+.summary-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-title {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.stat-item {
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Action Card */
+.action-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-info h6 {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.setup-save-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.setup-save-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .setup-container {
+        padding: 1rem !important;
+    }
+
+    .setup-title {
+        font-size: 2rem;
+    }
+
+    .setup-subtitle {
+        font-size: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .action-info {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Loading Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.setup-option-card,
+.summary-card,
+.action-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.setup-option-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.setup-option-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.setup-option-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.setup-option-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.setup-option-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.summary-card {
+    animation-delay: 0.6s;
+}
+
+.action-card {
+    animation-delay: 0.7s;
+}

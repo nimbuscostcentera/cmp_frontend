@@ -5,6 +5,7 @@ import useDesignMaster from "../../Store/MasterStore/useDesignMaster";
 import ReusableModal from "../../Components/ReusableModal";
 import DesignDetailTable from "./DesignDetailTable";
 import DesignItemTypeTable from "./DesignItemTypeTable";
+import Table2 from "../../Components/Table2";
 
 function DesignMasterTable({
   setIsDisable,
@@ -80,10 +81,7 @@ function DesignMasterTable({
       toast.error("Design Description is required");
       return;
     }
-    if (!Gross_Weight || isNaN(Gross_Weight)) {
-      toast.error("Weight must be a valid number");
-      return;
-    }
+   
     // console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
     if (
       editedData?.Tolerance_Lower !== "" &&
@@ -245,12 +243,6 @@ function DesignMasterTable({
       isNotEditable: true,
     },
     {
-      headername: "Gross Weight",
-      fieldname: "Gross_Weight",
-      type: "number",
-      width: "120px",
-    },
-    {
       headername: "Tolerance Lower",
       fieldname: "Tolerance_Lower",
       type: "number",
@@ -266,7 +258,7 @@ function DesignMasterTable({
 
   return (
     <div className="table-box">
-      <Table
+      <Table2
         tab={filteredData || []}
         isAction={params.IsAction}
         ActionFunc={ActionFunc}

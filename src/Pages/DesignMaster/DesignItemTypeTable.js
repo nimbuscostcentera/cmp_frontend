@@ -3,6 +3,7 @@ import Table from "../../Components/Table";
 import EstimateTable from "../../Components/EstimateTable";
 import { toast } from "react-toastify";
 import useDesignItemType from "../../Store/MasterStore/useDesignItemType";
+import Table2 from "../../Components/Table2";
 
 function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
   const editInputRef = useRef(null);
@@ -237,7 +238,7 @@ function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
 
   return (
     <div className="table-box">
-      <Table
+      <Table2
         tab={DesignItemType}
         isAction={params.IsAction}
         ActionFunc={ActionFunc}

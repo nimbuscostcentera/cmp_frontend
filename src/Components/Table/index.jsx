@@ -229,9 +229,9 @@ const Table = ({
         style={{ maxHeight: height || "auto" }}
       >
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-indigo-900 text-white sticky top-0 z-20">
+          <thead className="bg-indigo-900 text-white sticky top-0 z-500">
             <tr>
-              <th className="sticky left-0 px-1 py-1 text-center z-30 w-8 font-normal">
+              <th className="sticky left-0 px-1 py-1 text-center z-9000 w-8 font-normal">
                 Row
               </th>
               {Col.map((col, idx) => (

@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import useSpcpMaster from "../../Store/MasterStore/useSpcpMaster";
 import ReusableModal from "../../Components/ReusableModal";
 import SpcpDetailTable from "./SpcpDetailTable";
+import Table2 from "../../Components/Table2";
 
 function SpcpMasterTable({
   setIsDisable,
@@ -225,7 +226,7 @@ function SpcpMasterTable({
 
   return (
     <div className="table-box">
-      <Table
+      <Table2
         tab={filteredData || []}
         isAction={params.IsAction}
         ActionFunc={ActionFunc}

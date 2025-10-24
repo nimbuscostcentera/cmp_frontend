@@ -25,6 +25,11 @@ import Layout10Master from "./Pages/Layout10/Layout10Master";
 import LayoutMaster from "./Pages/MasterLayouts/LayoutMaster";  
 import LayoutPrac from "./Pages/MasterLayout2/LayoutPrac";
 import DesignMaster from "./Pages/DesignMaster/DesignMaster";
+import Register from "./Pages/Register";
+import UserMaster from "./Pages/UserMaster/UserMaster";
+import Setup from "./Pages/Setup/setup";
+import TabForm from "./Pages/OpeningTab/TabForm";
+import MappingTcTable from "./Pages/MappingTc/MappingTcTable";
 // Lazy load all page components
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
@@ -136,6 +141,22 @@ const router = createBrowserRouter([
       {
         path: "unit",
         element: withSuspense(UnitMaster),
+      },
+      {
+        path: "user",
+        element: withSuspense(UserMaster),
+      },
+      {
+        path: "setup",
+        element: withSuspense(Setup),
+      },
+      {
+        path: "tab",
+        element: withSuspense(TabForm),
+      },
+      {
+        path: "mappingtc",
+        element: withSuspense(MappingTcTable),
       },
     ],
   },

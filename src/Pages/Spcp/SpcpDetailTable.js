@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import EstimateTable from "../../Components/EstimateTable";
 import useSpcpDetails from "../../Store/MasterStore/useSpcpDetail";
 import useSpcpMaster from "../../Store/MasterStore/useSpcpMaster";
+import Table2 from "../../Components/Table2";
 
 function SpcpDetailTable({
   type,
@@ -270,7 +271,7 @@ function SpcpDetailTable({
 
   return (
     <div className="table-box">
-      <Table
+      <Table2
         tab={filteredData}
         isAction={params.IsAction}
         ActionFunc={ActionFunc}
