@@ -5,12 +5,19 @@ export const masters = [
     type: "cm",
     layout: "layout1",
     fields: [
-      { name: "Code", label: "Color Code", maxLength: 6, width: "w-[100px]" },
+      {
+        name: "Code",
+        label: "Color Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      },
       {
         name: "Description",
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
     ],
   },
@@ -25,6 +32,7 @@ export const masters = [
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
     ],
   },
@@ -39,6 +47,7 @@ export const masters = [
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
     ],
   },
@@ -53,14 +62,22 @@ export const masters = [
         maxLength: 6,
         width: "w-[100px]",
         disable: true,
+        required: true,
       },
       {
         name: "Description",
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
-      { name: "Size", label: "Has Size", type: "checkbox", width: "w-[100px]" },
+      {
+        name: "Size",
+        label: "Has Size",
+        type: "checkbox",
+        width: "w-[100px]",
+        required: false,
+      },
     ],
   },
   {
@@ -68,12 +85,19 @@ export const masters = [
     type: "dgm",
     layout: "layout1",
     fields: [
-      { name: "Code", label: "Code", maxLength: 6, width: "w-[100px]" },
+      {
+        name: "Code",
+        label: "Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      },
       {
         name: "Description",
         label: "Description",
-        maxLength: 15,
+        maxLength: 30,
         width: "w-[180px]",
+        required: true,
       },
     ],
   },
@@ -82,12 +106,19 @@ export const masters = [
     type: "szm",
     layout: "layout1",
     fields: [
-      { name: "Code", label: "Size Code", maxLength: 6, width: "w-[100px]" },
+      {
+        name: "Code",
+        label: "Size Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      },
       {
         name: "Description",
         label: "Description",
-        maxLength: 30,
+        maxLength: 15,
         width: "w-[200px]",
+        required: true,
       },
     ],
   },
@@ -96,7 +127,13 @@ export const masters = [
     type: "itmtype",
     layout: "layout1",
     fields: [
-      { name: "Code", label: "Item Code", maxLength: 6, width: "w-[100px]" }, ///item code
+      {
+        name: "Code",
+        label: "Item Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      }, ///item code
       // {
       //   name: "Item_Name",
       //   label: "Item Name",
@@ -106,8 +143,9 @@ export const masters = [
       {
         label: "Description",
         name: "Description",
-        maxLength: 255,
+        maxLength: 15,
         width: "w-[300px]",
+        required: true,
       },
     ],
   },
@@ -123,12 +161,14 @@ export const masters = [
         label: "Department Code",
         maxLength: 6,
         width: "w-[100px]",
+        required: true,
       },
       {
         name: "Description",
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
       {
         name: "ID_master",
@@ -140,6 +180,7 @@ export const masters = [
         optionLabelField: "Process_Code",
         optionValueField: "Process_ID",
         width: "w-[150px]",
+        required: true,
       },
     ],
   },
@@ -148,12 +189,19 @@ export const masters = [
     type: "sm",
     layout: "layout2",
     fields: [
-      { name: "Code", label: "Stone Code", maxLength: 6, width: "w-[100px]" },
+      {
+        name: "Code",
+        label: "Stone Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      },
       {
         name: "Description",
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
       {
         name: "ID_master",
@@ -165,6 +213,7 @@ export const masters = [
         optionLabelField: "Unit_Code",
         optionValueField: "Unit_ID",
         width: "w-[200px]",
+        required: true,
       },
     ],
   },
@@ -179,16 +228,18 @@ export const masters = [
         name: "VendorGrp_Code",
         label: "Vendor Group Code",
         type: "text",
-        maxLength: 100,
+        maxLength: 6,
         width: "w-[180px]",
         required: true,
       },
       {
         name: "ID_Type",
-        label: "ID Type",
+        label: "Vendor Type",
         type: "select",
         required: true,
-        options: [
+        multiple: true, // 👈 enables multi-select behavior
+
+        Options: [
           { value: "A", label: "Artisan" },
           { value: "D", label: "Dealer" },
           { value: "S", label: "Staff" },
@@ -205,37 +256,37 @@ export const masters = [
     ],
   },
 
-  {
-    name: "Enum Vendor Master",
-    type: "ev",
-    layout: "layout14",
-    fields: [
-      {
-        name: "ID",
-        label: "Vendor ID",
-        type: "number",
-        width: "w-[100px]",
-        disable: true,
-      },
-      {
-        name: "Description",
-        label: "Vendor Description",
-        maxLength: 30,
-        width: "w-[200px]",
-      },
-      {
-        name: "ENUM_CHOICES",
-        label: "Vendor Type",
-        type: "select",
-        options: [
-          { value: 1, label: "Artisan" },
-          { value: 2, label: "Dealer" },
-          { value: 3, label: "Staff" },
-        ],
-        width: "w-[150px]",
-      },
-    ],
-  },
+  // {
+  //   name: "Enum Vendor Master",
+  //   type: "ev",
+  //   layout: "layout14",
+  //   fields: [
+  //     {
+  //       name: "ID",
+  //       label: "Vendor ID",
+  //       type: "number",
+  //       width: "w-[100px]",
+  //       disable: true,
+  //     },
+  //     {
+  //       name: "Description",
+  //       label: "Vendor Description",
+  //       maxLength: 30,
+  //       width: "w-[200px]",
+  //     },
+  //     {
+  //       name: "ENUM_CHOICES",
+  //       label: "Vendor Type",
+  //       type: "select",
+  //       options: [
+  //         { value: 1, label: "Artisan" },
+  //         { value: 2, label: "Dealer" },
+  //         { value: 3, label: "Staff" },
+  //       ],
+  //       width: "w-[150px]",
+  //     },
+  //   ],
+  // },
 
   // Vendor Master
   {
@@ -300,7 +351,7 @@ export const masters = [
       {
         name: "Contact",
         label: "Contact Number",
-        type: "text",
+        type: "number",
         maxLength: 10,
         width: "w-[120px]",
         required: false,
@@ -315,45 +366,57 @@ export const masters = [
     layout: "layout4",
     fields: [
       {
-        name: "Customer_ID", ///customer code
+        name: "Customer_Code", ///customer code
         label: "Customer Code",
-        maxLength: 10,
+        maxLength: 6,
         width: "w-[100px]",
+        required: true,
       },
       {
         name: "Customer_Name",
         label: "Customer Name",
         maxLength: 100,
         width: "w-[200px]",
+        required: true,
       },
       {
         name: "Address1",
         label: "Address1",
         maxLength: 255,
         width: "w-[250px]",
+        required: false,
       },
       {
         name: "Address2",
         label: "Address2",
         maxLength: 255,
         width: "w-[250px]",
+        required: false,
       },
       {
         name: "Address3",
         label: "Address3",
         maxLength: 255,
         width: "w-[250px]",
+        required: false,
       },
-      { name: "Contact", label: "Contact", maxLength: 10, width: "w-[150px]" },
+      {
+        name: "Contact",
+        label: "Contact",
+        maxLength: 10,
+        width: "w-[150px]",
+        required: false,
+      },
       {
         name: "ID_Type",
-        label: "ID Type",
+        label: "Customer Type",
         type: "select",
         options: [
           { value: "1", label: "Self" },
           { value: "2", label: "Customer" },
         ],
         width: "w-[150px]",
+        required: true,
       },
     ],
   },
@@ -364,12 +427,19 @@ export const masters = [
     type: "rmm",
     layout: "layout5",
     fields: [
-      { name: "Raw_Code", label: "Raw Code", maxLength: 6, width: "w-[100px]" }, ///code
+      {
+        name: "Raw_Code",
+        label: "Raw Code",
+        maxLength: 6,
+        width: "w-[100px]",
+        required: true,
+      }, ///code
       {
         name: "Raw_Description",
         label: "Description",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
       },
       {
         name: "Metal_Type",
@@ -381,6 +451,7 @@ export const masters = [
         optionLabelField: "System_Name",
         optionValueField: "ID",
         width: "w-[150px]",
+        required: true,
       },
     ],
   },
@@ -396,7 +467,7 @@ export const masters = [
         name: "Process_Code",
         label: "Process Code",
         type: "text",
-        maxLength: 15,
+        maxLength: 6,
         width: "w-[120px]",
         required: true,
       },
@@ -450,16 +521,16 @@ export const masters = [
         name: "Description",
         label: "Description",
         type: "text",
-        maxLength: 30,
+        maxLength: 15,
         width: "w-[180px]",
-        required: false,
+        required: true,
       },
       {
         name: "Rate",
         label: "Rate",
         type: "number",
         width: "w-[120px]",
-        required: false,
+        required: true,
       },
     ],
   },
@@ -475,12 +546,14 @@ export const masters = [
         label: "Sub Code",
         maxLength: 6,
         width: "w-[100px]",
+        required: true,
       },
       {
         name: "Description",
         label: "Description",
-        maxLength: 30,
+        maxLength: 15,
         width: "w-[200px]",
+        required: true,
       },
       {
         name: "ID_Group",
@@ -491,6 +564,7 @@ export const masters = [
         foreignKeyType: "sm", // identifies master type
         optionValueField: "ID", // ✅ actual primary key field from StoneMaster
         optionLabelField: "Code", // ✅ visible label in dropdown
+        required: true,
       },
       {
         name: "Unit", // ✅ ensure this matches your Django model FK name
@@ -501,12 +575,14 @@ export const masters = [
         foreignKeyType: "um",
         optionValueField: "Unit_ID", // ✅ numeric primary key
         optionLabelField: "Unit_Code", // ✅ visible name
+        required: true,
       },
       {
         name: "Weight", // ✅ add missing field to avoid backend error
         label: "Weight",
         type: "number",
         width: "w-[100px]",
+        required: true,
       },
     ],
   },
@@ -620,16 +696,29 @@ export const masters = [
     layout: "layout11",
     fields: [
       {
-        name: "Unit_Code", ///code
+        name: "Unit_Code",
         label: "Unit Code",
+        type: "text",
         maxLength: 6,
         width: "w-[100px]",
+        required: true, // usually code fields are mandatory
       },
       {
         name: "Description",
         label: "Description",
+        type: "text",
         maxLength: 15,
         width: "w-[180px]",
+        required: true,
+      },
+      {
+        name: "Conversion",
+        label: "Conversion",
+        type: "number",
+        width: "w-[120px]",
+        precision: 3, // matches decimal_places=3
+        defaultValue: 1,
+        required: true,
       },
     ],
   },
@@ -643,7 +732,9 @@ export const masters = [
       {
         name: "Metal_Type",
         label: "Metal Type",
+        required: true,
         type: "select",
+        
         options: [
           { value: "P", label: "Pure" },
           { value: "B", label: "Brass" },
@@ -659,43 +750,45 @@ export const masters = [
         label: "System Name",
         maxLength: 255,
         width: "w-[250px]",
+        required: true,
       },
     ],
   },
 
   // ================= layout13 =================
+  // {
+  //   name: "Company Master",
+  //   type: "com",
+  //   layout: "layout13",
+  //   fields: [
+  //     {
+  //       name: "Company_Code", ///code
+  //       label: "Company Code",
+  //       maxLength: 15,
+  //       width: "w-[150px]",
+  //       required: true,
+  //     },
+  //     {
+  //       name: "Company_Name",
+  //       label: "Company Name",
+  //       maxLength: 50,
+  //       width: "w-[200px]",
+  //       required: true,
+  //     },
+  //   ],
+  // },
   {
-    name: "Company Master",
-    type: "com",
-    layout: "layout13",
-    fields: [
-      {
-        name: "Company_Code", ///code
-        label: "Company Code",
-        maxLength: 15,
-        width: "w-[150px]",
-      },
-      {
-        name: "Company_Name",
-        label: "Company Name",
-        maxLength: 50,
-        width: "w-[200px]",
-      },
-    ],
+    name: "Design Master",
+    type: "design",
+    layout: "static",
+    isStatic: true,
+    redirectTo: "/auth/design",
   },
   {
-  name: "Design Master",
-  type: "design",
-  layout: "static",
-  isStatic: true,
-  redirectTo: "/auth/design",
-},
-{
-  name: "Stone Rate Setting",
-  type: "stonerate",
-  layout: "static",
-  isStatic: true,
-  redirectTo: "/auth/spcp",
-},
-
+    name: "Stone Rate Setting",
+    type: "stonerate",
+    layout: "static",
+    isStatic: true,
+    redirectTo: "/auth/spcp",
+  },
 ];

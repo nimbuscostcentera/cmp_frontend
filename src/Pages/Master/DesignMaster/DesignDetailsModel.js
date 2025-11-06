@@ -92,76 +92,80 @@ function DesignDetailsModel({
   };
 
   // ✅ Save rows back to parent only when user clicks Save
-  const saveItem = () => {
-    if (localRows.length === 0) {
-      toast.error("No data to save");
-      return;
-    }
+const saveItem = () => {
+  if (localRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
 
-    // Filter out completely empty rows
-    const filteredRows = localRows.filter((row) => {
+  // Filter out completely empty rows
+  const filteredRows = localRows.filter((row) => {
+    return (
+      row.ID_StoneM ||
+      row.ID_StoneS ||
+      (row.Pcs && row.Pcs !== 0) ||
+      (row.Weight && row.Weight !== 0)
+    );
+  });
+
+  if (filteredRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
+
+  // Validate required fields if both Stone Master and Stone Sub are filled
+  const invalidRow = filteredRows.find((row) => {
+    if (row.ID_StoneM && row.ID_StoneS) {
+      // All fields except ID_Size must be filled
       return (
-        row.ID_StoneM ||
-        row.ID_StoneS ||
-        (row.Pcs && row.Pcs !== 0) ||
-        (row.Weight && row.Weight !== 0)
+        row.Pcs === null ||
+        row.Pcs === "" ||
+        row.Pcs === 0 ||
+        isNaN(row.Pcs) ||
+        row.Weight === null ||
+        row.Weight === "" ||
+        row.Weight === 0 ||
+        isNaN(row.Weight)
+        // Add any other mandatory field checks here if needed
       );
-    });
-
-    if (filteredRows.length === 0) {
-      toast.error("No data to save");
-      return;
     }
+    return false; // row is partially filled or empty → ok
+  });
 
-    // Validate required fields if both Stone Master and Stone Sub are filled
-    const invalidRow = filteredRows.find((row) => {
-      if (row.ID_StoneM && row.ID_StoneS) {
-        // All fields except ID_Size must be filled
-        return (
-          row.Pcs === null ||
-          row.Pcs === "" ||
-          row.Pcs === 0 ||
-          isNaN(row.Pcs) ||
-          row.Weight === null ||
-          row.Weight === "" ||
-          row.Weight === 0 ||
-          isNaN(row.Weight)
-          // Add any other mandatory field checks here if needed
-        );
-      }
-      return false; // row is partially filled or empty → ok
-    });
+  if (invalidRow) {
+    toast.error(
+      "All fields (except Size) are mandatory for rows where Stone Master and Stone Sub are filled."
+    );
+    return;
+  }
 
-    if (invalidRow) {
-      toast.error(
-        "All fields (except Size) are mandatory for rows where Stone Master and Stone Sub are filled."
-      );
-      return;
-    }
+  // Check for duplicates based on Size + Stone Master + Stone Sub
+  const duplicates = filteredRows.filter((row, index, self) => {
+    return (
+      self.findIndex(
+        (r) =>
+          r.ID_StoneM === row.ID_StoneM &&
+          r.ID_StoneS === row.ID_StoneS &&
+          r.ID_Size === row.ID_Size
+      ) !== index
+    );
+  });
 
-    // Check for duplicates based on Size + Stone Master + Stone Sub
-    const duplicates = filteredRows.filter((row, index, self) => {
-      return (
-        self.findIndex(
-          (r) =>
-            r.ID_StoneM === row.ID_StoneM &&
-            r.ID_StoneS === row.ID_StoneS &&
-            r.ID_Size === row.ID_Size
-        ) !== index
-      );
-    });
+  if (duplicates.length > 0) {
+    toast.error(
+      "Duplicate entries are not allowed for the combination of Size + Stone Master + Stone Sub Master"
+    );
+    return;
+  }
 
-    if (duplicates.length > 0) {
-      toast.error(
-        "Duplicate entries are not allowed for the combination of Size + Stone Master + Stone Sub Master"
-      );
-      return;
-    }
+  // Save only non-empty, valid, unique rows
+  setRows(filteredRows);
+  handleClose();
+};
 
-    // Save only non-empty, valid, unique rows
-    setRows(filteredRows);
-    handleClose();
-  };
+
+
+
 
   // ❌ When modal closed without saving → discard all local changes
   const handleModalClose = () => {

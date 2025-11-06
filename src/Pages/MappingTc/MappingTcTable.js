@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Table from "../../Components/Table";
+// import Table from "../../Components/Table";
 import { toast, ToastContainer } from "react-toastify";
 import useMappingTc from "../../Store/MasterStore/useMappingTc";
+import Table2 from "../../Components/Table2";
 
 function MappingTcTable() {
   const [filteredData, setFilteredData] = useState([]);
@@ -296,7 +297,7 @@ function MappingTcTable() {
 
       {/* ✅ Table Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto max-h-[60vh]">
-        <Table
+        <Table2
           tab={filteredData}
           OnChangeHandler={handleInputChange}
           Col={Col}

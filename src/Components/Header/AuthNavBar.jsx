@@ -283,6 +283,7 @@ import Image from "../../Asset/Nimbus_Logo_Transparent_white.png"; // logo
 
 export const menuInitial = [
   { title: "Master", link: "/auth/layout" },
+  { title: "Opening", link: "/auth/tab2" },
   { title: "Transaction", link: "/auth/home/transaction" },
   { title: "Reports", link: "/auth/home/reports" },
 ];
@@ -366,8 +367,7 @@ function AuthNavBar() {
                 to="/auth/home"
                 className="flex items-center hover:text-blue-400 transition-colors duration-200 text-white no-underline"
               >
-                <i className="bi bi-house mr-1"></i>{" "}
-                Home
+                <i className="bi bi-house mr-1"></i> Home
               </Link>
 
               {/* File dropdown */}
@@ -392,13 +392,13 @@ function AuthNavBar() {
                 </button>
 
                 {fileMenuOpen && (
-                  <div className="absolute left-0 top-9 bg-gray-800 rounded-md shadow-lg min-w-[160px]">
+                  <div className="absolute left-0 top-12 bg-indigo-950/95 shadow-lg min-w-[160px]">
                     <ul className="list-none p-0 m-0">
                       {menuInitial.map((menu, i) => (
                         <li key={i}>
                           <Link
                             to={menu.link}
-                            className="block px-4 py-2 hover:bg-gray-700 hover:text-blue-400 rounded-md"
+                            className="block px-4 py-2 hover:bg-gray-700 hover:text-blue-400 hover:-translate-y-1 rounded-md no-underline text-white text-left"
                           >
                             {menu.title}
                           </Link>

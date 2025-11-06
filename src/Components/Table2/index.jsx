@@ -130,10 +130,12 @@ const RenderCellContent = ({
       );
     }
     return (
+     
       <div
         className="flex items-center w-full mx-3"
         style={{ maxWidth: "75%" }}
       >
+        
         <input
           name={field.fieldname}
           maxLength={field.max}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Table from "../../../Components/Table";
+// import Table from "../../../Components/Table";
 import { toast } from "react-toastify";
 import useSpcpMaster from "../../../Store/MasterStore/useSpcpMaster";
 import ReusableModal from "../../../Components/ReusableModal";
@@ -89,10 +89,36 @@ function SpcpMasterTable({
       toast.error("Missing required fields!");
       return;
     }
-    if (!Weight || isNaN(Weight)) {
-      toast.error("Weight must be a valid number");
-      return;
+      if (!Weight || isNaN(Weight)) {
+        toast.error("Weight must be a valid number");
+        return;
+      }
+
+     if (
+      editedData.Tolerance_Lower !== "" &&
+      editedData.Tolerance_Upper !== ""
+    ) {
+      const tolLower = Number(editedData.Tolerance_Lower);
+      const tolUpper = Number(editedData.Tolerance_Upper);
+
+      if (isNaN(tolLower) || isNaN(tolUpper)) {
+        toast.error("Tolerance values must be valid numbers");
+        return;
+      }
+
+      if (tolLower >= tolUpper) {
+        toast.error(
+          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+        );
+        return;
+      }
+
+      if (tolLower < 0 || tolUpper < 0) {
+        toast.error("Tolerance values cannot be negative");
+        return;
+      }
     }
+    
 
     updateSpcp(type, ID, editedData);
   };
@@ -250,10 +276,10 @@ function SpcpMasterTable({
                 )?.Standard_Weight || 0;
               updated.Weight = weightchange;
             }
-            if (colKey === "CP") {
-              const regex = /^\d{0,7}(\.\d{0,2})?$/;
-              if (newValue !== "" && !regex.test(newValue)) return;
-            }
+             if (colKey === "CP") {
+               const regex = /^\d{0,7}(\.\d{0,2})?$/;
+               if (newValue !== "" && !regex.test(newValue)) return;
+             }
 
             if (colKey === "CP") {
               const prevCP = parseFloat(prev.CP || 0);
@@ -278,7 +304,7 @@ function SpcpMasterTable({
         height={"45vh"}
         isView={true}
         handleViewClick={handleViewClick}
-        viewPref={"St."}
+        viewPref={"Misc Ch"}
       />
 
       {/* --- Layout10 Modal --- */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import Table from "../../../Components/Table";
+// import Table from "../../../Components/Table";
 import { toast } from "react-toastify";
 import EstimateTable from "../../../Components/EstimateTable";
 import useSpcpDetails from "../../../Store/MasterStore/useSpcpDetail";
@@ -230,6 +230,8 @@ function SpcpDetailTable({
     await fetchSpcpDetails(type, selectedSpcpId);
     await fetchSpcp("header");
   };
+
+ 
 
   // Table columns
   const Col = [

@@ -1,142 +1,275 @@
-export const openingTabs = [
+// /new form
+export const openingInitial = [
+  // ================= layout1 =================
   {
-    tabName: "Tab1",
-    title: "Vendor Opening Raw Material Wise",
-    tableName: "Opening_Vendor_RawMaterial",
-    layout: "Same Layout: Tab1, Tab2",
-    gridFields: [
-      { name: "Srl", label: "Srl", type: "number", width: "w-[60px]" },
+    name: "Opening Vendor Raw Material",
+    type: "ovrm",
+    openingTab: "tab1",
+    fields: [
       {
-        name: "Vendor_Group_Name",
-        label: "Vendor Group Name",
-        type: "text",
-        required: true,
+        name: "VendorGroup",
+        label: "Vendor Group",
+        type: "Dropdown",
+        foreignKey: "layout3", // VendorGroupMaster
+        foreignKeyType: "vg",
+        optionValueField: "VendorGrp_ID",
+        optionLabelField: "VendorGrp_Code",
+        width: "w-[180px]",
       },
       {
-        name: "Vendor_Name",
-        label: "Vendor Name",
-        type: "dropdown",
-        idField: "Id_Vendor",
-        required: true,
+        name: "Vendor",
+        label: "Vendor",
+        type: "select",
+        foreignKey: "layout12", // VendorMaster
+        foreignKeyType: "ven",
+        optionValueField: "Vendor_ID",
+        optionLabelField: "Vendor_Code",
+        width: "w-[180px]",
       },
       {
-        name: "Metal_Master",
-        label: "Metal Master",
-        type: "dropdown",
-        idField: "Id_Metal",
-        required: true,
+        name: "RawMaterial",
+        label: "Raw Material",
+        type: "select",
+        foreignKey: "layout5", // RawMaterialMaster
+        foreignKeyType: "rmm",
+        optionValueField: "RawMaterial_ID",
+        optionLabelField: "Raw_Code",
+        width: "w-[180px]",
       },
-      { name: "Qty", label: "Qty", type: "number", decimal: 7.3, required: true },
+      {
+        name: "Qty",
+        label: "Quantity",
+        type: "number",
+        width: "w-[120px]",
+      },
       {
         name: "DrCr",
-        label: "Dr/Cr",
-        type: "combo",
-        options: ["Dr", "Cr"],
-        required: true,
+        label: "Dr / Cr",
+        type: "select",
+        options: [
+          { value: "DR", label: "Debit" },
+          { value: "CR", label: "Credit" },
+        ],
+        width: "w-[100px]",
       },
     ],
-    validation: {
-      mandatory: true,
-      rule: "If one field in a row has data, all fields must be filled.",
-      duplicateCheck: ["Vendor_Name", "Metal_Master"],
-      qtyMeaning: { Dr: "+Qty", Cr: "-Qty" },
-      repeatValues: ["Vendor_Group_Name", "Vendor_Name"], // Until manually changed
-    },
   },
 
+  // ================= layout2 =================
   {
-    tabName: "Tab2",
-    title: "Self Opening Raw Material Wise",
-    tableName: "Opening_RawMaterial",
-    layout: "Same Layout: Tab1, Tab2",
-    gridFields: [
-      { name: "Srl", label: "Srl", type: "number", width: "w-[60px]" },
+    name: "Opening Raw Material",
+    type: "orm",
+    openingTab: "layout2",
+    fields: [
+      // {
+      //   name: "Srl",
+      //   label: "Serial No",
+      //   type: "number",
+      //   width: "w-[100px]",
+      //   disable: true,
+      // },
       {
-        name: "Department_Name",
-        label: "Department Name",
-        type: "dropdown",
-        idField: "Id_Department",
-        required: true,
+        name: "Department",
+        label: "Department",
+        type: "select",
+        foreignKey: "layout2", // DepartmentMaster
+        foreignKeyType: "dm",
+        optionValueField: "Department_ID",
+        optionLabelField: "Code",
+        width: "w-[180px]",
       },
       {
-        name: "Metal_Master",
-        label: "Metal Master",
-        type: "dropdown",
-        idField: "Id_Metal",
-        required: true,
+        name: "RawMaterial",
+        label: "Raw Material",
+        type: "select",
+        foreignKey: "layout5", // RawMaterialMaster
+        foreignKeyType: "rmm",
+        optionValueField: "RawMaterial_ID",
+        optionLabelField: "Raw_Code",
+        width: "w-[180px]",
       },
-      { name: "Qty", label: "Qty", type: "number", decimal: 7.3, required: true },
+      {
+        name: "Qty",
+        label: "Quantity",
+        type: "number",
+        width: "w-[120px]",
+      },
+      {
+        name: "DrCr",
+        label: "Dr / Cr",
+        type: "select",
+        options: [
+          { value: "DR", label: "Debit" },
+          { value: "CR", label: "Credit" },
+        ],
+        width: "w-[100px]",
+      },
     ],
-    validation: {
-      mandatory: true,
-      rule: "If one field in a row has data, all fields must be filled.",
-      duplicateCheck: ["Department_Name", "Metal_Master"],
-    },
   },
 
+  // ================= layout3 =================
   {
-    tabName: "Tab3",
-    title: "Self Loose Stone Wise Opening Stock",
-    layout: "Same Layout: Tab3, Tab3A",
-    note: "Include into: Stone wise CP & SP Rate setting along with Opening Master",
-    linkedModule: "Stone wise CP & SP Rate Setting",
-    tableName: "Self_Stone_Opening", // inferred since not explicitly given
-  },
-
-  {
-    tabName: "Tab3A",
-    title: "Vendor Loose Stone Wise Opening Stock",
-    layout: "Same Layout: Tab3, Tab3A",
-    tableName: "Vendor_Stone_Opening",
-    linkedModule: "Stone wise CP & SP Rate Setting",
-    gridFields: [
+    name: "Vendor Stone Opening",
+    type: "vso",
+    openingTab: "layout3",
+    fields: [
+      // {
+      //   name: "Srl",
+      //   label: "Serial No",
+      //   type: "number",
+      //   width: "w-[100px]",
+      //   disable: true,
+      // },
       {
-        name: "Vendor_Group_Name",
-        label: "Vendor Group Name",
-        type: "text",
-        required: true,
+        name: "VendorGroup",
+        label: "Vendor Group",
+        type: "Dropdown",
+        foreignKey: "layout3", // VendorGroupMaster
+        foreignKeyType: "vg",
+        optionValueField: "VendorGrp_ID",
+        optionLabelField: "VendorGrp_Code",
+        width: "w-[180px]",
       },
       {
-        name: "Vendor_Name",
-        label: "Vendor Name",
-        type: "dropdown",
-        idField: "Id_Vendor",
-        required: true,
+        name: "Vendor",
+        label: "Vendor",
+        type: "Dropdown",
+        foreignKey: "layout14", // VendorMaster
+        foreignKeyType: "ven",
+        optionValueField: "Vendor_ID",
+        optionLabelField: "Vendor_Code",
+        width: "w-[180px]",
       },
       {
-        name: "Stone_Main",
+        name: "StoneMain",
         label: "Stone Main",
-        type: "dropdown",
-        required: true,
+        type: "Dropdown",
+        foreignKey: "layout2", // StoneMaster
+        foreignKeyType: "sm",
+        optionValueField: "Stone_ID",
+        optionLabelField: "Code",
+        width: "w-[150px]",
       },
       {
-        name: "Stone_Sub",
+        name: "StoneSub",
         label: "Stone Sub",
-        type: "dropdown",
-        required: true,
+        type: "Dropdown",
+        foreignKey: "layout8", // StoneSubMaster
+        foreignKeyType: "ssm",
+        optionValueField: "Sub_ID",
+        optionLabelField: "Sub_Code",
+        width: "w-[150px]",
       },
-      { name: "Color", label: "Color", type: "text", required: true },
-      { name: "Pcs", label: "Pcs", type: "number", required: true },
+      {
+        name: "Color",
+        label: "Color",
+        type: "Dropdown",
+        foreignKey: "layout1", // ColorMaster
+        foreignKeyType: "cm",
+        optionValueField: "Color_ID",
+        optionLabelField: "Code",
+        width: "w-[120px]",
+      },
+      {
+        name: "Pcs",
+        label: "Pieces",
+        type: "number",
+        width: "w-[100px]",
+      },
+      {
+        name: "Qty",
+        label: "Quantity",
+        type: "number",
+        width: "w-[120px]",
+      },
       {
         name: "DrCr",
-        label: "Dr/Cr",
-        type: "combo",
-        options: ["Dr", "Cr"],
-        required: true,
+        label: "Dr / Cr",
+        type: "Dropdown",
+        options: [
+          { value: "DR", label: "Debit" },
+          { value: "CR", label: "Credit" },
+        ],
+        width: "w-[100px]",
       },
     ],
-    validation: {
-      mandatory: true,
-      duplicateCheck: ["Vendor_Name", "Stone_Main", "Stone_Sub", "Color"],
-      copyFrom: "Stone Master → Pcs column",
-    },
   },
 
+  // ================= layout4 =================
   {
-    tabName: "Tab4",
-    title: "Tab4 Layout (Reserved for future use)",
-    layout: "Same Layout: Tab4",
-    gridFields: [],
-    validation: {},
+    name: "Self Stone Opening",
+    type: "sso",
+    openingTab: "layout4",
+    fields: [
+      // {
+      //   name: "Srl",
+      //   label: "Serial No",
+      //   type: "number",
+      //   width: "w-[100px]",
+      //   disable: true,
+      // },
+      {
+        name: "Department",
+        label: "Department",
+        type: "Dropdown",
+        foreignKey: "layout2", // DepartmentMaster
+        foreignKeyType: "dm",
+        optionValueField: "Department_ID",
+        optionLabelField: "Code",
+        width: "w-[180px]",
+      },
+      {
+        name: "StoneMain",
+        label: "Stone Main",
+        type: "Dropdown",
+        foreignKey: "layout2", // StoneMaster
+        foreignKeyType: "sm",
+        optionValueField: "Stone_ID",
+        optionLabelField: "Code",
+        width: "w-[150px]",
+      },
+      {
+        name: "StoneSub",
+        label: "Stone Sub",
+        type: "Dropdown",
+        foreignKey: "layout8", // StoneSubMaster
+        foreignKeyType: "ssm",
+        optionValueField: "Sub_ID",
+        optionLabelField: "Sub_Code",
+        width: "w-[150px]",
+      },
+      {
+        name: "Color",
+        label: "Color",
+        type: "Dropdown",
+        foreignKey: "layout1", // ColorMaster
+        foreignKeyType: "cm",
+        optionValueField: "Color_ID",
+        optionLabelField: "Code",
+        width: "w-[120px]",
+      },
+      {
+        name: "Pcs",
+        label: "Pieces",
+        type: "number",
+        width: "w-[100px]",
+      },
+      {
+        name: "Qty",
+        label: "Quantity",
+        type: "number",
+        width: "w-[120px]",
+      },
+      {
+        name: "DrCr",
+        label: "Dr / Cr",
+        type: "Dropdown",
+        options: [
+          { value: "DR", label: "Debit" },
+          { value: "CR", label: "Credit" },
+        ],
+        width: "w-[100px]",
+      },
+    ],
   },
 ];

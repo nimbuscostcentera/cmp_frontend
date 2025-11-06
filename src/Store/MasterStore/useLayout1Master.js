@@ -52,7 +52,6 @@ const useLayout1Master = create((set, get) => ({
   addLayout1: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     // console.log(newItem);
-    
     try {
       console.log(type);
       await axios.post(AddLayout1MasterAPI, { ...newItem, type });

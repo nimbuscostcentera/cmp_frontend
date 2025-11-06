@@ -3,7 +3,7 @@ import PrivateLayout from "./PrivateLayout";
 
 function AuthNavigator() {
   const token = localStorage.getItem("accessToken");
-  return true ? <PrivateLayout /> : <Navigate to="/login" replace />;
+  return token ? <PrivateLayout /> : <Navigate to="/login" replace />;
 }
 
 export default AuthNavigator;

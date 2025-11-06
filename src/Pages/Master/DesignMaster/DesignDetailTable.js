@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Table from "../../../Components/Table";
+// import Table from "../../../Components/Table";
 import EstimateTable from "../../../Components/EstimateTable";
 import { toast } from "react-toastify";
 import useDesignDetail from "../../../Store/MasterStore/useDesignDetail";

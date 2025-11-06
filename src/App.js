@@ -8,14 +8,18 @@ import "./GlobalStyle/GlobalTheme.css";
 import "./App.css";
 
 import SpcpMaster from "./Pages/Master/Spcp/SpcpMaster";
-import LayoutMaster from "./Pages/MasterLayouts/LayoutMaster";
+import LayoutMaster from "./Pages/Master/MasterLayouts/LayoutMaster";
 import LayoutPrac from "./Pages/MasterLayout2/LayoutPrac";
 import DesignMaster from "./Pages/Master/DesignMaster/DesignMaster";
 import Register from "./Pages/Register";
 import UserMaster from "./Pages/UserMaster/UserMaster";
 import Setup from "./Pages/Setup/setup";
 import TabForm from "./Pages/OpeningTab/TabForm";
+
+
 import MappingTcTable from "./Pages/MappingTc/MappingTcTable";
+import OpeningTabManager from "./Pages/OpeningTab/OpeningTabManager";
+// import OpeningTabManager from "./Pages/OpeningTab/OpeningTabManager";
 const LoginPage = lazy(() => import("./Pages/Login"));
 const Home = lazy(() => import("./Pages/Home/Home"));
 const File = lazy(() => import("./Pages/File"));
@@ -38,7 +42,7 @@ const router = createBrowserRouter([
       },
       {
         path: "register",
-        // element: withSuspense(Register),
+        element: withSuspense(Register),
       },
     ],
   },
@@ -84,6 +88,10 @@ const router = createBrowserRouter([
       {
         path: "tab",
         element: withSuspense(TabForm),
+      },
+      {
+        path: "tab2",
+        element: withSuspense(OpeningTabManager),
       },
       {
         path: "mappingtc",

@@ -99,7 +99,7 @@ function Register() {
           className="d-none d-md-flex flex-column justify-content-center align-items-center left-section text-white"
         >
           <div className="text-center px-5 d-flex flex-column align-items-center">
-                <img src={ImgLogo} width="20%" alt="Company Logo" />
+            <img src={ImgLogo} width="20%" alt="Company Logo" />
             <h2 className="mb-3 fw-bold">Welcome to Nimbus Systems</h2>
             <p className="lead">
               Build impactful digital solutions with cutting-edge technology.
@@ -200,6 +200,16 @@ function Register() {
                     name="active"
                     checked={formData.active}
                     onChange={InputHandler}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // ⛔ prevent form submit
+                        e.stopPropagation(); // ⛔ prevent toggle on Enter
+                        setFormData((prev) => ({
+                          ...prev,
+                          active: !prev.active,
+                        }));
+                      }
+                    }}
                     className="me-2"
                   />
                   <Form.Label htmlFor="activeCheckbox" className="mb-0">
@@ -208,12 +218,20 @@ function Register() {
                 </Form.Group>
 
                 {/* Show Password */}
+                {/* Show Password */}
                 <Form.Group className="mb-4 d-flex align-items-center">
                   <Form.Check
                     type="checkbox"
                     id="showPasswordCheckbox"
                     checked={showPass}
                     onChange={() => setShowPass((prev) => !prev)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // ✅ stop form submit
+                        e.stopPropagation(); // ✅ stop toggle trigger
+                        setShowPass((prev) => !prev);
+                      }
+                    }}
                     className="me-2"
                   />
                   <Form.Label
@@ -236,7 +254,7 @@ function Register() {
                 >
                   {registerIsLoading ? (
                     <>
-                      <Spinner animation="border" size="sm" className="me-2" />{" "}
+                      <Spinner animation="border" size="sm" className="me-2" />
                       Registering...
                     </>
                   ) : (

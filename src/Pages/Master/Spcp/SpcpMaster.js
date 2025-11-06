@@ -1,16 +1,18 @@
+// StoneRateMaster.jsx (edited)
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import "../../../Components/Table/table.css";
 import useSpcpMaster from "../../../Store/MasterStore/useSpcpMaster";
-// import Layout13Table from "../Layout13/Layout13Table";
 import StoneDetailsModal from "./StoneDetailsModal";
 import useLayout2Master from "../../../Store/MasterStore/useLayout2Master";
 import useLayout8Master from "../../../Store/MasterStore/useLayout8Master";
 import useLayout1Master from "../../../Store/MasterStore/useLayout1Master";
 import SearchableDropDown from "../../../Components/SearchableDropDown";
 import SpcpMasterTable from "./SpcpMasterTable";
-// import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
+
+import MasterDropdownMenu from "../../../Components/Dropdown/MasterDropdown"; // <- new
+import { masters } from "../MasterLayouts/MasterInitialData"; // adjust path if needed
 
 function StoneRateMaster() {
   const inputRef = useRef();
@@ -21,7 +23,6 @@ function StoneRateMaster() {
   const [colorList, setColorList] = useState([]);
   const [mischargeList, setMischargeList] = useState([]);
 
-  // ✅ single object state (not array)
   const [stoneRateHeaders, setStoneRateHeaders] = useState({
     type: "header",
     ID_StoneM: null,
@@ -47,7 +48,7 @@ function StoneRateMaster() {
 
   const dropdownListStoneS = useMemo(
     () =>
-      layout8?.map((item) => ({
+      layout8.map((item) => ({
         label: `${item.Sub_Code}`,
         value: item.Sub_ID,
         Standard_Weight: item.Weight,
@@ -57,7 +58,7 @@ function StoneRateMaster() {
 
   const dropdownListStoneM = useMemo(
     () =>
-      layout2?.map((item) => ({
+      layout2.map((item) => ({
         label: `${item.Code}`,
         value: item.ID,
       })),
@@ -66,7 +67,7 @@ function StoneRateMaster() {
 
   const dropdownListColor = useMemo(
     () =>
-      colorList?.map((item) => ({
+      colorList.map((item) => ({
         label: `${item.Code}`,
         value: item.ID,
       })),
@@ -74,7 +75,7 @@ function StoneRateMaster() {
   );
   const dropdownListMiscCharge = useMemo(
     () =>
-      mischargeList?.map((item) => ({
+      mischargeList.map((item) => ({
         label: `${item.Code}: ${item.Description}`,
         value: item.ID,
       })),
@@ -88,11 +89,8 @@ function StoneRateMaster() {
 
     async function fetchLayout() {
       const res = await fetchLayout1("cm");
-      //    console.log(res,"res")
       setColorList(res);
-
       const res1 = await fetchLayout1("mm");
-      //    console.log(res1,"res1")
       setMischargeList(res1);
     }
     fetchLayout();
@@ -110,10 +108,7 @@ function StoneRateMaster() {
       const regex = /^[0-9]{0,6}$/;
       if (value !== "" && !regex.test(value)) return;
     }
-    setStoneRateHeaders((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setStoneRateHeaders((prev) => ({ ...prev, [name]: value }));
   };
 
   // Calculate SP = CP + Σ(Misc Charges)
@@ -131,10 +126,8 @@ function StoneRateMaster() {
     }));
   }, [stoneRateHeaders.CP, stoneRateHeaders.Details]);
 
-  // Save new record
   const SaveData = () => {
     const { ID_StoneM, Srl_Col, ID_StoneS, ID_Color } = stoneRateHeaders;
-    console.log(stoneRateHeaders, "stoneRateHeaders");
     if (
       !ID_StoneM ||
       !Srl_Col ||
@@ -146,16 +139,32 @@ function StoneRateMaster() {
       toast.error("Missing required fields!");
       return;
     }
+    const tolLower = Number(stoneRateHeaders.Tolerance_Lower);
+    const tolUpper = Number(stoneRateHeaders.Tolerance_Upper);
 
-    if (stoneRateHeaders.Details?.length === 0) {
+    console.log(tolLower, tolUpper, "Tol");
+
+    if (!isNaN(tolLower) && !isNaN(tolUpper)) {
+      if (tolLower >= tolUpper) {
+        toast.error(
+          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+        );
+        return;
+      }
+
+      if (tolLower < 0 || tolUpper < 0) {
+        toast.error("Tolerance values cannot be negative");
+        return;
+      }
+    }
+
+    if (!stoneRateHeaders.Details || stoneRateHeaders.Details.length === 0) {
       toast.error("Please add at least one Misc. Charge in details.");
       return;
     }
-    // console.log(stoneRateHeaders, "🚀 Final Payload (header + details)");
     addSpcp("header", stoneRateHeaders);
   };
 
-  // Handle success & error
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Stone Rate Setting Added Successfully");
@@ -181,24 +190,30 @@ function StoneRateMaster() {
     clearAddState();
   }, [addIsLoading, addIsSuccess, addError]);
 
-  // Save details from modal into header
   const handleSaveDetails = (rows) => {
-    setStoneRateHeaders((prev) => ({
-      ...prev,
-      Details: rows,
-    }));
+    setStoneRateHeaders((prev) => ({ ...prev, Details: rows }));
   };
 
   return (
     <Container fluid className="p-0" style={{ width: "98%" }}>
       <ToastContainer />
       <Row className="w-100">
-        <Col xs={12}>
-          <h5 className="mb-0 text-sm md:text-base">Stone Rate Setting</h5>
-          {/* <hr className="my-1" /> */}
+        <Col
+          xs={12}
+          className="d-flex justify-content-center align-items-center my-2"
+        >
+          <div className="flex items-center gap-2">
+            <label className="mr-2 text-sm font-semibold">Select Master:</label>
+
+            {/* Master dropdown — consistent UI across all masters */}
+            <MasterDropdownMenu
+              masters={masters}
+              layoutMasterRoute="/auth/layout"
+            />
+          </div>
         </Col>
 
-        {/* ✅ Header Table */}
+        {/* rest of your JSX remains unchanged */}
         <Col xs={12}>
           <div
             className="table-wrapper"
@@ -232,7 +247,6 @@ function StoneRateMaster() {
                       options={dropdownListStoneM}
                       handleChange={(e) => {
                         const id = e.target.value;
-
                         setStoneRateHeaders((prev) => ({
                           ...prev,
                           ID_StoneM: id,
@@ -245,6 +259,7 @@ function StoneRateMaster() {
                       defaultval={-1}
                     />
                   </td>
+
                   <td>
                     <SearchableDropDown
                       options={dropdownListStoneS}
@@ -253,7 +268,6 @@ function StoneRateMaster() {
                         const stone_weight = layout8.find(
                           (stone) => stone.Sub_ID === id
                         )?.Weight;
-                        console.log(stone_weight, "💠 Stone Weight from SSM");
                         setStoneRateHeaders((prev) => ({
                           ...prev,
                           Weight: stone_weight,
@@ -267,6 +281,7 @@ function StoneRateMaster() {
                       defaultval={-1}
                     />
                   </td>
+
                   <td>
                     <SearchableDropDown
                       options={dropdownListColor}
@@ -283,6 +298,7 @@ function StoneRateMaster() {
                       defaultval={-1}
                     />
                   </td>
+
                   <td>
                     <input
                       placeholder="Pcs"
@@ -344,10 +360,8 @@ function StoneRateMaster() {
                         value={stoneRateHeaders.totalcharge}
                         type="number"
                         step="0.01"
-                        // style={{ width: "100%" }}
                         readOnly
                       />
-
                       <Button
                         variant="secondary"
                         size="sm"
@@ -374,25 +388,12 @@ function StoneRateMaster() {
               </tbody>
             </table>
           </div>
-          {/* 
-          <div>
-            <Button
-              variant="success"
-              onClick={SaveData}
-              disabled={isDisable}
-              className="text-xs md:text-sm py-1"
-              size="sm"
-            >
-              {addIsLoading ? "Please wait..." : "Submit"}
-            </Button>
-          </div> */}
         </Col>
 
         <Col
           xs={12}
           className="d-flex justify-content-between align-items-center mb-2"
         >
-          {/* Save Button */}
           <Button
             variant="success"
             onClick={SaveData}
@@ -401,7 +402,7 @@ function StoneRateMaster() {
           >
             {addIsLoading ? "Please wait..." : "Submit"}
           </Button>
-          {/* Search Field */}
+
           <div className="flex-grow" style={{ maxWidth: "250px" }}>
             <div className="d-flex align-items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm">
               <i className="bi bi-search text-gray-400 mx-1"></i>
@@ -416,7 +417,6 @@ function StoneRateMaster() {
           </div>
         </Col>
 
-        {/* ✅ Master Table */}
         <Col xs={12}>
           <SpcpMasterTable
             isDisable={isDisable}
@@ -432,7 +432,6 @@ function StoneRateMaster() {
         </Col>
       </Row>
 
-      {/* ✅ Details Modal */}
       {showModal && (
         <StoneDetailsModal
           show={showModal}

@@ -1,17 +1,20 @@
+// DesignMaster.jsx (edited)
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import "../../../Components/Table/table.css";
 import useDesignMaster from "../../../Store/MasterStore/useDesignMaster";
-// import Layout13Table from "../Layout13/Layout13Table";
+
 import useLayout2Master from "../../../Store/MasterStore/useLayout2Master";
-// import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
+import useLayout8Master from "../../../Store/MasterStore/useLayout8Master";
 import useLayout1Master from "../../../Store/MasterStore/useLayout1Master";
 import SearchableDropDown from "../../../Components/SearchableDropDown";
 import DesignDetailsModel from "./DesignDetailsModel";
 import DesignItemTypeModel from "./DesignItemTypeModel";
 import DesignMasterTable from "./DesignMasterTable";
-import useLayout8Master from "../../../Store/MasterStore/useLayout8Master";
+
+import MasterDropdownMenu from "../../../Components/Dropdown/MasterDropdown"; // <- new
+import { masters } from "../MasterLayouts/MasterInitialData"; // adjust path if needed
 
 function DesignMaster() {
   const inputRef = useRef();
@@ -26,11 +29,11 @@ function DesignMaster() {
   const [layoutitm, setLayoutitm] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
   const [fileObj, setFileObj] = useState(null);
-  // ✅ Zustand store
+
   const { addIsLoading, addError, addIsSuccess, addDesign, clearAddState } =
     useDesignMaster();
-  const fileInputRef = useRef(null); // 👈 add this line
-  // Masters for dropdowns
+  const fileInputRef = useRef(null);
+
   const { layout2, fetchLayout2 } = useLayout2Master(); // Stone Master
   const { layout8, fetchLayout8 } = useLayout8Master(); // Stone Sub Master
   const { layout1, fetchLayout1 } = useLayout1Master(); // Size Master
@@ -121,34 +124,44 @@ function DesignMaster() {
     reader.readAsDataURL(file);
   };
 
-  // ✅ Save Data
+  // Save Data
   const SaveData = async () => {
-    const { Design_Code, Design_Description, Design_Group, ID_master } =
-      designHeader;
+    const {
+      Design_Code,
+      Design_Description,
+      Design_Group,
+      ID_master,
+    } = designHeader;
 
     if (!Design_Code || !Design_Description || !Design_Group || !ID_master) {
       toast.error("All mandatory fields must be filled");
       return;
     }
-    console.log(designHeader, "designHeader");
+
     if (
-      designHeader?.Tolerance_Lower !== "" &&
-      designHeader?.Tolerance_Upper !== ""
-    ) {
-      if (designHeader?.Tolerance_Lower >= designHeader?.Tolerance_Upper) {
-        toast.error(
-          "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
-        );
-        return;
-      }
-      if (
-        designHeader?.Tolerance_Lower < 0 ||
-        designHeader?.Tolerance_Upper < 0
-      ) {
-        toast.error("Tolerance values cannot be negative");
-        return;
-      }
-    }
+     designHeader?.Tolerance_Lower !== "" &&
+     designHeader?.Tolerance_Upper !== ""
+   ) {
+     const tolLower = Number(designHeader?.Tolerance_Lower);
+     const tolUpper = Number(designHeader?.Tolerance_Upper);
+
+     if (isNaN(tolLower) || isNaN(tolUpper)) {
+       toast.error("Tolerance values must be valid numbers");
+       return;
+     }
+
+     if (tolLower >= tolUpper) {
+       toast.error(
+         "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
+       );
+       return;
+     }
+
+     if (tolLower < 0 || tolUpper < 0) {
+       toast.error("Tolerance values cannot be negative");
+       return;
+     }
+   }
 
     const formData = new FormData();
     formData.append("Design_Code", designHeader.Design_Code);
@@ -158,7 +171,6 @@ function DesignMaster() {
     formData.append("Tolerance_Lower", designHeader.Tolerance_Lower || "");
     formData.append("Tolerance_Upper", designHeader.Tolerance_Upper || "");
 
-    // ✅ Important: send Design Details as stringified JSON
     const detailsForBackend = designHeader.Details.map((detail) => ({
       Srl_Col: detail.Srl_Col,
       ID_StoneM: detail.ID_StoneM,
@@ -170,24 +182,17 @@ function DesignMaster() {
 
     formData.append("Details", JSON.stringify(detailsForBackend));
 
-    // ✅ Stringify ItemTypeDetails for backend
-    const itemTypeDetailsForBackend = designHeader.ItemTypeDetails.map(
-      (itm) => ({
-        ID_ItemType: itm.ID_ItemType,
-        Approx_Gross_Weight: itm.Approx_Gross_Weight,
-      })
-    );
-    formData.append(
-      "ItemTypeDetails",
-      JSON.stringify(itemTypeDetailsForBackend)
-    );
+    const itemTypeDetailsForBackend = designHeader.ItemTypeDetails.map((itm) => ({
+      ID_ItemType: itm.ID_ItemType,
+      Approx_Gross_Weight: itm.Approx_Gross_Weight,
+    }));
+    formData.append("ItemTypeDetails", JSON.stringify(itemTypeDetailsForBackend));
 
     if (fileObj) formData.append("Picture", fileObj);
 
-    await addDesign("header", formData); // ✅ use Zustand addDesign
+    await addDesign("header", formData);
   };
 
-  // ✅ After Save success or error
   useEffect(() => {
     if (addIsSuccess && !addIsLoading && !addError) {
       toast.success("Design Master Added Successfully");
@@ -205,7 +210,7 @@ function DesignMaster() {
       setPreviewImage(null);
       setFileObj(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = null; // 👈 reset file input
+        fileInputRef.current.value = null;
       }
     }
     if (addError) toast.error(addError);
@@ -223,16 +228,22 @@ function DesignMaster() {
     <Container fluid className="p-0" style={{ width: "98%" }}>
       <ToastContainer />
       <Row className="w-100">
-        <Col xs={12}>
-          <h5 className="mb-0 text-sm md:text-base">Design Master</h5>
-          {/* <hr className="my-1" /> */}
-        </Col>
+        <Col xs={12} className="d-flex justify-content-center align-items-center my-2">
+  <div className="flex items-center gap-2">
+    <label className="mr-2 text-sm font-semibold">Select Master:</label>
 
+    {/* Master dropdown — consistent UI across all masters */}
+    <MasterDropdownMenu
+      masters={masters}
+      layoutMasterRoute="/auth/layout"
+    />
+  </div>
+</Col>
+
+
+        {/* rest of your JSX (unchanged) */}
         <Col xs={12}>
-          <div
-            className="table-wrapper"
-            style={{ overflowX: "auto", marginBottom: "10px" }}
-          >
+          <div className="table-wrapper" style={{ overflowX: "auto", marginBottom: "10px" }}>
             <table className="text-sm">
               <thead className="tab-head">
                 <tr>
@@ -278,10 +289,7 @@ function DesignMaster() {
                     <SearchableDropDown
                       options={dropdowndgm}
                       handleChange={(e) =>
-                        setDesignHeader((prev) => ({
-                          ...prev,
-                          Design_Group: e.target.value,
-                        }))
+                        setDesignHeader((prev) => ({ ...prev, Design_Group: e.target.value }))
                       }
                       selectedVal={designHeader.Design_Group || -1}
                       placeholder={"--Select Group--"}
@@ -292,10 +300,7 @@ function DesignMaster() {
                     <SearchableDropDown
                       options={dropdownitem}
                       handleChange={(e) =>
-                        setDesignHeader((prev) => ({
-                          ...prev,
-                          ID_master: e.target.value,
-                        }))
+                        setDesignHeader((prev) => ({ ...prev, ID_master: e.target.value }))
                       }
                       selectedVal={designHeader.ID_master || -1}
                       placeholder={"--Select Item--"}
@@ -306,7 +311,7 @@ function DesignMaster() {
                     <input
                       type="file"
                       accept="image/*"
-                      ref={fileInputRef} // 👈 add ref here
+                      ref={fileInputRef}
                       onChange={handleImageUpload}
                       className="input-cell text-xs md:text-sm"
                     />
@@ -340,15 +345,8 @@ function DesignMaster() {
                         readOnly
                         style={{ width: "50px", marginRight: "5px" }}
                       />
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowModal(true)}
-                      >
-                        <i
-                          className="bi bi-pencil-square"
-                          style={{ fontSize: "12px" }}
-                        ></i>
+                      <Button variant="secondary" size="sm" onClick={() => setShowModal(true)}>
+                        <i className="bi bi-pencil-square" style={{ fontSize: "12px" }}></i>
                       </Button>
                     </div>
                   </td>
@@ -361,15 +359,8 @@ function DesignMaster() {
                         readOnly
                         style={{ width: "50px", marginRight: "5px" }}
                       />
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowModal1(true)}
-                      >
-                        <i
-                          className="bi bi-pencil-square"
-                          style={{ fontSize: "12px" }}
-                        ></i>
+                      <Button variant="secondary" size="sm" onClick={() => setShowModal1(true)}>
+                        <i className="bi bi-pencil-square" style={{ fontSize: "12px" }}></i>
                       </Button>
                     </div>
                   </td>
@@ -379,11 +370,7 @@ function DesignMaster() {
           </div>
         </Col>
 
-        <Col
-          xs={12}
-          className="d-flex justify-content-between align-items-center mb-2"
-        >
-          {/* Search Field */}
+        <Col xs={12} className="d-flex justify-content-between align-items-center mb-2">
           <div className="flex-grow" style={{ maxWidth: "250px" }}>
             <div className="d-flex align-items-center border border-blue-400 rounded-md p-1 text-xs md:text-sm">
               <i className="bi bi-search text-gray-400 mx-1"></i>
@@ -397,13 +384,7 @@ function DesignMaster() {
             </div>
           </div>
 
-          {/* Save Button */}
-          <Button
-            variant="success"
-            onClick={SaveData}
-            disabled={isDisable}
-            size="sm"
-          >
+          <Button variant="success" onClick={SaveData} disabled={isDisable} size="sm">
             {addIsLoading ? "Please wait..." : "Submit"}
           </Button>
         </Col>

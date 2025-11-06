@@ -15,13 +15,13 @@ function DesignItemTypeModel({ show, handleClose, rows, setRows, itmOptions }) {
       if (rows && rows.length > 0) {
         setLocalRows([...rows]);
       } else {
-        setLocalRows([
-          {
-            rowid: 1,
-            ID_ItemType: null,
-            Approx_Gross_Weight: 0,
-          },
-        ]);
+         setLocalRows([
+           {
+             rowid: 1,
+             ID_ItemType: null,
+             Approx_Gross_Weight: 0,
+           },
+         ]);
       }
     }
   }, [show]);

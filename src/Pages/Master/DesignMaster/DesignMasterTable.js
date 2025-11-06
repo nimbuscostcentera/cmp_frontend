@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import Table from "../../../Components/Table";
+import Table2 from "../../../Components/Table2";
 import { toast } from "react-toastify";
 import useDesignMaster from "../../../Store/MasterStore/useDesignMaster";
 import ReusableModal from "../../../Components/ReusableModal";
 import DesignDetailTable from "./DesignDetailTable";
 import DesignItemTypeTable from "./DesignItemTypeTable";
-import Table2 from "../../../Components/Table2";
 
 function DesignMasterTable({
   setIsDisable,
@@ -81,21 +80,30 @@ function DesignMasterTable({
       toast.error("Design Description is required");
       return;
     }
-
+   
     // console.log(editedData?.Tolerance_Lower, editedData?.Tolerance_Upper);
+    const tolLower = Number(editedData?.Tolerance_Lower);
+    const tolUpper = Number(editedData?.Tolerance_Upper);
+
     if (
       editedData?.Tolerance_Lower !== "" &&
       editedData?.Tolerance_Upper !== "" &&
       editedData?.Tolerance_Lower !== null &&
       editedData?.Tolerance_Upper !== null
     ) {
-      if (editedData?.Tolerance_Lower >= editedData?.Tolerance_Upper) {
+      if (isNaN(tolLower) || isNaN(tolUpper)) {
+        toast.error("Tolerance values must be valid numbers");
+        return;
+      }
+
+      if (tolLower >= tolUpper) {
         toast.error(
           "Tolerance Lower cannot be greater than or equal to Tolerance Upper"
         );
         return;
       }
-      if (editedData?.Tolerance_Lower < 0 || editedData?.Tolerance_Upper < 0) {
+
+      if (tolLower < 0 || tolUpper < 0) {
         toast.error("Tolerance values cannot be negative");
         return;
       }
@@ -280,7 +288,7 @@ function DesignMasterTable({
           }
 
           if (colKey === "Tolerance_Lower" || colKey === "Tolerance_Upper") {
-            const regex = /^[0-9]{0,6}$/;
+           const regex = /^[0-9]{0,6}$/;
             if (newValue !== "" && !regex.test(newValue)) return;
           }
           if (colKey === "Gross_Weight") {

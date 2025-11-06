@@ -1,23 +1,22 @@
-// pages/LayoutMaster/LayoutTable.js
 import React, { useEffect, useRef, useState } from "react";
-import Table from "../../Components/Table";
+import Table from "../../../Components/Table";
 import { toast } from "react-toastify";
 
 // Import all layout hooks
-import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
-import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
-import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
-import useLayout4Master from "../../Store/MasterStore/useLayout4Master";
-import useLayout5Master from "../../Store/MasterStore/useLayout5Master";
-import useLayout6Master from "../../Store/MasterStore/useLayout6Master";
-import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
-import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
-import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
-import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
-import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
-import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
-import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
-import useLayout14Master from "../../Store/MasterStore/useLayout14Master";
+import useLayout1Master from "../../../Store/MasterStore/useLayout1Master";
+import useLayout2Master from "../../../Store/MasterStore/useLayout2Master";
+import useLayout3Master from "../../../Store/MasterStore/useLayout3Master";
+import useLayout4Master from "../../../Store/MasterStore/useLayout4Master";
+import useLayout5Master from "../../../Store/MasterStore/useLayout5Master";
+import useLayout6Master from "../../../Store/MasterStore/useLayout6Master";
+import useLayout7Master from "../../../Store/MasterStore/useLayout7Master";
+import useLayout8Master from "../../../Store/MasterStore/useLayout8Master";
+import useLayout9Master from "../../../Store/MasterStore/useLayout9Master";
+import useLayout10Master from "../../../Store/MasterStore/useLayout10Master";
+import useLayout11Master from "../../../Store/MasterStore/useLayout11Master";
+import useLayout12Master from "../../../Store/MasterStore/useLayout12Master";
+import useLayout13Master from "../../../Store/MasterStore/useLayout13Master";
+import useLayout14Master from "../../../Store/MasterStore/useLayout14Master";
 
 function LayoutTable({
   Col,
@@ -28,6 +27,7 @@ function LayoutTable({
   layout,
   currentMaster,
   layoutData: items = [],
+  foreignData = {}, // ✅ ADD THIS LINE
 }) {
   const editInputRef = useRef(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -92,10 +92,9 @@ function LayoutTable({
     foreignKeyCode: col.foreignKeyCode || null,
     optionValueField: col.optionValueField,
     optionLabelField: col.optionLabelField,
-    foreignOptions:
-      col.foreignKey && hooks[col.foreignKey]
-        ? hooks[col.foreignKey].data || []
-        : [],
+    foreignOptions: foreignData[col.name] || [],
+    options: col.options || [], // ✅ ADD THIS LINE
+
     render:
       col.type === "checkbox"
         ? (value) => (
@@ -212,6 +211,13 @@ function LayoutTable({
     }
   }, [deleteIsSuccess, deleteError]);
 
+  useEffect(() => {
+    // When master changes, reset edit state
+    setParams({ ActionID: -1, IsAction: false });
+    setEditedData({});
+    setIsDisable(false);
+  }, [type, setIsDisable]);
+
   return (
     <div className="table-box">
       <Table
@@ -224,11 +230,7 @@ function LayoutTable({
         handleDelete={handleDelete}
         OnChangeHandler={(i, e) => {
           const { name, value, type, checked } = e.target;
-          const colDef = Col.find((c) => c.name === name);
-          if (colDef?.required && type !== "checkbox" && value === "") {
-            toast.warn(`${colDef.label} cannot be empty`);
-            return;
-          }
+          // ✅ Just update state — don't block typing or show warnings here
           setEditedData((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,

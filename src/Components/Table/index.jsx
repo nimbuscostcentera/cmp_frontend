@@ -2,6 +2,8 @@ import React, { useRef } from "react";
 import defaultimage from "../../Asset/default.png";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Action button
 const ActionButton = ({ icon, color, onClick, disabled, title }) => (
@@ -17,7 +19,7 @@ const ActionButton = ({ icon, color, onClick, disabled, title }) => (
   </button>
 );
 
-// ✅ Cell renderer with foreign key label support
+// ✅ Cell renderer with foreign key label support and select-on-edit for foreign keys
 const RenderCellContent = ({
   item,
   field,
@@ -28,7 +30,9 @@ const RenderCellContent = ({
   useInputRef,
 }) => {
   const isEditing = ActionId === index && !field?.isNotEditable;
+  const isCodeField = (field?.fieldname || "").toLowerCase().includes("code");
 
+  // Checkbox editable
   if (isEditing && field.type === "checkbox") {
     return (
       <input
@@ -38,11 +42,85 @@ const RenderCellContent = ({
         ref={field?.isUseInputRef ? useInputRef : null}
         onChange={(e) => OnChangeHandler(index, e)}
         className="cursor-pointer"
+        disabled={isCodeField}
       />
     );
   }
 
+  // 🧩 Dropdown for both foreign key and hardcoded options
+  if (
+    isEditing &&
+    (field.foreignKey || (field.options && field.options.length))
+  ) {
+    const options = field.foreignKey
+      ? Array.isArray(field.foreignOptions)
+        ? field.foreignOptions
+        : []
+      : Array.isArray(field.options)
+      ? field.options
+      : [];
+
+    const val = EditedData[field.fieldname] ?? item[field.fieldname] ?? "";
+
+    return (
+      <select
+        name={field.fieldname}
+        value={val}
+        ref={field?.isUseInputRef ? useInputRef : null}
+        onChange={(e) => OnChangeHandler(index, e)}
+        className="form-select w-full border rounded px-1 py-0.5 text-sm"
+      >
+        <option value="" className="text-center">
+          -- Select --
+        </option>
+        {options.map((opt, i) => {
+          const value =
+            (field.optionValueField && opt[field.optionValueField]) ||
+            opt.value ||
+            opt.id ||
+            opt.ID ||
+            opt[Object.keys(opt)[0]];
+          const label =
+            (field.optionLabelField && opt[field.optionLabelField]) ||
+            opt.label ||
+            opt.Code ||
+            opt[Object.keys(opt)[1]] ||
+            value;
+          return (
+            <option key={i} value={value}>
+              {label}
+            </option>
+          );
+        })}
+      </select>
+    );
+  }
+
+  // Input editable
+  // Editable: input or dropdown (for foreign key)
   if (isEditing) {
+    console.log("Foreign options for", field.fieldname, field.foreignOptions);
+    // 🔽 Foreign key dropdown
+    if (field.foreignKey && Array.isArray(field.foreignOptions)) {
+      return (
+        <select
+          name={field.fieldname}
+          value={EditedData[field.fieldname] || ""}
+          onChange={(e) => OnChangeHandler(index, e)}
+          ref={field?.isUseInputRef ? useInputRef : null}
+          className="form-select w-full border rounded px-1 py-0.5 text-sm"
+        >
+          <option value="">-- Select --</option>
+          {field.foreignOptions.map((opt, i) => (
+            <option key={i} value={opt[field.optionValueField || "ID"]}>
+              {opt[field.optionLabelField || "Name"]}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    // 🧾 Regular input field
     return (
       <input
         name={field.fieldname}
@@ -53,11 +131,12 @@ const RenderCellContent = ({
         type={field.type || "text"}
         onChange={(e) => OnChangeHandler(index, e)}
         className="input-cell form-input w-full"
-        readOnly={field?.isReadOnly || false}
+        readOnly={field?.isReadOnly || isCodeField}
       />
     );
   }
 
+  // Image view
   if (field.type === "Img") {
     const imageUrl = item[field.fieldname] || defaultimage;
     return (
@@ -73,6 +152,7 @@ const RenderCellContent = ({
     );
   }
 
+  // Checkbox view
   if (field.type === "checkbox") {
     return (
       <span className="text-green-600 font-bold text-center">
@@ -81,22 +161,29 @@ const RenderCellContent = ({
     );
   }
 
-  // 🔹 Foreign key display
-  if (field.foreignKey) {
-    const label =
-      item[field.foreignKeyCode] ||
-      item[`${field.fieldname}_Code`] ||
-      item[`${field.fieldname}Code`] ||
-      item[`${field.fieldname}_Label`] ||
-      item[field.optionLabelField] ||
-      item[field.fieldname];
-    return label || "-";
-  }
+// ✅ Special case: Customer Master - show ID_Type_Display instead of 1/2
+if (field.fieldname === "ID_Type" && item.ID_Type_Display) {
+  return item.ID_Type_Display || "-";
+}
+
+// Foreign key display (non-edit)
+if (field.foreignKey) {
+  const label =
+    item[field.foreignKeyCode] ||
+    item[`${field.fieldname}_Code`] ||
+    item[`${field.fieldname}Code`] ||
+    item[`${field.fieldname}_Label`] ||
+    item[field.optionLabelField] ||
+    item[field.fieldname];
+
+  return label || "-";
+}
+
 
   return item[field.fieldname] || "-";
 };
 
-// ✅ Main Table component
+// ✅ Main Table component (unchanged props signature)
 const Table = ({
   tab = [],
   Col = [],
@@ -115,6 +202,24 @@ const Table = ({
   const scrollRef = useRef(null);
 
   const renderRowNumber = (index) => index + 1;
+
+  // ✅ New save handler wrapper to validate Description
+  const handleSave = (index) => {
+    const descriptionField = Col.find(
+      (col) => col.fieldname?.toLowerCase() === "description"
+    );
+
+    if (descriptionField) {
+      const descValue =
+        EditedData["Description"] || EditedData["description"] || "";
+      if (!descValue.trim()) {
+        toast.error("Description cannot be empty");
+        return;
+      }
+    }
+
+    OnSaveHandler(index);
+  };
 
   const renderLoadingSkeleton = () =>
     [...Array(12)].map((_, index) => (
@@ -200,7 +305,7 @@ const Table = ({
               <ActionButton
                 icon="floppy"
                 color={index === ActionId ? "green" : "lightgrey"}
-                onClick={() => OnSaveHandler(index)}
+                onClick={() => handleSave(index)} // ✅ Custom save validation
                 disabled={ActionId == null || ActionId === -1}
                 title="Save"
               />
@@ -215,6 +320,7 @@ const Table = ({
               color="#ff0000"
               onClick={() => handleDelete(index)}
               title="Delete"
+              disabled={ActionId !== null && ActionId !== -1} // ✅ Disable delete during edit
             />
           </td>
         )}
@@ -245,12 +351,18 @@ const Table = ({
               ))}
               {isEdit && (
                 <>
-                  <th className="px-1 py-1 text-center w-12 font-normal">Edit</th>
-                  <th className="px-1 py-1 text-center w-12 font-normal">Save</th>
+                  <th className="px-1 py-1 text-center w-12 font-normal">
+                    Edit
+                  </th>
+                  <th className="px-1 py-1 text-center w-12 font-normal">
+                    Save
+                  </th>
                 </>
               )}
               {isDelete && (
-                <th className="px-1 py-1 text-center w-12 font-normal">Delete</th>
+                <th className="px-1 py-1 text-center w-12 font-normal">
+                  Delete
+                </th>
               )}
             </tr>
           </thead>

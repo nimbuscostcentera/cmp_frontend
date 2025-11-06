@@ -1,7 +1,7 @@
 // LayoutMasterUI.jsx
 import React, { useState } from "react";
 import { ToastContainer } from "react-toastify";
-import { masters } from "../MasterLayouts/MasterInitialData";
+import { masters } from "../Master/MasterLayouts/MasterInitialData";
 
 function LayoutPrac() {
   const [ masterType, setMasterType ] = useState("im");

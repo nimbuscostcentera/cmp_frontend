@@ -69,32 +69,35 @@ function StoneDetailsModal({
   };
 
   // ✅ Save only when Save button is clicked
-  const saveItem = () => {
-    if (localRows.length === 0) {
-      toast.error("No data to save");
-      return;
-    }
+const saveItem = () => {
+  if (localRows.length === 0) {
+    toast.error("No data to save");
+    return;
+  }
 
-    // console.log(localRows)
+  // console.log(localRows)
 
-    // ✅ Validation: ensure both fields are filled for every row
-    const hasEmptyField = localRows.some(
-      (row) =>
-        !row.ID_MiscCharge || // null or empty
-        row.Amount === "" ||
-        row.Amount === 0 ||
-        isNaN(row.Amount)
+  // ✅ Validation: ensure both fields are filled for every row
+  const hasEmptyField = localRows.some(
+    (row) =>
+      !row.ID_MiscCharge || // null or empty
+      row.Amount === "" ||
+      row.Amount === 0 ||
+      isNaN(row.Amount)
+  );
+
+  if (hasEmptyField) {
+    toast.error(
+      "Please fill all required fields!"
     );
+    return;
+  }
 
-    if (hasEmptyField) {
-      toast.error("Please fill all required fields!");
-      return;
-    }
+  // ✅ Passed validation — save the data
+  setRows(localRows);
+  handleClose();
+};
 
-    // ✅ Passed validation — save the data
-    setRows(localRows);
-    handleClose();
-  };
 
   // ❌ Close modal without saving
   const handleModalClose = () => {

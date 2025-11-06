@@ -1,4 +1,4 @@
-
+// LayoutMaster.jsx (fully edited to support multi-select fields)
 import React, {
   useEffect,
   useRef,
@@ -7,35 +7,64 @@ import React, {
   useMemo,
 } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // <-- added for redirection
-import useLayout1Master from "../../Store/MasterStore/useLayout1Master";
-import useLayout2Master from "../../Store/MasterStore/useLayout2Master";
-import useLayout3Master from "../../Store/MasterStore/useLayout3Master";
-import useLayout4Master from "../../Store/MasterStore/useLayout4Master";
-import useLayout5Master from "../../Store/MasterStore/useLayout5Master";
-import useLayout6Master from "../../Store/MasterStore/useLayout6Master";
-import useLayout7Master from "../../Store/MasterStore/useLayout7Master";
-import useLayout8Master from "../../Store/MasterStore/useLayout8Master";
-import useLayout9Master from "../../Store/MasterStore/useLayout9Master";
-import useLayout10Master from "../../Store/MasterStore/useLayout10Master";
-import useLayout11Master from "../../Store/MasterStore/useLayout11Master";
-import useLayout12Master from "../../Store/MasterStore/useLayout12Master";
-import useLayout13Master from "../../Store/MasterStore/useLayout13Master";
-import useLayout14Master from "../../Store/MasterStore/useLayout14Master";
+import { useNavigate, useLocation } from "react-router-dom";
+import useLayout1Master from "../../../Store/MasterStore/useLayout1Master";
+import useLayout2Master from "../../../Store/MasterStore/useLayout2Master";
+import useLayout3Master from "../../../Store/MasterStore/useLayout3Master";
+import useLayout4Master from "../../../Store/MasterStore/useLayout4Master";
+import useLayout5Master from "../../../Store/MasterStore/useLayout5Master";
+import useLayout6Master from "../../../Store/MasterStore/useLayout6Master";
+import useLayout7Master from "../../../Store/MasterStore/useLayout7Master";
+import useLayout8Master from "../../../Store/MasterStore/useLayout8Master";
+import useLayout9Master from "../../../Store/MasterStore/useLayout9Master";
+import useLayout10Master from "../../../Store/MasterStore/useLayout10Master";
+import useLayout11Master from "../../../Store/MasterStore/useLayout11Master";
+import useLayout12Master from "../../../Store/MasterStore/useLayout12Master";
+import useLayout13Master from "../../../Store/MasterStore/useLayout13Master";
+import useLayout14Master from "../../../Store/MasterStore/useLayout14Master";
 import { masters } from "./MasterInitialData";
 import LayoutTable from "./LayoutTable";
-
-
+import MasterDropdownMenu from "../../../Components/Dropdown/MasterDropdown"; // <- existing
+import MultiSelectInput from "./MultiSelectInput "; // multi-select component you saved from canvas
 
 function LayoutMaster() {
   const inputRef = useRef();
   const [searchData, setSearchData] = useState("");
   const [isDisable, setIsDisable] = useState(false);
   const [textDetail, setTextDetail] = useState("");
-  const [mastertype, setMasterType] = useState("im");
+
   const [foreignData, setForeignData] = useState({});
 
-  const navigate = useNavigate(); // <-- initialize navigation
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // single source of truth for selected master type
+  const [mastertype, setMasterType] = useState(null);
+
+  useEffect(() => {
+    const routeType = location?.state?.type;
+    const storedType = localStorage.getItem("selectedMasterType");
+
+    const validRoute =
+      routeType && masters.find((m) => m.type === routeType)?.type;
+    const validStored =
+      storedType && masters.find((m) => m.type === storedType)?.type;
+
+    const initial = validRoute || validStored || masters[0]?.type || null;
+
+    setMasterType(initial);
+
+    if (routeType) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masters]);
+
+  useEffect(() => {
+    if (mastertype) {
+      localStorage.setItem("selectedMasterType", mastertype);
+    }
+  }, [mastertype]);
 
   // Active master details
   const currentMaster = masters.find((m) => m.type === mastertype);
@@ -94,6 +123,7 @@ function LayoutMaster() {
   );
 
   const activeHook = layoutHooks[layout] || {};
+
   const {
     addError,
     addIsLoading,
@@ -106,43 +136,44 @@ function LayoutMaster() {
   } = activeHook;
 
   const layoutData = activeHook[layout] || [];
+
   const capitalizedLayout = layout.charAt(0).toUpperCase() + layout.slice(1);
 
   const fetchFn =
     activeHook[`fetch${capitalizedLayout}`] ||
     activeHook[`fetch${capitalizedLayout}Master`];
+
   const addFn =
     activeHook[`add${capitalizedLayout}`] ||
     activeHook[`add${capitalizedLayout}Master`];
 
-  // Initialize form data
+  // Initialize form data (multiselect fields begin as arrays)
   const [itemData, setItemData] = useState(
-    fields.reduce(
-      (acc, f) => ({
-        ...acc,
-        [f.name]: f.type === "checkbox" ? false : "",
-      }),
-      {}
-    )
+    fields.reduce((acc, f) => {
+      if (f.type === "checkbox") return { ...acc, [f.name]: false };
+      if (f.multiple) return { ...acc, [f.name]: [] };
+      return { ...acc, [f.name]: "" };
+    }, {})
   );
 
   // Reset when master changes
   useEffect(() => {
     setItemData(
-      fields.reduce(
-        (acc, f) => ({
-          ...acc,
-          [f.name]: f.type === "checkbox" ? false : "",
-        }),
-        {}
-      )
+      fields.reduce((acc, f) => {
+        if (f.type === "checkbox") return { ...acc, [f.name]: false };
+        if (f.multiple) return { ...acc, [f.name]: [] };
+        return { ...acc, [f.name]: "" };
+      }, {})
     );
     inputRef.current?.focus();
   }, [mastertype, fields]);
 
-  // Fetch data
+  // Fetch data + foreign masters
   const fetchAllRequiredData = useCallback(async () => {
     if (!fetchFn) return;
+
+    // don't fetch for static masters (they are routed)
+    if (currentMaster?.isStatic) return;
 
     try {
       await fetchFn(mastertype);
@@ -173,7 +204,7 @@ function LayoutMaster() {
         }
       }
     }
-  }, [fetchFn, fields, layoutHooks, mastertype]);
+  }, [fetchFn, fields, layoutHooks, mastertype, currentMaster]);
 
   useEffect(() => {
     fetchAllRequiredData();
@@ -185,35 +216,57 @@ function LayoutMaster() {
     }
   }, [addIsSuccess, updateIsSuccess, deleteIsSuccess]);
 
+  // Build foreignData map from hooks
   useEffect(() => {
     const updatedForeignData = {};
     fields.forEach((f) => {
       if (f.foreignKey && f.foreignKeyType) {
         const fkHook = layoutHooks[f.foreignKey];
         if (fkHook) {
-          updatedForeignData[f.name] = fkHook[f.foreignKey] || [];
+          // try a few keys — keeps existing behavior but safer
+          updatedForeignData[f.name] =
+            fkHook[f.foreignKey] ||
+            fkHook[f.foreignKey + "Master"] ||
+            fkHook[Object.keys(fkHook)[0]] ||
+            [];
         }
       }
     });
     setForeignData(updatedForeignData);
   }, [fields, layoutHooks]);
 
-  // Save handler
   const SaveData = () => {
     for (const f of fields) {
-      // Skip checkbox
       if (f.type === "checkbox") continue;
 
-      // Only check required fields
-      if (f.required && !itemData[f.name]) {
-        toast.error(`${f.label} is mandatory`);
-        return;
+      if (f.required) {
+        const val = itemData[f.name];
+        if (f.multiple) {
+          if (!Array.isArray(val) || val.length === 0) {
+            toast.error(`${f.label} is mandatory`);
+            return;
+          }
+        } else {
+          if (!val) {
+            toast.error(`${f.label} is mandatory`);
+            return;
+          }
+        }
       }
     }
 
     if (addFn) {
       try {
-        addFn(mastertype, itemData);
+        const payload = { ...itemData };
+
+        // ✅ convert arrays into CSV strings, ONLY for multi-select fields
+        fields.forEach((f) => {
+          if (f.multiple && Array.isArray(payload[f.name])) {
+            payload[f.name] = payload[f.name].join(",");
+          }
+        });
+
+        addFn(mastertype, payload);
       } catch {
         addFn(itemData);
       }
@@ -227,13 +280,11 @@ function LayoutMaster() {
     if (addIsSuccess) {
       toast.success(`${currentMaster?.name} added successfully`);
       setItemData(
-        fields.reduce(
-          (acc, f) => ({
-            ...acc,
-            [f.name]: f.type === "checkbox" ? false : "",
-          }),
-          {}
-        )
+        fields.reduce((acc, f) => {
+          if (f.type === "checkbox") return { ...acc, [f.name]: false };
+          if (f.multiple) return { ...acc, [f.name]: [] };
+          return { ...acc, [f.name]: "" };
+        }, {})
       );
     }
     if (addError) toast.error(addError);
@@ -248,11 +299,20 @@ function LayoutMaster() {
     }
   };
 
-  // 🧠 Handle input change with validations
   const handleInputChange = (e, f) => {
     let value = e.target.value;
 
-    // ✅ 1. If field has decimal(5.2) validation
+    // Prevent negative input for number fields
+    if (f.type === "number") {
+      if (e.nativeEvent && (e.nativeEvent.data === "-" || value === "-"))
+        return;
+
+      if (value !== "" && Number(value) < 0) {
+        value = "0";
+      }
+    }
+
+    // decimal52 validation
     if (f.validate === "decimal52") {
       const regex = /^\d{0,5}(\.\d{0,2})?$/;
       if (!regex.test(value) && value !== "") {
@@ -260,12 +320,19 @@ function LayoutMaster() {
       }
     }
 
-    // ✅ 2. Enforce maxLength
+    // block special chars for Code
+    if (f.name.toLowerCase() === "code") {
+      const regex = /^[A-Za-z0-9_]*$/;
+      if (!regex.test(value)) {
+        toast.error("Special characters are not allowed in Code field");
+        return;
+      }
+    }
+
     if (f.maxLength && value.length > f.maxLength) {
       value = value.slice(0, f.maxLength);
     }
 
-    // ✅ 3. Update state
     setItemData((prev) => ({ ...prev, [f.name]: value }));
   };
 
@@ -274,38 +341,20 @@ function LayoutMaster() {
     <div className="w-[98%] p-2">
       <ToastContainer />
 
-      {/* Master Selector */}
-      <div className="mb-3">
-        <label className="mr-2 text-sm font-semibold">Select Master:</label>
-        <select
-          value={masters.find((m) => m.type === mastertype)?.name}
-          onChange={(e) => {
-            const selectedMaster = masters.find((m) => m.name === e.target.value);
-            if (!selectedMaster) return;
-
-            // <-- NEW: if static master, redirect to its route
-            if (selectedMaster?.isStatic && selectedMaster?.redirectTo) {
-              navigate(selectedMaster.redirectTo);
-              return;
-            }
-
-            // otherwise behave as before
-            setMasterType(selectedMaster.type);
-          }}
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
-        >
-          {masters.map((m) => (
-            <option key={m.name} value={m.name}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+      {/* Top header: Master dropdown + title */}
+      <div className="flex justify-center items-center h-full w-full">
+        <div className="flex items-center gap-2">
+          <label className="mr-2 text-sm font-semibold">Select Master:</label>
+          <MasterDropdownMenu
+            masters={masters}
+            setType={setMasterType}
+            selectedType={mastertype}
+            layoutMasterRoute="/auth/master"
+          />
+        </div>
       </div>
 
-      <div className="w-full">
-        <h1 className="mb-0 text-sm font-semibold">{currentMaster?.name}</h1>
-        <hr className="my-1" />
-      </div>
+      <hr className="my-1" />
 
       {/* Input Section */}
       <div className="w-full mt-2">
@@ -317,7 +366,8 @@ function LayoutMaster() {
                   <th className="px-2 py-1"></th>
                   {fields.map((f) => (
                     <th key={f.name} className="px-2 py-1">
-                      {f.label}*
+                      {f.label}{" "}
+                      {f.required && <span className="text-red-600">*</span>}
                     </th>
                   ))}
                 </tr>
@@ -325,62 +375,99 @@ function LayoutMaster() {
               <tbody>
                 <tr>
                   <td className="px-2 py-1"></td>
-                  {fields.map((f, idx) => (
-                    <td key={f.name} className="px-2 py-1">
-                      {f.type === "select" ? (
-                        <select
-                          name={f.name}
-                          value={itemData[f.name] ?? ""}
-                          onChange={(e) =>
-                            setItemData((prev) => ({
-                              ...prev,
-                              [f.name]: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
-                        >
-                          <option value="">Select {f.label}</option>
-                          {f.foreignKey &&
-                          Array.isArray(foreignData[f.name]) &&
-                          foreignData[f.name].length > 0
-                            ? foreignData[f.name].map((d, i) => (
-                                <option key={i} value={d[f.optionValueField]}>
-                                  {d[f.optionLabelField]}
-                                </option>
-                              ))
-                            : f.options?.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                        </select>
-                      ) : f.type === "checkbox" ? (
-                        <input
-                          type="checkbox"
-                          name={f.name}
-                          checked={Boolean(itemData[f.name])}
-                          onChange={(e) =>
-                            setItemData((prev) => ({
-                              ...prev,
-                              [f.name]: e.target.checked,
-                            }))
-                          }
-                          onKeyDown={handleKeyDown}
-                          ref={idx === 0 ? inputRef : null}
-                        />
-                      ) : (
-                        <input
-                          type={f.type || "text"}
-                          name={f.name}
-                          value={itemData[f.name] ?? ""}
-                          onChange={(e) => handleInputChange(e, f)}
-                          ref={idx === 0 ? inputRef : null}
-                          maxLength={f.maxLength || undefined}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs"
-                        />
-                      )}
-                    </td>
-                  ))}
+                  {fields.map((f, idx) => {
+                    // support both 'options' and 'Options' keys
+                    const rawOptions = f.options || f.Options || [];
+                    const mappedOptions = rawOptions.map((o) => ({
+                      value: o.value ?? o.Value ?? o.id ?? o,
+                      label: o.label ?? o.Label ?? o.name ?? o,
+                    }));
+
+                    const fkOptions =
+                      f.foreignKey &&
+                      Array.isArray(foreignData[f.name]) &&
+                      foreignData[f.name].length > 0
+                        ? foreignData[f.name].map((d) => ({
+                            value:
+                              d[f.optionValueField] ??
+                              d[f.optionValueField?.toLowerCase()] ??
+                              d.id,
+                            label:
+                              d[f.optionLabelField] ??
+                              d[f.optionLabelField?.toLowerCase()] ??
+                              d[Object.keys(d)[0]],
+                          }))
+                        : [];
+
+                    const optionsToUse =
+                      fkOptions.length > 0 ? fkOptions : mappedOptions;
+
+                    return (
+                      <td key={f.name} className="px-2 py-1">
+                        {f.type === "select" && f.multiple ? (
+                          <MultiSelectInput
+                            field={f}
+                            value={
+                              Array.isArray(itemData[f.name])
+                                ? itemData[f.name]
+                                : []
+                            }
+                            onChange={(arr) =>
+                              setItemData((prev) => ({
+                                ...prev,
+                                [f.name]: arr,
+                              }))
+                            }
+                            options={optionsToUse}
+                            placeholder={`Select ${f.label}`}
+                          />
+                        ) : f.type === "select" ? (
+                          <select
+                            name={f.name}
+                            value={itemData[f.name] ?? ""}
+                            onChange={(e) =>
+                              setItemData((prev) => ({
+                                ...prev,
+                                [f.name]: e.target.value,
+                              }))
+                            }
+                            className="border border-gray-300 rounded px-2 py-1 text-xs"
+                          >
+                            <option value="">Select {f.label}</option>
+                            {optionsToUse.map((opt, i) => (
+                              <option key={i} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : f.type === "checkbox" ? (
+                          <input
+                            type="checkbox"
+                            name={f.name}
+                            checked={Boolean(itemData[f.name])}
+                            onChange={(e) =>
+                              setItemData((prev) => ({
+                                ...prev,
+                                [f.name]: e.target.checked,
+                              }))
+                            }
+                            onKeyDown={handleKeyDown}
+                            ref={idx === 0 ? inputRef : null}
+                          />
+                        ) : (
+                          <input
+                            type={f.type || "text"}
+                            name={f.name}
+                            value={itemData[f.name] ?? ""}
+                            onChange={(e) => handleInputChange(e, f)}
+                            ref={idx === 0 ? inputRef : null}
+                            maxLength={f.maxLength || undefined}
+                            className="border border-gray-300 rounded px-2 py-1 text-xs"
+                          />
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               </tbody>
             </table>
@@ -411,6 +498,7 @@ function LayoutMaster() {
           layout={layout}
           layoutData={layoutData}
           currentMaster={currentMaster}
+          foreignData={foreignData}
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Table from "../../../Components/Table";
+// import Table from "../../../Components/Table";
 import EstimateTable from "../../../Components/EstimateTable";
 import { toast } from "react-toastify";
 import useDesignItemType from "../../../Store/MasterStore/useDesignItemType";
@@ -62,18 +62,18 @@ function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
 
   // 🎯 Handle cell change
   const OnCellChange = (i, e) => {
-    const { name, value } = e.target;
-    if (name === "Approx_Gross_Weight" && value !== "") {
-      const regex = /^\d{1,6}\.?\d{0,3}$/; // up to 3 decimal places and before . 6 place can be filled
-      if (!regex.test(value)) {
-        return;
+      const { name, value } = e.target;
+      if (name === "Approx_Gross_Weight" && value !== "") {
+        const regex = /^\d{1,6}\.?\d{0,3}$/; // up to 3 decimal places and before . 6 place can be filled
+        if (!regex.test(value)) {
+          return;
+        }
       }
-    }
-    setEditedData((prev) => ({
-      ...prev,
-      [name]: value,
-      ID_Header: selectedDesignId,
-    }));
+        setEditedData((prev) => ({
+          ...prev,
+          [name]: value,
+          ID_Header: selectedDesignId,
+        }));
   };
 
   // 🎯 Save edited row
@@ -100,9 +100,9 @@ function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
   const handleDetailChange = (rowIndex, key, e) => {
     const value = e.target.value;
 
-    if (key === "Approx_Gross_Weight" && value !== "") {
+    if(key === "Approx_Gross_Weight" && value !== ""){
       const regex = /^\d{1,6}\.?\d{0,3}$/; // up to 3 decimal places and before . 6 place can be filled
-      if (!regex.test(value)) {
+      if(!regex.test(value)){
         return;
       }
     }
@@ -133,21 +133,25 @@ function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
   const isFormValid = () =>
     rows.every((r) => r.ID_ItemType && r.Approx_Gross_Weight);
 
+ 
+
+
+
   const saveNewRows = async () => {
     if (!isFormValid()) {
       toast.error("Please fill all required fields.");
       return;
     }
-
+  
     // Attach header ID to all rows
     const payload = rows.map((row) => ({
       ...row,
       // ID_Header: selectedDesignId,
     }));
-
+  
     // ✅ Send all rows at once
     await addItemType(type, payload, selectedDesignId);
-
+  
     // ✅ Reset form
     setShowAddForm(false);
     setRows([
@@ -210,26 +214,27 @@ function DesignItemTypeTable({ type, selectedDesignId, itemTypeOptions }) {
       fieldname: "Approx_Gross_Weight",
       type: "number",
       width: "150px",
+
     },
   ];
 
-  const detailColumns = [
-    {
-      label: "Item Type",
-      key: "ID_ItemType",
-      AutoSearch: true,
-      data: itemTypeOptions,
-      width: "200px",
-      PlaceHolder: "Select Item Type",
-    },
-    {
-      label: "Approx Gross Weight",
-      key: "Approx_Gross_Weight",
-      type: "number",
-      width: "150px",
-      PlaceHolder: "Enter Weight",
-    },
-  ];
+   const detailColumns = [
+     {
+       label: "Item Type",
+       key: "ID_ItemType",
+       AutoSearch: true,
+       data: itemTypeOptions,
+       width: "200px",
+       PlaceHolder: "Select Item Type",
+     },
+     {
+       label: "Approx Gross Weight",
+       key: "Approx_Gross_Weight",
+       type: "number",
+       width: "150px",
+       PlaceHolder: "Enter Weight",
+     },
+   ];
 
   return (
     <div className="table-box">
