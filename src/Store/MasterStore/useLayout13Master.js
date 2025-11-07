@@ -45,14 +45,27 @@ const useLayout13Master = create((set, get) => ({
   },
 
   // Add new item
-  addLayout13: async (type , newItem) => {
+  addLayout13: async (type, newItem) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
       await axios.post(AddLayout13MasterAPI, { ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        addError: err.response?.data?.message || "Failed to add item",
+        addError: errorMsg,
         addIsLoading: false,
       });
     }

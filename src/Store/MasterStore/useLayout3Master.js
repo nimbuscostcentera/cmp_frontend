@@ -51,8 +51,21 @@ const useLayout3Master = create((set, get) => ({
       await axios.post(AddLayout3MasterAPI, { ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        addError: err.response?.data?.message || "Failed to add item",
+        addError: errorMsg,
         addIsLoading: false,
       });
     }
@@ -62,7 +75,10 @@ const useLayout3Master = create((set, get) => ({
   updateLayout3: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout3MasterAPI}/${id}/`, { ...updatedData, type });
+      await axios.put(`${UpdateLayout3MasterAPI}/${id}/`, {
+        ...updatedData,
+        type,
+      });
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({

@@ -36,7 +36,9 @@ const useLayout11Master = create((set, get) => ({
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
       // append type as a query param so backend can handle different masters without changing endpoints
-      const res = await axios.get(`${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`);
+      const res = await axios.get(
+        `${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`
+      );
       // keep original console for debugging
       console.log(res.data);
       set({ layout11: res.data, fetchIsLoading: false, fetchIsSuccess: true });
@@ -53,11 +55,27 @@ const useLayout11Master = create((set, get) => ({
   addLayout11: async (type, newUnit) => {
     set({ addIsLoading: true, addError: null, addIsSuccess: false });
     try {
-      await axios.post(`${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`, newUnit);
+      await axios.post(
+        `${AddLayout11MasterAPI}?type=${encodeURIComponent(type)}`,
+        newUnit
+      );
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        addError: err.response?.data?.message || "Failed to add unit",
+        addError: errorMsg,
         addIsLoading: false,
       });
     }
@@ -68,7 +86,10 @@ const useLayout11Master = create((set, get) => ({
   updateLayout11: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`, updatedData);
+      await axios.put(
+        `${UpdateLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`,
+        updatedData
+      );
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
@@ -83,7 +104,9 @@ const useLayout11Master = create((set, get) => ({
   deleteLayout11: async (type, id) => {
     set({ deleteIsLoading: true, deleteError: null, deleteIsSuccess: false });
     try {
-      await axios.delete(`${DeleteLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`);
+      await axios.delete(
+        `${DeleteLayout11MasterAPI}/${id}/?type=${encodeURIComponent(type)}`
+      );
       set({ deleteIsSuccess: true, deleteIsLoading: false });
     } catch (err) {
       set({

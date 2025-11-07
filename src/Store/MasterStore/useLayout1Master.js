@@ -10,7 +10,6 @@ import {
 const useLayout1Master = create((set, get) => ({
   layout1: [], // generic array for any layout1 master
 
-
   // Fetch States
   fetchIsLoading: false,
   fetchError: null,
@@ -33,8 +32,6 @@ const useLayout1Master = create((set, get) => ({
 
   // Fetch all layout1 items
   fetchLayout1: async (type) => {
- 
-    
     set({ fetchIsLoading: true, fetchError: null, fetchIsSuccess: false });
     try {
       const res = await axios.get(`${AddLayout1MasterAPI}?type=${type}`); // type passed to API
@@ -43,6 +40,7 @@ const useLayout1Master = create((set, get) => ({
     } catch (err) {
       set({
         fetchError: err.response?.data?.message || "Failed to fetch items",
+
         fetchIsLoading: false,
       });
     }
@@ -57,8 +55,21 @@ const useLayout1Master = create((set, get) => ({
       await axios.post(AddLayout1MasterAPI, { ...newItem, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        addError: err.response?.data?.message || "Failed to add item",
+        addError: errorMsg,
         addIsLoading: false,
       });
     }
@@ -68,7 +79,10 @@ const useLayout1Master = create((set, get) => ({
   updateLayout1: async (type, id, updatedData) => {
     set({ updateIsLoading: true, updateError: null, updateIsSuccess: false });
     try {
-      await axios.put(`${UpdateLayout1MasterAPI}/${id}/`,{ ...updatedData, type });
+      await axios.put(`${UpdateLayout1MasterAPI}/${id}/`, {
+        ...updatedData,
+        type,
+      });
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({

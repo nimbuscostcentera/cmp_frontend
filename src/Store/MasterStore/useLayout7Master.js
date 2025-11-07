@@ -37,9 +37,22 @@ const useLayout7Master = create((set, get) => ({
       const res = await axios.get(`${AddLayout7MasterAPI}?type=${type}`); // type passed to API
       set({ layout7: res.data, fetchIsLoading: false, fetchIsSuccess: true });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        fetchError: err.response?.data?.message || "Failed to fetch items",
-        fetchIsLoading: false,
+        addError: errorMsg,
+        addIsLoading: false,
       });
     }
   },

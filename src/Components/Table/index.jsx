@@ -98,8 +98,10 @@ const RenderCellContent = ({
 
   // Input editable
   // Editable: input or dropdown (for foreign key)
+  // 🧾 Regular input field
   if (isEditing) {
     console.log("Foreign options for", field.fieldname, field.foreignOptions);
+
     // 🔽 Foreign key dropdown
     if (field.foreignKey && Array.isArray(field.foreignOptions)) {
       return (
@@ -120,7 +122,19 @@ const RenderCellContent = ({
       );
     }
 
-    // 🧾 Regular input field
+    // ✅ BLOCK NEGATIVE VALUES FOR NUMBER TYPE
+    const handleNumberInput = (e) => {
+      const val = e.target.value;
+
+      // If user tries to type '-' or negative number, stop it
+      if (val.includes("-") || Number(val) < 0) {
+        toast.error("Negative values are not allowed");
+        return;
+      }
+
+      OnChangeHandler(index, e);
+    };
+
     return (
       <input
         name={field.fieldname}
@@ -129,7 +143,11 @@ const RenderCellContent = ({
         value={EditedData[field.fieldname] || ""}
         ref={field?.isUseInputRef ? useInputRef : null}
         type={field.type || "text"}
-        onChange={(e) => OnChangeHandler(index, e)}
+        onChange={
+          field.type === "no" || field.type === "number"
+            ? handleNumberInput
+            : (e) => OnChangeHandler(index, e)
+        }
         className="input-cell form-input w-full"
         readOnly={field?.isReadOnly || isCodeField}
       />
@@ -161,24 +179,23 @@ const RenderCellContent = ({
     );
   }
 
-// ✅ Special case: Customer Master - show ID_Type_Display instead of 1/2
-if (field.fieldname === "ID_Type" && item.ID_Type_Display) {
-  return item.ID_Type_Display || "-";
-}
+  // ✅ Special case: Customer Master - show ID_Type_Display instead of 1/2
+  if (field.fieldname === "ID_Type" && item.ID_Type_Display) {
+    return item.ID_Type_Display || "-";
+  }
 
-// Foreign key display (non-edit)
-if (field.foreignKey) {
-  const label =
-    item[field.foreignKeyCode] ||
-    item[`${field.fieldname}_Code`] ||
-    item[`${field.fieldname}Code`] ||
-    item[`${field.fieldname}_Label`] ||
-    item[field.optionLabelField] ||
-    item[field.fieldname];
+  // Foreign key display (non-edit)
+  if (field.foreignKey) {
+    const label =
+      item[field.foreignKeyCode] ||
+      item[`${field.fieldname}_Code`] ||
+      item[`${field.fieldname}Code`] ||
+      item[`${field.fieldname}_Label`] ||
+      item[field.optionLabelField] ||
+      item[field.fieldname];
 
-  return label || "-";
-}
-
+    return label || "-";
+  }
 
   return item[field.fieldname] || "-";
 };

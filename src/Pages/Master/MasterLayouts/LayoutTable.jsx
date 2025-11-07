@@ -208,7 +208,7 @@ function LayoutTable({
     if (deleteError) {
       toast.error(deleteError);
       clearDeleteState && clearDeleteState();
-    }
+    } 
   }, [deleteIsSuccess, deleteError]);
 
   useEffect(() => {

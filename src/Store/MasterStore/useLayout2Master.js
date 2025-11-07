@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   AddLayout2MasterAPI,
   UpdateLayout2MasterAPI,
-  DeleteLayout2MasterAPI
+  DeleteLayout2MasterAPI,
 } from "../../Apis/MasterApis"; // single API endpoint
 
 const useLayout2Master = create((set, get) => ({
@@ -52,8 +52,21 @@ const useLayout2Master = create((set, get) => ({
       await axios.post(AddLayout2MasterAPI, { ...newData, type });
       set({ addIsSuccess: true, addIsLoading: false });
     } catch (err) {
+      let errorMsg = "Failed to add item";
+
+      const data = err.response?.data;
+
+      if (data && typeof data === "object") {
+        const firstKey = Object.keys(data)[0];
+        const firstVal = data[firstKey];
+
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          errorMsg = firstVal[0]; // "unit master
+        }
+      }
+
       set({
-        addError: err.response?.data?.message || "Failed to add data",
+        addError: errorMsg,
         addIsLoading: false,
       });
     }
@@ -67,7 +80,7 @@ const useLayout2Master = create((set, get) => ({
         ...updatedData,
         type,
       });
- 
+
       set({ updateIsSuccess: true, updateIsLoading: false });
     } catch (err) {
       set({
