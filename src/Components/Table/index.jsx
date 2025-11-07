@@ -354,13 +354,13 @@ const Table = ({
         <table className="w-full border-collapse text-sm">
           <thead className="bg-indigo-900 text-white sticky top-0 z-500">
             <tr>
-              <th className="sticky left-0 px-1 py-1 text-center z-9000 w-8 font-normal">
+              <th className="sticky left-0 px-1 py-1 text-center z-9000 w-8 font-norma font-bold">
                 Row
               </th>
               {Col.map((col, idx) => (
                 <th
                   key={idx}
-                  className="px-1 py-1 text-center font-normal"
+                  className="px-1 py-1 text-center font-medium"
                   style={{ minWidth: col.width || "120px" }}
                 >
                   {col.label}
@@ -368,16 +368,16 @@ const Table = ({
               ))}
               {isEdit && (
                 <>
-                  <th className="px-1 py-1 text-center w-12 font-normal">
+                  <th className="px-1 py-1 text-center w-12 font-medium">
                     Edit
                   </th>
-                  <th className="px-1 py-1 text-center w-12 font-normal">
+                  <th className="px-1 py-1 text-center w-12 font-medium">
                     Save
                   </th>
                 </>
               )}
               {isDelete && (
-                <th className="px-1 py-1 text-center w-12 font-normal">
+                <th className="px-1 py-1 text-center w-12 font-medium">
                   Delete
                 </th>
               )}

@@ -33,6 +33,7 @@ function LayoutTable({
   const [filteredData, setFilteredData] = useState([]);
   const [params, setParams] = useState({ ActionID: -1, IsAction: false });
   const [editedData, setEditedData] = useState({});
+  const [codeSearch, setCodeSearch] = useState("");
 
   // All layout hooks map
   const hooks = {
@@ -165,19 +166,31 @@ function LayoutTable({
     }
   };
 
-  // Filter by search
   useEffect(() => {
-    const val = (search || "").toLowerCase();
-    const filtered = (items || []).filter((item) =>
-      Object.values(item).some(
+    const globalSearch = (search || "").toLowerCase();
+    const codeText = codeSearch.toLowerCase();
+
+    const filtered = (items || []).filter((item) => {
+      // ✅ Apply your existing global search
+      const matchesGlobal = Object.values(item).some(
         (v) =>
           v !== null &&
           v !== undefined &&
-          v.toString().toLowerCase().includes(val)
-      )
-    );
+          v.toString().toLowerCase().includes(globalSearch)
+      );
+
+      // ✅ Code-only search
+      const matchesCode = Object.entries(item).some(([key, val]) => {
+        if (!key.toLowerCase().includes("code")) return false;
+        return val?.toString().toLowerCase().includes(codeText);
+      });
+
+      // ✅ Must match BOTH searches
+      return matchesGlobal && matchesCode;
+    });
+
     setFilteredData(filtered);
-  }, [search, items]);
+  }, [search, codeSearch, items]);
 
   // Update success effect
   useEffect(() => {
@@ -208,7 +221,7 @@ function LayoutTable({
     if (deleteError) {
       toast.error(deleteError);
       clearDeleteState && clearDeleteState();
-    } 
+    }
   }, [deleteIsSuccess, deleteError]);
 
   useEffect(() => {
@@ -219,32 +232,43 @@ function LayoutTable({
   }, [type, setIsDisable]);
 
   return (
-    <div className="table-box">
-      <Table
-        tab={filteredData || []}
-        Col={normalizedCols}
-        isAction={params.IsAction}
-        ActionId={params.ActionID}
-        ActionFunc={ActionFunc}
-        OnSaveHandler={SaveChange}
-        handleDelete={handleDelete}
-        OnChangeHandler={(i, e) => {
-          const { name, value, type, checked } = e.target;
-          // ✅ Just update state — don't block typing or show warnings here
-          setEditedData((prev) => ({
-            ...prev,
-            [name]: type === "checkbox" ? checked : value,
-          }));
-        }}
-        getFocusText={(val) => setTextDetail(val)}
-        isEdit={true}
-        isDelete={true}
-        EditedData={editedData}
-        isLoading={updateIsLoading || deleteIsLoading || fetchIsLoading}
-        useInputRef={editInputRef}
-        height="40vh"
-      />
-    </div>
+    <>
+      <div className="flex items-center justify-between mb-2">
+        <input
+          type="text"
+          placeholder="Search Code..."
+          className="border border-gray-300 rounded px-2 py-1 text-sm w-60"
+          value={codeSearch}
+          onChange={(e) => setCodeSearch(e.target.value)}
+        />
+      </div>
+      <div className="table-box">
+        <Table
+          tab={filteredData || []}
+          Col={normalizedCols}
+          isAction={params.IsAction}
+          ActionId={params.ActionID}
+          ActionFunc={ActionFunc}
+          OnSaveHandler={SaveChange}
+          handleDelete={handleDelete}
+          OnChangeHandler={(i, e) => {
+            const { name, value, type, checked } = e.target;
+            // ✅ Just update state — don't block typing or show warnings here
+            setEditedData((prev) => ({
+              ...prev,
+              [name]: type === "checkbox" ? checked : value,
+            }));
+          }}
+          getFocusText={(val) => setTextDetail(val)}
+          isEdit={true}
+          isDelete={true}
+          EditedData={editedData}
+          isLoading={updateIsLoading || deleteIsLoading || fetchIsLoading}
+          useInputRef={editInputRef}
+          height="40vh"
+        />
+      </div>
+    </>
   );
 }
 
