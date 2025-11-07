@@ -351,6 +351,7 @@ export const masters = [
       {
         name: "Contact",
         label: "Contact Number",
+        placeholder: "Enter contact number",
         type: "number",
         maxLength: 10,
         width: "w-[120px]",
@@ -483,6 +484,7 @@ export const masters = [
         name: "Process_Serial",
         label: "Process Serial",
         type: "number",
+        defaultValue: 0,
         width: "w-[120px]",
         required: false,
       },
@@ -490,6 +492,7 @@ export const masters = [
         name: "Execution_Days",
         label: "Execution Days",
         type: "number",
+        defaultValue: 0,
         width: "w-[120px]",
         required: false,
       },
@@ -529,6 +532,7 @@ export const masters = [
         name: "Rate",
         label: "Rate",
         type: "number",
+        defaultValue: 1.0,
         width: "w-[120px]",
         required: true,
       },
@@ -581,6 +585,7 @@ export const masters = [
         name: "Weight", // ✅ add missing field to avoid backend error
         label: "Weight",
         type: "number",
+        defaultValue: 0.0,
         width: "w-[100px]",
         required: true,
       },
@@ -714,6 +719,7 @@ export const masters = [
       {
         name: "Conversion",
         label: "Conversion",
+        maxLength: 6,
         type: "number",
         width: "w-[120px]",
         precision: 3, // matches decimal_places=3
@@ -734,7 +740,7 @@ export const masters = [
         label: "Metal Type",
         required: true,
         type: "select",
-        
+
         options: [
           { value: "P", label: "Pure" },
           { value: "B", label: "Brass" },

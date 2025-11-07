@@ -160,11 +160,15 @@ function LayoutMaster() {
   useEffect(() => {
     setItemData(
       fields.reduce((acc, f) => {
-        if (f.type === "checkbox") return { ...acc, [f.name]: false };
-        if (f.multiple) return { ...acc, [f.name]: [] };
-        return { ...acc, [f.name]: "" };
+        if (f.type === "checkbox")
+          return { ...acc, [f.name]: f.defaultValue ?? false };
+
+        if (f.multiple) return { ...acc, [f.name]: f.defaultValue ?? [] };
+
+        return { ...acc, [f.name]: f.defaultValue ?? "" };
       }, {})
     );
+
     inputRef.current?.focus();
   }, [mastertype, fields]);
 
@@ -301,6 +305,15 @@ function LayoutMaster() {
 
   const handleInputChange = (e, f) => {
     let value = e.target.value;
+
+    // ✅ Precision validation
+    if (f.type === "number" && f.precision != null && value.includes(".")) {
+      const [intPart, decPart] = value.split(".");
+      if (decPart.length > f.precision) {
+        toast.error(`Only ${f.precision} digits allowed after decimal`);
+        return;
+      }
+    }
 
     // Prevent negative input for number fields
     if (f.type === "number") {
@@ -459,6 +472,7 @@ function LayoutMaster() {
                             type={f.type || "text"}
                             name={f.name}
                             value={itemData[f.name] ?? ""}
+                            placeholder={f.placeholder || f.label}
                             onChange={(e) => handleInputChange(e, f)}
                             ref={idx === 0 ? inputRef : null}
                             maxLength={f.maxLength || undefined}
